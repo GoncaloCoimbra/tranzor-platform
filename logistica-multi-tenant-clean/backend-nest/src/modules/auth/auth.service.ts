@@ -124,42 +124,50 @@ export class AuthService {
 
     this.logger.log(`🔵 Login attempt for: ${email}`);
 
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: { company: true }, // Include company in date
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        include: { company: true }, // Include company in date
+      });
 
-    if (!user) {
-      this.logger.warn(` LOGIN FAILED: Email "${email}" not found`);
-      throw new UnauthorizedException('Invalid credentials');
+      if (!user) {
+        this.logger.warn(` LOGIN FAILED: Email "${email}" not found`);
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      this.logger.log(
+        `🔍 User found: ${user.id} | Role: ${user.role} | Active: ${user.isActive}`,
+      );
+
+      if (!user.isActive) {
+        this.logger.warn(` LOGIN FAILED: User "${email}" is inactive`);
+        throw new UnauthorizedException('User inactive');
+      }
+
+      const valid = await bcrypt.compare(password, user.password);
+
+      if (!valid) {
+        this.logger.warn(` LOGIN FAILED: Incorrect password for "${email}"`);
+        throw new UnauthorizedException('Invalid credentials');
+      }
+
+      this.logger.log(
+        ` LOGIN SUCCESS: ${email} | Company: ${user.companyId || 'None'}`,
+      );
+
+      const tokens = await this.generateTokens(user.id, user.email, user.role);
+
+      return {
+        ...tokens,
+        user: this.formatUser(user),
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Login error for ${email}: ${errorMessage}`, errorStack);
+      throw error;
     }
-
-    this.logger.log(
-      `🔍 User found: ${user.id} | Role: ${user.role} | Active: ${user.isActive}`,
-    );
-
-    if (!user.isActive) {
-      this.logger.warn(` LOGIN FAILED: User "${email}" is inactive`);
-      throw new UnauthorizedException('User inactive');
-    }
-
-    const valid = await bcrypt.compare(password, user.password);
-
-    if (!valid) {
-      this.logger.warn(` LOGIN FAILED: Incorrect password for "${email}"`);
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    this.logger.log(
-      ` LOGIN SUCCESS: ${email} | Company: ${user.companyId || 'None'}`,
-    );
-
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
-
-    return {
-      ...tokens,
-      user: this.formatUser(user),
-    };
   }
 
   //  VALIDATE USER

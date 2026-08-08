@@ -27,6 +27,8 @@ export class PrismaService
       const companyId = this.tenantContext.getCompanyId();
 
       if (companyId && this.shouldInjectCompanyId(params.model)) {
+        params.args = params.args || {};
+
         // For queries, add where clause
         if (params.action === 'findUnique' || params.action === 'findFirst') {
           params.args.where = {
