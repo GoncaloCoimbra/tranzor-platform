@@ -110,6 +110,8 @@ export class AuthService {
       savedUser.id,
       savedUser.email,
       savedUser.role,
+      savedUser.companyId,
+      savedUser.isActive,
     );
 
     return {
@@ -155,7 +157,13 @@ export class AuthService {
         ` LOGIN SUCCESS: ${email} | Company: ${user.companyId || 'None'}`,
       );
 
-      const tokens = await this.generateTokens(user.id, user.email, user.role);
+      const tokens = await this.generateTokens(
+        user.id,
+        user.email,
+        user.role,
+        user.companyId,
+        user.isActive,
+      );
 
       return {
         ...tokens,
@@ -329,6 +337,8 @@ export class AuthService {
         user.id,
         user.email,
         user.role,
+        user.companyId,
+        user.isActive,
       );
 
       return {
@@ -364,8 +374,14 @@ export class AuthService {
   }
 
   //  PRIVATE METHODS
-  private async generateTokens(userId: string, email: string, role: Role) {
-    const payload = { sub: userId, email, role };
+  private async generateTokens(
+    userId: string,
+    email: string,
+    role: Role,
+    companyId: string | null,
+    isActive: boolean,
+  ) {
+    const payload = { sub: userId, email, role, companyId, isActive };
 
     const token = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_SECRET || 'replace-with-a-secure-random-secret',

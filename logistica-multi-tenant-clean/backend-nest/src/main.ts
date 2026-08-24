@@ -35,7 +35,7 @@ export async function createApp(): Promise<NestExpressApplication> {
 
   // GLOBAL PREFIX (/api) com exclusão do health check raiz
 
-  app.setGlobalPrefix('api', { exclude: ['health'] });
+  app.setGlobalPrefix('api', { exclude: ['health', 'readyz', 'livez'] });
   logger.log('📌 Prefixo global configurado: /api (exclui /health)');
 
   // VALIDATION PIPE

@@ -1,7 +1,6 @@
 
 {
   "compilerOptions": {
-    "ignoreDeprecations": "5.0",
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
@@ -16,20 +15,18 @@
     "sourceMap": true,
     "outDir": "./dist",
     
-    "baseUrl": "./src", 
-    
     "paths": {
      
       "@common/*": [
-        "common/*"
+        "./common/*"
       ],
      
       "@modules/*": [
-        "modules/*"
+        "./modules/*"
       ],
       
       "@auth/*": [
-        "modules/auth/*" 
+        "./modules/auth/*" 
       ]
     },
     
@@ -41,5 +38,15 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "types": ["node", "jest"]
-  }
+  },
+  "files": [
+    "node_modules/@types/node/index.d.ts"
+  ],
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

@@ -1,8 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { createApp } from './../src/main';
-import { AppModule } from './../src/app.module';
 
 describe('API Health Checks - E2E', () => {
   let app: INestApplication;
@@ -127,11 +125,7 @@ describe('Multi-Tenant Data Isolation - E2E', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
+    app = await createApp();
     await app.init();
   });
 

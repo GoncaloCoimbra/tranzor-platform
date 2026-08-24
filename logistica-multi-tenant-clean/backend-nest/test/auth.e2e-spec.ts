@@ -8,12 +8,13 @@ const prisma = new PrismaClient();
 const describeOrSkip = process.env.DATABASE_URL ? describe : describe.skip;
 
 async function createSupplier(server: any, token: string, ts: number) {
+  const numericNif = String(ts % 1000000000).padStart(9, '0');
   const response = await request(server)
     .post('/api/suppliers')
     .set('Authorization', `Bearer ${token}`)
     .send({
       name: `Supplier ${ts}`,
-      nif: `NIF${ts}`,
+      nif: numericNif,
       email: `supplier.${ts}@example.com`,
       phone: '+351912345678',
     });
