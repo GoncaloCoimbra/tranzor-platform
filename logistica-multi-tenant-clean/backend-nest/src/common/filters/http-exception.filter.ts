@@ -7,6 +7,11 @@
   Logger,
 } from '@nestjs/common';
 
+interface ExceptionResponseBody {
+  message?: string | string[];
+  error?: string;
+}
+
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
@@ -21,10 +26,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+    const exceptionResponse =
+      exception instanceof HttpException ? exception.getResponse() : null;
+    const responseBody =
+      typeof exceptionResponse === 'object' && exceptionResponse !== null
+        ? (exceptionResponse as ExceptionResponseBody)
+        : null;
+    const message = responseBody?.message ?? exceptionResponse ??
+      (exception instanceof Error ? exception.message : 'Internal server error');
+    const error =
+      responseBody?.error ??
+      (exception instanceof HttpException
+        ? HttpStatus[status]
+        : 'Internal Server Error');
 
     this.logger.error(
       `Unhandled exception on ${request.method} ${request.url}`,
@@ -33,9 +47,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     response.status(status).json({
       statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
       message,
+      error,
+      timestamp: new Date().toISOString(),
+      path: request.originalUrl || request.url,
     });
   }
 }
