@@ -62,6 +62,7 @@ export class TransportsService {
     const activeTransport = await this.prisma.transport.findFirst({
       where: {
         vehicleId: vehicleId,
+        companyId,
         status: {
           in: [
             TransportStatus.PENDING,
