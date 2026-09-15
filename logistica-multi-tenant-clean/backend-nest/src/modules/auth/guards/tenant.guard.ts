@@ -5,20 +5,48 @@
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
 export class TenantGuard implements CanActivate {
   private readonly logger = new Logger(TenantGuard.name);
+
+  constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const method = request.method;
     const url = request.url;
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    const isStockRoute =
+      request.method === 'GET' &&
+      (request.url?.includes('/products/stock') ||
+        request.originalUrl?.includes('/products/stock'));
 
-    this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     this.logger.log(` TenantGuard - ${method} ${url}`);
+
+    if (isPublic) {
+      this.logger.log(
+        '🔓 Public route detected - allowing request to reach route-level guards',
+      );
+      this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      return true;
+    }
+
+    if (isStockRoute) {
+      this.logger.log(
+        '📦 Stock route detected without user - allowing ApiKeyGuard to validate headers',
+      );
+      this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      return true;
+    }
 
     // Check se usuário existe
     if (!user) {
