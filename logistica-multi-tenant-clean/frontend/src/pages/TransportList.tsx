@@ -127,7 +127,7 @@ const TransportList: React.FC = () => {
     products: [] as SelectedProduct[],
   });
 
-  // Flags e mensagens para UX (salvamento/exclusão)
+  // Flags e mensagens para UX (salvamento/exclusï¿½o)
   const [savingTransport, setSavingTransport] = useState<boolean>(false);
   const [deletingTransportId, setDeletingTransportId] = useState<string | null>(null);
   const [transportMessage, setTransportMessage] = useState<string>('');
@@ -175,7 +175,7 @@ const TransportList: React.FC = () => {
       if (getFilter('dateTo')) params.set('dateTo', getFilter('dateTo')!);
       
       const response = await api.get(`/transports?${params.toString()}`);
-      setTransports(response.data);
+      setTransports(response.data.data);
     } catch (error: any) {
       console.error('Error loading transports:', error);
       setError(extractErrorMessage(error, 'Error loading transports'));
@@ -228,23 +228,23 @@ const TransportList: React.FC = () => {
 
   const nextFilter = getNextFilter();
 
-  //  MÉTODO handleSubmit CORRIGIDO
+  //  Mï¿½TODO handleSubmit CORRIGIDO
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
     try {
       if (!formData.vehicleId || !formData.origin || !formData.destination || !formData.departureDate) {
-        setError('Por favor, preencha todos os campos obrigatórios');
+        setError('Por favor, preencha todos os campos obrigatï¿½rios');
         return;
       }
 
       if (!formData.estimatedArrival) {
-        setError('Date de chegada estimada é obrigatória');
+        setError('Date de chegada estimada ï¿½ obrigatï¿½ria');
         return;
       }
 
-      // ?? Validation de products APENAS na criação
+      // ?? Validation de products APENAS na criaï¿½ï¿½o
       if (!editingId && formData.products.length === 0) {
         const confirm = window.confirm(
           'Nenhum product foi adicionado ao transport. Deseja continuar mesmo assim?'
@@ -645,13 +645,13 @@ const TransportList: React.FC = () => {
                 className={theme.inputs.base}
               >
                 <option value="PENDING">Pending</option>
-                <option value="IN_TRANSIT">Em Trânsito</option>
+                <option value="IN_TRANSIT">Em Trï¿½nsito</option>
                 <option value="DELIVERED">Entregue</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-medium mb-1 text-amber-200">Observações</label>
+              <label className="block text-sm font-medium mb-1 text-amber-200">Observaï¿½ï¿½es</label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
@@ -661,7 +661,7 @@ const TransportList: React.FC = () => {
               />
             </div>
 
-            {/*  SEÇÃO DE productS COM LÓGICA CORRIGIDA */}
+            {/*  SEï¿½ï¿½O DE productS COM Lï¿½GICA CORRIGIDA */}
             <div className="col-span-2 border-t border-amber-500/30 pt-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -671,12 +671,12 @@ const TransportList: React.FC = () => {
                   </h3>
                   {editingId && (
                     <span className="px-2 py-1 bg-orange-900/30 text-orange-400 text-xs font-bold rounded border border-orange-500/30">
-                      ?? Não editáveis
+                      ?? Nï¿½o editï¿½veis
                     </span>
                   )}
                 </div>
                 
-                {/*  Botão só aparece na CRIAÇÃO */}
+                {/*  Botï¿½o sï¿½ aparece na CRIAï¿½ï¿½O */}
                 {!editingId && (
                   <button
                     type="button"
@@ -689,7 +689,7 @@ const TransportList: React.FC = () => {
                 )}
               </div>
 
-              {/* ?? AVISO na EDIÇÃO */}
+              {/* ?? AVISO na EDIï¿½ï¿½O */}
               {editingId && (
                 <div className="mb-4 p-4 bg-gradient-to-r from-amber-900/20 to-amber-800/10 border-2 border-amber-500/30 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -748,7 +748,7 @@ const TransportList: React.FC = () => {
                         </p>
                       </div>
                       
-                      {/*  Botão remove só aparece na CRIAÇÃO */}
+                      {/*  Botï¿½o remove sï¿½ aparece na CRIAï¿½ï¿½O */}
                       {!editingId && (
                         <button
                           type="button"
@@ -839,7 +839,7 @@ const TransportList: React.FC = () => {
                   Status
                 </th>
                 <th className="bg-gradient-to-r from-[#0f172a] to-black px-8 py-4 text-right text-xs font-black text-amber-400 uppercase tracking-widest border-b-2 border-amber-500/30">
-                  Ações
+                  Aï¿½ï¿½es
                 </th>
               </tr>
             </thead>

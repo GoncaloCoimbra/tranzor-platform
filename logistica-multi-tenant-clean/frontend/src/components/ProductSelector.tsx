@@ -57,10 +57,11 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
       const response = await api.get('/products');
       
       console.log('[ProductSelector] Backend response:', response.data);
-      console.log('[ProductSelector] Total products:', response.data.length);
+      const products = response.data.data;
+      console.log('[ProductSelector] Total products:', products.length);
       
       // Filter only products available for transport
-      const availableProducts = response.data.filter((product: Product) => {
+      const availableProducts = products.filter((product: Product) => {
         const isInStorage = product.status === 'IN_STORAGE';
         const hasQuantity = product.quantity > 0;
         

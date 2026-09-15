@@ -18,6 +18,13 @@ interface Transport {
   updatedAt: string;
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 interface CreateTransportDto {
   origin: string;
   destination: string;
@@ -35,8 +42,8 @@ export function useTransports(filters?: { status?: string; vehicleId?: string })
   return useQuery({
     queryKey: ['transports', filters],
     queryFn: async () => {
-      const response = await apiClient.get<Transport[]>('/transports', { params: filters });
-      return response.data;
+      const response = await apiClient.get<PaginatedResponse<Transport>>('/transports', { params: filters });
+      return response.data.data;
     },
   });
 }

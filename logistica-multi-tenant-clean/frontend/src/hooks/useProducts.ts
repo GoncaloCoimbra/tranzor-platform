@@ -22,6 +22,13 @@ interface Product {
   updatedAt: string;
 }
 
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 interface CreateProductDto {
   internalCode: string;
   description: string;
@@ -52,9 +59,9 @@ export function useProducts(filters?: { status?: string; supplierId?: string; se
       
       console.log('[useProducts] Clean filters:', cleanFilters);
       try {
-        const response = await apiClient.get<Product[]>('/products', { params: cleanFilters });
+        const response = await apiClient.get<PaginatedResponse<Product>>('/products', { params: cleanFilters });
         console.log('[useProducts] Success:', response.data);
-        return response.data;
+        return response.data.data;
       } catch (err: any) {
         console.error('[useProducts] Error:', {
           message: err.message,
