@@ -92,6 +92,7 @@ async function main() {
         await prisma.productMovement.create({
           data: {
             productId: product.id,
+            companyId: company.id,
             previousStatus: 'RECEIVED',
             newStatus: 'RECEIVED',
             quantity: product.quantity,

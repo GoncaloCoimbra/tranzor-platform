@@ -15,7 +15,12 @@ export class PrismaService
   private readonly logger = new Logger(PrismaService.name);
 
   constructor(private readonly tenantContext: TenantContextService) {
-    super();
+    const databaseUrl = process.env.DATABASE_URL;
+    const url = databaseUrl
+      ? `${databaseUrl}${databaseUrl.includes('?') ? '&' : '?'}connection_limit=20`
+      : undefined;
+
+    super(url ? { datasources: { db: { url } } } : undefined);
   }
 
   async onModuleInit() {
@@ -83,10 +88,11 @@ export class PrismaService
       'Vehicle',
       'Transport',
       'TransportProduct',
+      'ProductMovement',
+      'StockReservation',
       'AuditLog',
       'Settings',
       'Notification',
-      'RefreshToken',
       'Task',
       'Referral',
     ];

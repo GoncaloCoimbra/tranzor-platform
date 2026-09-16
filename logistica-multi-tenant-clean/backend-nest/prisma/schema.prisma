@@ -8,25 +8,44 @@ datasource db {
 }
 
 model Company {
-  id            String         @id @default(uuid())
-  name          String
-  nif           String         @unique
-  email         String         @unique
-  phone         String?
-  address       String?
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  auditLogs     AuditLog[]
-  notifications Notification[]
-  products      Product[]
-  settings      Settings?
-  suppliers     Supplier[]
-  transports    Transport[]
-  users         User[]
-  vehicles      Vehicle[]
-  tasks         Task[]
-  referrals     Referral[]
+  id               String            @id @default(uuid())
+  name             String
+  nif              String            @unique
+  email            String            @unique
+  phone            String?
+  address          String?
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  apiKeys          ApiKey[]
+  auditLogs        AuditLog[]
+  notifications    Notification[]
+  products         Product[]
+  settings         Settings?
+  suppliers        Supplier[]
+  transports       Transport[]
+  users            User[]
+  vehicles         Vehicle[]
+  tasks            Task[]
+  referrals        Referral[]
+  productMovements ProductMovement[]
+  transportProducts TransportProduct[]
+  stockReservations StockReservation[]
+}
+
+model ApiKey {
+  id        String    @id @default(uuid())
+  companyId String
+  name      String
+  prefix    String
+  keyHash   String    @unique
+  createdAt DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt DateTime?
+
+  company   Company   @relation(fields: [companyId], references: [id])
+
+  @@index([companyId])
 }
 
 model User {
@@ -82,6 +101,7 @@ model Product {
   supplier         Supplier           @relation(fields: [supplierId], references: [id])
   movements        ProductMovement[]
   transportProducts TransportProduct[]
+  stockReservations StockReservation[]
 
   @@unique([internalCode, companyId])
 }
@@ -89,6 +109,7 @@ model Product {
 model ProductMovement {
   id             String        @id @default(uuid())
   productId      String
+  companyId      String
   previousStatus ProductStatus
   newStatus      ProductStatus
   quantity       Float
@@ -97,7 +118,10 @@ model ProductMovement {
   userId         String
   createdAt      DateTime      @default(now())
   product        Product       @relation(fields: [productId], references: [id])
+  company        Company       @relation(fields: [companyId], references: [id])
   user           User          @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
 }
 
 model Vehicle {
@@ -138,21 +162,46 @@ model Transport {
   company          Company            @relation(fields: [companyId], references: [id])
   vehicle          Vehicle            @relation(fields: [vehicleId], references: [id])
   products         TransportProduct[]
+  stockReservations StockReservation[]
 }
 
 model TransportProduct {
   id          String    @id @default(uuid())
   transportId String
   productId   String
+  companyId   String
   quantity    Float
   createdAt   DateTime  @default(now())
-  
+
   transport   Transport @relation(fields: [transportId], references: [id], onDelete: Cascade)
   product     Product   @relation(fields: [productId], references: [id])
-  
+  company     Company   @relation(fields: [companyId], references: [id])
+
   @@unique([transportId, productId])
   @@index([transportId])
   @@index([productId])
+  @@index([companyId])
+}
+
+model StockReservation {
+  id          String                 @id @default(uuid())
+  companyId   String
+  productId   String
+  transportId String?
+  quantity    Float
+  status      StockReservationStatus @default(RESERVED)
+  createdAt   DateTime               @default(now())
+  confirmedAt DateTime?
+  releasedAt  DateTime?
+  expiresAt   DateTime?
+
+  company    Company   @relation(fields: [companyId], references: [id])
+  product    Product   @relation(fields: [productId], references: [id])
+  transport  Transport? @relation(fields: [transportId], references: [id])
+
+  @@index([companyId])
+  @@index([productId])
+  @@index([status])
 }
 
 model AuditLog {
@@ -252,6 +301,13 @@ enum ReferralStatus {
   CONTACTED
   CONVERTED
   LOST
+}
+
+enum StockReservationStatus {
+  RESERVED
+  CONFIRMED
+  RELEASED
+  EXPIRED
 }
 
 enum Role {
