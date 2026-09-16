@@ -35,8 +35,8 @@ services:
 
   backend:
     build:
-      context: ./backend-nest
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend-nest/Dockerfile
     container_name: logistica-backend
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/logistica

@@ -14,19 +14,17 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
+    "baseUrl": ".",
     
     "paths": {
-     
       "@common/*": [
-        "./common/*"
+        "./src/common/*"
       ],
-     
       "@modules/*": [
-        "./modules/*"
+        "./src/modules/*"
       ],
-      
       "@auth/*": [
-        "./modules/auth/*" 
+        "./src/modules/auth/*"
       ]
     },
     

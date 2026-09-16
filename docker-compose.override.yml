@@ -51,26 +51,20 @@ services:
     restart: unless-stopped
 
   logistica-backend:
-    image: node:20-bullseye
-    container_name: logistica-backend
-    working_dir: /workspace/logistica-multi-tenant-clean/backend-nest
-    volumes:
-      - ./logistica-multi-tenant-clean/backend-nest:/workspace/logistica-multi-tenant-clean/backend-nest
-      - /workspace/logistica-multi-tenant-clean/backend-nest/node_modules
+    build:
+      context: ./logistica-multi-tenant-clean
+      dockerfile: backend-nest/Dockerfile
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres_logistica:5432/logistica
       REDIS_URL: redis://redis:6379
       JWT_SECRET: replace-with-a-secure-random-secret
       PORT: 3000
       NODE_ENV: development
-    ports:
-      - "3000:3000"
     depends_on:
       postgres_logistica:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: sh -c "npm install && npm run build && npm start"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', res => process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
@@ -78,6 +72,18 @@ services:
       timeout: 10s
       retries: 5
       start_period: 40s
+
+  logistica-proxy:
+    image: nginx:1.27-alpine
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./infra/nginx/logistica.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      logistica-backend:
+        condition: service_healthy
+    networks:
+      - default
 
   logistica-frontend:
     image: node:20-bullseye
@@ -92,7 +98,7 @@ services:
       PORT: 3000
       BROWSER: none
     ports:
-      - "3005:3000"
+      - "3001:3000"
     depends_on:
       - logistica-backend
     command: sh -c "npm install && npm run start -- --host 0.0.0.0 --port 3000"

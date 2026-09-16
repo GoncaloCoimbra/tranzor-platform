@@ -1,6 +1,8 @@
 node_modules/
 dist/
 build/
+tmp-*
+login_superadmin.json
 .env
 .vscode/
 .DS_Store
