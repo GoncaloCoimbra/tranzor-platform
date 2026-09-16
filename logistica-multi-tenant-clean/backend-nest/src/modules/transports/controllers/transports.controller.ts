@@ -21,6 +21,7 @@ import { CreateTransportDto } from '../dto/create-transport.dto';
 import { UpdateTransportDto } from '../dto/update-transport.dto';
 import { AddTransportProductDto } from '../dto/add-transport-product.dto';
 import { FilterTransportDto } from '../dto/filter-transport.dto';
+import { ListTransportsDto } from '../dto/list-transports.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { TenantGuard } from '../../auth/guards/tenant.guard';
@@ -103,7 +104,7 @@ export class TransportsController {
   @Roles(Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN)
   findAll(
     @Request() req,
-    @Query() filters: FilterTransportDto,
+    @Query() filters: ListTransportsDto,
     @Query('companyId') queryCompanyId?: string,
   ) {
     const user = req.user;

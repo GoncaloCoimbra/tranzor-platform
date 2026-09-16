@@ -41,7 +41,11 @@ export class DashboardController {
     required: false,
     description: 'Filter por company (SUPER_ADMIN)',
   })
-  getStats(@Request() req, @Query('companyId') queryCompanyId?: string) {
+  getStats(
+    @Request() req,
+    @Query() filters: DashboardFiltersDto,
+    @Query('companyId') queryCompanyId?: string,
+  ) {
     const user = req.user;
     this.logger.log(
       `📥 GET /dashboard/stats - User: ${user.email} (${user.role})`,
@@ -51,7 +55,7 @@ export class DashboardController {
     const companyId =
       user.role === Role.SUPER_ADMIN ? queryCompanyId : user.companyId;
 
-    return this.dashboardService.getStats(companyId);
+    return this.dashboardService.getStats(companyId, filters);
   }
 
   @Get('overview')

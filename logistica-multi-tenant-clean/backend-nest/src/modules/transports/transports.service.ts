@@ -12,8 +12,11 @@ import { TransportStatus, VehicleStatus, ProductStatus } from '@prisma/client';
 import { CreateTransportDto } from './dto/create-transport.dto';
 import { UpdateTransportDto } from './dto/update-transport.dto';
 import { FilterTransportDto } from './dto/filter-transport.dto';
+import { ListTransportsDto } from './dto/list-transports.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
+import { StockReservationsService } from '../stock-reservations/stock-reservations.service';
+import { AppGateway } from '../../app.gateway';
 
 @Injectable()
 export class TransportsService {
@@ -23,6 +26,8 @@ export class TransportsService {
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
     private auditLogService: AuditLogService,
+    private stockReservationsService: StockReservationsService,
+    private appGateway: AppGateway,
   ) {}
 
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -300,7 +305,7 @@ export class TransportsService {
         }
 
         if (product.quantity < productData.quantity) {
-          throw new BadRequestException(
+          throw new ConflictException(
             `📦 INSUFFICIENT STOCK\n\n` +
               `Product: ${product.internalCode}\n` +
               `Available: ${product.quantity} units\n` +
@@ -349,10 +354,19 @@ export class TransportsService {
         this.logger.log(`📦 Processando ${date.products.length} product(s)...`);
 
         for (const productData of date.products) {
+          await this.stockReservationsService.createReservation(
+            companyId,
+            productData.productId,
+            productData.quantity,
+            newTransport.id,
+            tx,
+          );
+
           await tx.transportProduct.create({
             data: {
               transportId: newTransport.id,
               productId: productData.productId,
+              companyId,
               quantity: productData.quantity,
             },
           });
@@ -363,9 +377,6 @@ export class TransportsService {
             where: { id: productData.productId },
             data: {
               status: ProductStatus.DISPATCHED,
-              quantity: {
-                decrement: productData.quantity,
-              },
             },
           });
 
@@ -375,6 +386,7 @@ export class TransportsService {
           await tx.productMovement.create({
             data: {
               productId: productData.productId,
+              companyId,
               previousStatus: ProductStatus.IN_STORAGE,
               newStatus: ProductStatus.DISPATCHED,
               quantity: productData.quantity,
@@ -401,6 +413,20 @@ export class TransportsService {
     });
 
     this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
+    this.appGateway.emitToCompany(companyId, 'transport:created', {
+      companyId,
+      transportId: transport.id,
+      status: transport.status,
+      timestamp: new Date().toISOString(),
+    });
+    await this.emitReservationsForTransport(
+      transport.id,
+      companyId,
+      'reservation:created',
+      'RESERVED',
+    );
+
     this.logger.log(`✅ Transport criado com success!`);
     this.logger.log(`   🆔 ID: ${transport.id}`);
     this.logger.log(`   🔢 Código: ${transport.internalCode}`);
@@ -413,7 +439,10 @@ export class TransportsService {
     return transport;
   }
 
-  async findAll(companyId?: string, filters?: FilterTransportDto) {
+  async findAll(
+    companyId?: string,
+    filters: ListTransportsDto = new ListTransportsDto(),
+  ) {
     const where: any = {};
 
     if (companyId) {
@@ -438,23 +467,32 @@ export class TransportsService {
       where.vehicleId = filters.vehicleId;
     }
 
-    return this.prisma.transport.findMany({
-      where,
-      include: {
-        vehicle: true,
-        company: true,
-        products: {
-          include: {
-            product: {
-              include: {
-                supplier: true,
+    const skip = (filters.page - 1) * filters.limit;
+    const orderBy = { [filters.sortBy]: filters.order };
+    const [data, total] = await Promise.all([
+      this.prisma.transport.findMany({
+        where,
+        skip,
+        take: filters.limit,
+        include: {
+          vehicle: true,
+          company: true,
+          products: {
+            include: {
+              product: {
+                include: {
+                  supplier: true,
+                },
               },
             },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy,
+      }),
+      this.prisma.transport.count({ where }),
+    ]);
+
+    return { data, total, page: filters.page, limit: filters.limit };
   }
 
   async findPending(companyId?: string) {
@@ -567,16 +605,25 @@ export class TransportsService {
     }
 
     if (product.quantity < quantity) {
-      throw new BadRequestException(
+      throw new ConflictException(
         `Insufficient stock for product ${product.internalCode}. Requested ${quantity}, available ${product.quantity}.`,
       );
     }
 
     const updatedTransport = await this.prisma.$transaction(async (tx) => {
+      await this.stockReservationsService.createReservation(
+        companyId,
+        productId,
+        quantity,
+        transportId,
+        tx,
+      );
+
       await tx.transportProduct.create({
         data: {
           transportId,
           productId,
+          companyId,
           quantity,
         },
       });
@@ -585,15 +632,13 @@ export class TransportsService {
         where: { id: productId },
         data: {
           status: ProductStatus.DISPATCHED,
-          quantity: {
-            decrement: quantity,
-          },
         },
       });
 
       await tx.productMovement.create({
         data: {
           productId,
+          companyId,
           previousStatus: ProductStatus.IN_STORAGE,
           newStatus: ProductStatus.DISPATCHED,
           quantity,
@@ -631,6 +676,13 @@ export class TransportsService {
         'Failed to add product to transport',
       );
     }
+
+    await this.emitReservationsForTransport(
+      transportId,
+      companyId,
+      'reservation:created',
+      'RESERVED',
+    );
 
     this.logger.log(`✅ Product added to transport ${transportId}`);
     this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
@@ -686,7 +738,7 @@ export class TransportsService {
         );
       }
 
-      return await this.prisma.$transaction(async (tx) => {
+      const updatedTransport = await this.prisma.$transaction(async (tx) => {
         const updatedTransport = await tx.transport.update({
           where: { id },
           data: updateData,
@@ -719,6 +771,7 @@ export class TransportsService {
           await tx.productMovement.create({
             data: {
               productId: tp.productId,
+              companyId: transport.companyId,
               previousStatus: ProductStatus.DISPATCHED,
               newStatus: ProductStatus.APPROVED,
               quantity: tp.quantity,
@@ -763,6 +816,9 @@ export class TransportsService {
 
         return updatedTransport;
       });
+
+      this.emitTransportStatusChanged(transport, updatedTransport);
+      return updatedTransport;
     }
 
     if (
@@ -773,7 +829,7 @@ export class TransportsService {
         `❌ Status mudando para CANCELED - Revertendo automação...`,
       );
 
-      return await this.prisma.$transaction(async (tx) => {
+      const updatedTransport = await this.prisma.$transaction(async (tx) => {
         const updatedTransport = await tx.transport.update({
           where: { id },
           data: updateData,
@@ -788,14 +844,17 @@ export class TransportsService {
           },
         });
 
+        await this.stockReservationsService.releaseReservationsForTransport(
+          id,
+          transport.companyId,
+          tx,
+        );
+
         for (const tp of updatedTransport.products) {
           await tx.product.update({
             where: { id: tp.productId },
             data: {
               status: ProductStatus.IN_STORAGE,
-              quantity: {
-                increment: tp.quantity,
-              },
             },
           });
 
@@ -806,6 +865,7 @@ export class TransportsService {
           await tx.productMovement.create({
             data: {
               productId: tp.productId,
+              companyId: transport.companyId,
               previousStatus: ProductStatus.DISPATCHED,
               newStatus: ProductStatus.IN_STORAGE,
               quantity: tp.quantity,
@@ -844,6 +904,53 @@ export class TransportsService {
 
         return updatedTransport;
       });
+
+      this.emitTransportStatusChanged(transport, updatedTransport);
+      await this.emitReservationsForTransport(
+        id,
+        transport.companyId,
+        'reservation:released',
+        'RELEASED',
+      );
+      return updatedTransport;
+    }
+
+    if (
+      data.status === TransportStatus.IN_TRANSIT &&
+      transport.status !== TransportStatus.IN_TRANSIT
+    ) {
+      const updatedTransport = await this.prisma.$transaction(async (tx) => {
+        const updatedTransport = await tx.transport.update({
+          where: { id },
+          data: updateData,
+          include: {
+            vehicle: true,
+            company: true,
+            products: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        });
+
+        await this.stockReservationsService.confirmReservationsForTransport(
+          id,
+          transport.companyId,
+          tx,
+        );
+
+        return updatedTransport;
+      });
+
+      this.emitTransportStatusChanged(transport, updatedTransport);
+      await this.emitReservationsForTransport(
+        id,
+        transport.companyId,
+        'reservation:confirmed',
+        'CONFIRMED',
+      );
+      return updatedTransport;
     }
 
     this.logger.log(`📝 Atualização simples de campos logísticos`);
@@ -866,10 +973,53 @@ export class TransportsService {
       },
     });
 
+    if (data.status && data.status !== transport.status) {
+      this.emitTransportStatusChanged(transport, result);
+    }
+
     this.logger.log(`✅ Transport atualizado com success`);
     this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
 
     return result;
+  }
+
+  private emitTransportStatusChanged(
+    previousTransport: { companyId: string; id: string; status: TransportStatus },
+    updatedTransport: { id: string; status: TransportStatus },
+  ) {
+    this.appGateway.emitToCompany(
+      previousTransport.companyId,
+      'transport:status-changed',
+      {
+        companyId: previousTransport.companyId,
+        transportId: updatedTransport.id,
+        previousStatus: previousTransport.status,
+        status: updatedTransport.status,
+        timestamp: new Date().toISOString(),
+      },
+    );
+  }
+
+  private async emitReservationsForTransport(
+    transportId: string,
+    companyId: string,
+    event:
+      | 'reservation:created'
+      | 'reservation:confirmed'
+      | 'reservation:released',
+    status: 'RESERVED' | 'CONFIRMED' | 'RELEASED',
+  ) {
+    const reservations = await this.prisma.stockReservation.findMany({
+      where: { transportId, companyId, status },
+    });
+
+    for (const reservation of reservations) {
+      await this.stockReservationsService.emitReservationEvent(
+        event,
+        reservation,
+        companyId,
+      );
+    }
   }
 
   async updateStatus(
@@ -949,14 +1099,17 @@ export class TransportsService {
 
           this.logger.log(`📦 products a devolver: ${productsList}`);
 
+          await this.stockReservationsService.releaseReservationsForTransport(
+            id,
+            transport.companyId,
+            tx,
+          );
+
           for (const tp of transport.products) {
             await tx.product.update({
               where: { id: tp.productId },
               data: {
                 status: ProductStatus.IN_STORAGE,
-                quantity: {
-                  increment: tp.quantity,
-                },
               },
             });
 
@@ -967,6 +1120,7 @@ export class TransportsService {
             await tx.productMovement.create({
               data: {
                 productId: tp.productId,
+                companyId: transport.companyId,
                 previousStatus: ProductStatus.DISPATCHED,
                 newStatus: ProductStatus.IN_STORAGE,
                 quantity: tp.quantity,

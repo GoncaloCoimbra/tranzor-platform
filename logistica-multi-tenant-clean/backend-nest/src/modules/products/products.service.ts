@@ -2,6 +2,7 @@
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
@@ -10,6 +11,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { UpdateProductStatusDto } from './dto/update-product-status.dto';
 import { FilterProductDto } from './dto/filter-product.dto';
+import { ListProductsDto } from './dto/list-products.dto';
 
 @Injectable()
 export class ProductsService {
@@ -66,6 +68,7 @@ export class ProductsService {
     await this.prisma.productMovement.create({
       data: {
         productId: product.id,
+        companyId,
         previousStatus: status,
         newStatus: status,
         quantity: product.quantity,
@@ -122,7 +125,7 @@ export class ProductsService {
     return product;
   }
 
-  async findAll(companyId: string, filters?: FilterProductDto) {
+  async findAll(companyId: string, filters: ListProductsDto = new ListProductsDto()) {
     const where: any = {
       companyId, // Add companyId filter to restrict to current company
     };
@@ -173,19 +176,28 @@ export class ProductsService {
       ];
     }
 
-    return this.prisma.product.findMany({
-      where,
-      include: {
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-            nif: true,
+    const skip = (filters.page - 1) * filters.limit;
+    const orderBy = { [filters.sortBy]: filters.order };
+    const [data, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        skip,
+        take: filters.limit,
+        include: {
+          supplier: {
+            select: {
+              id: true,
+              name: true,
+              nif: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy,
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    return { data, total, page: filters.page, limit: filters.limit };
   }
 
   async findOne(id: string, companyId: string) {
@@ -203,9 +215,9 @@ export class ProductsService {
     return product;
   }
 
-  async getStockBySku(sku: string) {
+  async getStockBySku(sku: string, companyId: string) {
     const product = await this.prisma.product.findFirst({
-      where: { internalCode: sku },
+      where: { internalCode: sku, companyId },
       select: {
         id: true,
         internalCode: true,
@@ -329,6 +341,7 @@ export class ProductsService {
     await this.prisma.productMovement.create({
       data: {
         productId: product.id,
+        companyId,
         previousStatus: product.status,
         newStatus: statusDto.newStatus,
         quantity: statusDto.quantity || product.quantity,
@@ -377,6 +390,13 @@ export class ProductsService {
 
   //  MÉTODO REMOVE COM VALIDAÇÃO DE STATUS
   async remove(id: string, companyId: string, userId: string) {
+    const productRecord = await this.prisma.product.findUnique({ where: { id } });
+    if (!productRecord) {
+      throw new NotFoundException('product not found');
+    }
+    if (productRecord.companyId !== companyId) {
+      throw new ForbiddenException('Cannot delete a product from another company');
+    }
     const product = await this.findOne(id, companyId);
 
     // Validation: Só permite excluir products no estado RECEIVED

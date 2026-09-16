@@ -3,6 +3,7 @@ import { ProductsService } from './products.service';
 import { PrismaService } from '../../database/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ProductStatus } from '@prisma/client';
+import { ListProductsDto } from './dto/list-products.dto';
 
 describe('ProductsService - State Machine Tests', () => {
   let service: ProductsService;
@@ -22,6 +23,8 @@ describe('ProductsService - State Machine Tests', () => {
           useValue: {
             product: {
               findFirst: jest.fn(),
+              findMany: jest.fn(),
+              count: jest.fn(),
               update: jest.fn(),
             },
             productMovement: {
@@ -100,6 +103,7 @@ describe('ProductsService - State Machine Tests', () => {
             expect(prisma.productMovement.create).toHaveBeenCalledWith({
               data: {
                 productId: mockProductId,
+                companyId: mockCompanyId,
                 previousStatus: fromStatus as ProductStatus,
                 newStatus: toStatus,
                 quantity: mockProduct.quantity,
@@ -161,6 +165,39 @@ describe('ProductsService - State Machine Tests', () => {
     });
   });
 
+  it('returns paginated products with tenant filters and ordering', async () => {
+    const query: ListProductsDto = {
+      page: 2,
+      limit: 10,
+      status: ProductStatus.IN_STORAGE,
+      sortBy: 'internalCode',
+      order: 'asc',
+    };
+    const products = [{ id: mockProductId }];
+
+    (prisma.product.findMany as jest.Mock).mockResolvedValue(products);
+    (prisma.product.count as jest.Mock).mockResolvedValue(11);
+
+    await expect(service.findAll(mockCompanyId, query)).resolves.toEqual({
+      data: products,
+      total: 11,
+      page: 2,
+      limit: 10,
+    });
+
+    expect(prisma.product.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { companyId: mockCompanyId, status: ProductStatus.IN_STORAGE },
+        skip: 10,
+        take: 10,
+        orderBy: { internalCode: 'asc' },
+      }),
+    );
+    expect(prisma.product.count).toHaveBeenCalledWith({
+      where: { companyId: mockCompanyId, status: ProductStatus.IN_STORAGE },
+    });
+  });
+
   describe('Edge Cases', () => {
     it('should handle transition with location change', async () => {
       const mockProduct = {
@@ -203,6 +240,7 @@ describe('ProductsService - State Machine Tests', () => {
       expect(prisma.productMovement.create).toHaveBeenCalledWith({
         data: {
           productId: mockProductId,
+          companyId: mockCompanyId,
           previousStatus: ProductStatus.RECEIVED,
           newStatus: ProductStatus.IN_STORAGE,
           quantity: mockProduct.quantity,
@@ -252,6 +290,7 @@ describe('ProductsService - State Machine Tests', () => {
       expect(prisma.productMovement.create).toHaveBeenCalledWith({
         data: {
           productId: mockProductId,
+          companyId: mockCompanyId,
           previousStatus: ProductStatus.IN_STORAGE,
           newStatus: ProductStatus.DISPATCHED,
           quantity: newQuantity,

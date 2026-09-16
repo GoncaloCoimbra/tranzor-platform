@@ -20,6 +20,6 @@ import { TenantGuard } from './guards/tenant.guard';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard, TenantGuard],
-  exports: [AuthService, JwtAuthGuard, RolesGuard, TenantGuard],
+  exports: [AuthService, JwtAuthGuard, RolesGuard, TenantGuard, JwtModule],
 })
 export class AuthModule {}

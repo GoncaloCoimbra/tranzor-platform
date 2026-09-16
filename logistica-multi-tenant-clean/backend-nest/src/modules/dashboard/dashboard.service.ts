@@ -2,7 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { DashboardFiltersDto } from './dto/dashboard-filters.dto';
-import { ProductStatus } from '@prisma/client';
+import { Prisma, ProductStatus } from '@prisma/client';
 
 @Injectable()
 export class DashboardService {
@@ -14,7 +14,7 @@ export class DashboardService {
    * Retorna TODAS as estatísticas necessárias para o Dashboard
    * Funciona para SUPER_ADMIN (sem companyId) e ADMIN/OPERATOR (com companyId)
    */
-  async getStats(companyId?: string) {
+  async getStats(companyId?: string, filters?: DashboardFiltersDto) {
     this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     this.logger.log(
       ` Getting stats for company: ${companyId || 'ALL (SUPER_ADMIN)'}`,
@@ -24,6 +24,11 @@ export class DashboardService {
     const where: any = {};
     if (companyId) {
       where.companyId = companyId;
+    }
+
+    const dateRange = this.getDateRange(filters);
+    if (dateRange) {
+      where.createdAt = dateRange;
     }
 
     this.logger.log(` Where query: ${JSON.stringify(where)}`);
@@ -53,34 +58,34 @@ export class DashboardService {
 
       // 2. PRODUCTS BY STATUS (for pie chart)
 
-      const productsByStatusRaw = await this.prisma.product.groupBy({
-        by: ['status'],
-        where,
-        _count: true,
-      });
+      // 3. SUMMARY DETALHADO (para cards e gráfico de barras)
+
+      // Os status disponíveis no Prisma são:
+      // RECEIVED, IN_ANALYSIS, IN_STORAGE, APPROVED, DISPATCHED
+
+      const movementDateRange = dateRange || this.getDateRange({ period: '30d' });
+
+      const [productsByStatusRaw, received, inAnalysis, delivered, topSuppliers, recentMovements] =
+        await Promise.all([
+          this.prisma.product.groupBy({ by: ['status'], where, _count: true }),
+          this.prisma.product.count({ where: { ...where, status: ProductStatus.RECEIVED } }),
+          this.prisma.product.count({ where: { ...where, status: ProductStatus.IN_ANALYSIS } }),
+          this.prisma.product.count({ where: { ...where, status: ProductStatus.DISPATCHED } }),
+          this.getTopSuppliersForDashboard(companyId),
+          this.prisma.product.count({ where: { ...where, updatedAt: movementDateRange } }),
+        ]);
 
       const productsByStatus = productsByStatusRaw.map((p) => ({
         status: p.status,
         count: p._count,
       }));
 
-      // 3. SUMMARY DETALHADO (para cards e gráfico de barras)
-
-      // Os status disponíveis no Prisma são:
-      // RECEIVED, IN_ANALYSIS, IN_STORAGE, APPROVED, DISPATCHED
-
       const summary = {
-        received: await this.prisma.product.count({
-          where: { ...where, status: ProductStatus.RECEIVED },
-        }),
-        inAnalysis: await this.prisma.product.count({
-          where: { ...where, status: ProductStatus.IN_ANALYSIS },
-        }),
+        received,
+        inAnalysis,
         inStorage: productsInStorage,
-        delivered: await this.prisma.product.count({
-          where: { ...where, status: ProductStatus.DISPATCHED }, // DISPATCHED = entregue
-        }),
-        rejected: 0, // REJECTED não existe - deixar como 0 ou create lógica customizada
+        delivered,
+        rejected: 0,
       };
 
       // 4. PERCENTAGENS (para mostrar nos cards)
@@ -106,41 +111,7 @@ export class DashboardService {
 
       // 5. TOP 5 FORNECEDORES (para a seção inferior)
 
-      const suppliersWithProducts = await this.prisma.supplier.findMany({
-        where,
-        include: {
-          products: {
-            select: { id: true },
-            where: companyId ? { companyId } : {}, // Filter products by company
-          },
-        },
-      });
-
-      const topSuppliers = suppliersWithProducts
-        .map((s) => ({
-          id: s.id,
-          name: s.name,
-          productCount: s.products.length,
-        }))
-        .filter((s) => s.productCount > 0) // Remove suppliers without products
-        .sort((a, b) => b.productCount - a.productCount)
-        .slice(0, 5);
-
-      // 6. MOVIMENTAÇÕES RECENTES (Last 30 days)
-
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const recentMovements = await this.prisma.product.count({
-        where: {
-          ...where,
-          updatedAt: {
-            gte: thirtyDaysAgo,
-          },
-        },
-      });
-
-      // 7. MONTA RESPOSTA COMPLETA
+      // 6. MONTA RESPOSTA COMPLETA
 
       const result = {
         totalProducts,
@@ -185,6 +156,56 @@ export class DashboardService {
       this.logger.error(` Stack: ${error.stack}`);
       throw error;
     }
+  }
+
+  private getDateRange(filters?: DashboardFiltersDto) {
+    const now = new Date();
+    let start: Date | undefined;
+    let end: Date | undefined;
+
+    if (filters?.startDate || filters?.endDate) {
+      start = filters.startDate ? new Date(filters.startDate) : undefined;
+      end = filters.endDate ? new Date(filters.endDate) : undefined;
+      if (end) end.setHours(23, 59, 59, 999);
+    } else if (filters?.period) {
+      const days = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 }[filters.period];
+      if (days) {
+        start = new Date(now);
+        start.setDate(start.getDate() - days);
+      }
+    }
+
+    if (!start && !end) return undefined;
+    return { ...(start ? { gte: start } : {}), ...(end ? { lte: end } : {}) };
+  }
+
+  private async getTopSuppliersForDashboard(companyId?: string) {
+    const rows = companyId
+      ? await this.prisma.$queryRaw<Array<{ id: string; name: string; productCount: bigint }>>(
+          Prisma.sql`SELECT s."id", s."name", COUNT(p."id") AS "productCount"
+            FROM "Supplier" s
+            LEFT JOIN "Product" p ON p."supplierId" = s."id" AND p."companyId" = ${companyId}
+            WHERE s."companyId" = ${companyId}
+            GROUP BY s."id", s."name"
+            HAVING COUNT(p."id") > 0
+            ORDER BY COUNT(p."id") DESC
+            LIMIT 5`,
+        )
+      : await this.prisma.$queryRaw<Array<{ id: string; name: string; productCount: bigint }>>(
+          Prisma.sql`SELECT s."id", s."name", COUNT(p."id") AS "productCount"
+            FROM "Supplier" s
+            LEFT JOIN "Product" p ON p."supplierId" = s."id"
+            GROUP BY s."id", s."name"
+            HAVING COUNT(p."id") > 0
+            ORDER BY COUNT(p."id") DESC
+            LIMIT 5`,
+        );
+
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      productCount: Number(row.productCount),
+    }));
   }
 
   /**

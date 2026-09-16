@@ -86,6 +86,7 @@ describe('Prisma tenant middleware', () => {
         prisma.productMovement.create({
           data: {
             productId: product.id,
+            companyId: company.id,
             previousStatus: 'RECEIVED',
             newStatus: 'IN_STORAGE',
             quantity: 2,
@@ -102,6 +103,7 @@ describe('Prisma tenant middleware', () => {
           data: {
             transportId: transport.id,
             productId: product.id,
+            companyId: company.id,
             quantity: 1,
           },
         }),

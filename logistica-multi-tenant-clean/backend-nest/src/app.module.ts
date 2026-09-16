@@ -1,6 +1,7 @@
 ﻿// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './controllers/app.controller';
 import { AppService } from './app.service';
@@ -32,11 +33,13 @@ import { TasksModule } from './modules/tasks/tasks.module';
 import { ReferralsModule } from './modules/Referrals/referrals.module';
 import { TutorialsModule } from './modules/tutorials/tutorials.module';
 import { MetricsModule } from './common/metrics/metrics.module';
+import { StockReservationsModule } from './modules/stock-reservations/stock-reservations.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
 
 // GUARDS, FILTERS, INTERCEPTORS
 
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
-import { RolesGuard } from '@common/guards/roles.guard';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { HttpExceptionFilter } from '@common/filters/http-exception.filter';
 import { LoggingInterceptor } from '@common/interceptors/logging.interceptor';
 import { AuditLogInterceptor } from '@common/interceptors/audit-log.interceptor';
@@ -51,6 +54,8 @@ import { TenantInterceptor } from '@common/interceptors/tenant.interceptor';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    ScheduleModule.forRoot(),
 
     DatabaseModule,
 
@@ -70,7 +75,9 @@ import { TenantInterceptor } from '@common/interceptors/tenant.interceptor';
     TransportsModule,
     VehiclesModule,
     NotificationsModule,
-    TasksModule, // ← ADICIONE ESTA LINHA
+    TasksModule,
+    StockReservationsModule,
+    RealtimeModule,
     TutorialsModule,
 
     // ADMIN & SETTINGS
@@ -84,8 +91,6 @@ import { TenantInterceptor } from '@common/interceptors/tenant.interceptor';
 
   providers: [
     AppService,
-    AppGateway,
-
     // GLOBAL GUARDS
 
     {

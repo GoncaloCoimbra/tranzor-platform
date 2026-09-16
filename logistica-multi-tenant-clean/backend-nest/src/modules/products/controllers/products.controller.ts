@@ -8,12 +8,14 @@
   Delete,
   UseGuards,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from '../products.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { FilterProductDto } from '../dto/filter-product.dto';
+import { ListProductsDto } from '../dto/list-products.dto';
 import { UpdateProductStatusDto } from '../dto/update-product-status.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
@@ -22,6 +24,7 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { Role } from '@prisma/client';
+import { ApiKeyGuard } from '../../api-keys/api-key.guard';
 
 @ApiTags('Products')
 @Controller('products')
@@ -50,7 +53,7 @@ export class ProductsController {
   @Get()
   @Roles(Role.ADMIN, Role.OPERATOR)
   @ApiOperation({ summary: 'Listar todos os products' })
-  findAll(@CurrentUser() user: any, @Query() filters: FilterProductDto) {
+  findAll(@CurrentUser() user: any, @Query() filters: ListProductsDto) {
     return this.productsService.findAll(user.companyId, filters);
   }
 
@@ -63,9 +66,10 @@ export class ProductsController {
 
   @Get('stock')
   @Public()
+  @UseGuards(ApiKeyGuard)
   @ApiOperation({ summary: 'Consulta de stock para integração ChatOps' })
-  async getStockBySku(@Query('sku') sku: string) {
-    return this.productsService.getStockBySku(sku);
+  async getStockBySku(@Query('sku') sku: string, @Req() request: any) {
+    return this.productsService.getStockBySku(sku, request.companyId);
   }
 
   @Get(':id')
