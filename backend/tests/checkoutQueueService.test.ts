@@ -47,7 +47,7 @@ describe('checkout queue fallback', () => {
   });
 
   it('should enqueue checkout jobs without depending on Redis', async () => {
-    const { enqueueCheckout, getQueueStats } = await import('../server/services/checkoutQueueService');
+    const { enqueueCheckout, getQueueStats } = require('../server/services/checkoutQueueService');
 
     const job = await enqueueCheckout({
       orderId: 'order-1',

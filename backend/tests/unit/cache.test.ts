@@ -74,7 +74,7 @@ describe('distributed cache', () => {
   });
 
   it('writes through Redis and reads back the cached value', async () => {
-    const { setCachedValue, getCachedValue, clearCachedValue } = await import('../../server/utils/cache');
+    const { setCachedValue, getCachedValue, clearCachedValue } = require('../../server/utils/cache');
 
     mockGet.mockResolvedValue(JSON.stringify({
       value: { price: 25 },
