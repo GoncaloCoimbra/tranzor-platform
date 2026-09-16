@@ -59,6 +59,8 @@ Validação executada localmente:
 - Cliente frontend Socket.IO tenant-aware ligado ao Dashboard.
 - Typecheck frontend passado (`tsc --noEmit`).
 - Build frontend de produção passado com `GENERATE_SOURCEMAP=false`.
+- CI: correção TS6 para `baseUrl` aplicada em [frontend/tsconfig.json](frontend/tsconfig.json).
+- CI: testes Jest CommonJS estabilizados; backend legado localmente com `14` suites e `39` testes passados.
 
 Uma feature só deve ser marcada como validada depois de o comando correspondente ser executado e o resultado registado.
 

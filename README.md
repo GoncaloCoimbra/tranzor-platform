@@ -1,6 +1,6 @@
 # Tranzor — Full-Stack Distributed Commerce Platform
 
-> 🚧 **Projeto em desenvolvimento contínuo.** Ver [Roadmap de melhoria](#-roadmap-de-melhoria) e [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) para o estado atual e próximos passos.
+> 🚧 **Projeto em desenvolvimento contínuo.** Ver [Roadmap de melhoria](#-roadmap-de-melhoria) e [IMPROVEMENT_PLAN.md](./IMPROVEMENT_PLAN.md) para o estado atual e próximos passos.
 
 Ecossistema integrado de três serviços: **Commerce** (e-commerce com checkout resiliente), **Logistics** (WMS/TMS multi-tenant) e **ChatOps** (motor operacional em tempo real). Projeto com foco em arquitetura distribuída, Docker, Redis, autenticação segura e comportamento fail-fast em ambiente de produção.
 
@@ -118,8 +118,8 @@ npm test
 - **11/11 serviços definidos no Docker Compose a correr, todos `healthy`**
   (backend, chatops-backend, chatops-frontend, logistica-backend, logistica-frontend, clickhouse, mongo, postgres_Tranzor, postgres_chatops, postgres_logistica, redis)
 - **3/3 health endpoints a devolver `200 OK`** (Commerce, ChatOps, Logistics)
-- Suite E2E automatizada (Playwright) a correr em CI: 10/10 testes a passar
-- Pipeline CI/CD (GitHub Actions): testes de backend, frontend, qualidade de código e segurança automatizados em cada push
+- Suite E2E automatizada (Playwright) configurada para CI; o resultado depende da execução do workflow atual.
+- Pipeline CI/CD (GitHub Actions): backend, frontend, qualidade de código e segurança automatizados em cada push.
 
 ### Fluxos validados
 - Comando de stock via ChatOps para Logistics
@@ -143,7 +143,7 @@ O projeto está funcional, mas precisa de maturidade adicional para produção c
 ### Logistics
 - [ ] Validar o `k8s/` em cluster real
 - [ ] Limpar código legado e separar fluxo ativo
-- [ ] Adicionar testes tenant-aware e RBAC
+- [x] Adicionar testes tenant-aware e RBAC no backend ativo
 - [ ] Configurar monitoramento e alertas
 
 ### ChatOps
