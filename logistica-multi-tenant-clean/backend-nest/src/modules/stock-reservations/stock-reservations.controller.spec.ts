@@ -7,12 +7,14 @@ import { ListStockReservationsDto } from './dto/list-stock-reservations.dto';
 describe('StockReservationsController', () => {
   let controller: StockReservationsController;
   let service: {
+    createReservation: jest.Mock;
     findAll: jest.Mock;
     findOne: jest.Mock;
   };
 
   beforeEach(async () => {
     service = {
+      createReservation: jest.fn(),
       findAll: jest.fn(),
       findOne: jest.fn(),
     };
@@ -29,6 +31,27 @@ describe('StockReservationsController', () => {
 
     controller = module.get<StockReservationsController>(
       StockReservationsController,
+    );
+  });
+
+  it('creates a reservation using the authenticated company', async () => {
+    const body = {
+      productId: '11111111-1111-4111-8111-111111111111',
+      quantity: 3,
+      transportId: '22222222-2222-4222-8222-222222222222',
+    };
+    const reservation = { id: 'reservation-a', companyId: 'company-a' };
+    service.createReservation.mockResolvedValue(reservation);
+
+    await expect(
+      controller.create(body, { companyId: 'company-a' }),
+    ).resolves.toEqual(reservation);
+
+    expect(service.createReservation).toHaveBeenCalledWith(
+      'company-a',
+      body.productId,
+      body.quantity,
+      body.transportId,
     );
   });
 

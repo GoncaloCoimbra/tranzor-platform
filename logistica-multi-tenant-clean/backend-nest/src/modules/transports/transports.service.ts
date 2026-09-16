@@ -423,7 +423,7 @@ export class TransportsService {
     await this.emitReservationsForTransport(
       transport.id,
       companyId,
-      'reservation:created',
+      'stock:reservation-created',
       'RESERVED',
     );
 
@@ -680,7 +680,7 @@ export class TransportsService {
     await this.emitReservationsForTransport(
       transportId,
       companyId,
-      'reservation:created',
+      'stock:reservation-created',
       'RESERVED',
     );
 
@@ -909,7 +909,7 @@ export class TransportsService {
       await this.emitReservationsForTransport(
         id,
         transport.companyId,
-        'reservation:released',
+        'stock:reservation-released',
         'RELEASED',
       );
       return updatedTransport;
@@ -947,7 +947,7 @@ export class TransportsService {
       await this.emitReservationsForTransport(
         id,
         transport.companyId,
-        'reservation:confirmed',
+        'stock:reservation-confirmed',
         'CONFIRMED',
       );
       return updatedTransport;
@@ -989,7 +989,7 @@ export class TransportsService {
   ) {
     this.appGateway.emitToCompany(
       previousTransport.companyId,
-      'transport:status-changed',
+      'transport:updated',
       {
         companyId: previousTransport.companyId,
         transportId: updatedTransport.id,
@@ -998,15 +998,29 @@ export class TransportsService {
         timestamp: new Date().toISOString(),
       },
     );
+
+    if (updatedTransport.status === TransportStatus.DELIVERED) {
+      this.appGateway.emitToCompany(
+        previousTransport.companyId,
+        'transport:delivered',
+        {
+          companyId: previousTransport.companyId,
+          transportId: updatedTransport.id,
+          previousStatus: previousTransport.status,
+          status: updatedTransport.status,
+          timestamp: new Date().toISOString(),
+        },
+      );
+    }
   }
 
   private async emitReservationsForTransport(
     transportId: string,
     companyId: string,
     event:
-      | 'reservation:created'
-      | 'reservation:confirmed'
-      | 'reservation:released',
+      | 'stock:reservation-created'
+      | 'stock:reservation-confirmed'
+      | 'stock:reservation-released',
     status: 'RESERVED' | 'CONFIRMED' | 'RELEASED',
   ) {
     const reservations = await this.prisma.stockReservation.findMany({

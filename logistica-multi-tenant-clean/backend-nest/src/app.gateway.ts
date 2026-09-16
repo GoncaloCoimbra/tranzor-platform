@@ -14,12 +14,13 @@ export const COMPANY_ROOM_PREFIX = 'company:';
 
 export type AppGatewayEvent =
   | 'stock:updated'
-  | 'reservation:created'
-  | 'reservation:confirmed'
-  | 'reservation:released'
-  | 'reservation:expired'
+  | 'stock:reservation-created'
+  | 'stock:reservation-confirmed'
+  | 'stock:reservation-released'
+  | 'stock:reservation-expired'
   | 'transport:created'
-  | 'transport:status-changed';
+  | 'transport:updated'
+  | 'transport:delivered';
 
 export interface StockUpdatedPayload {
   companyId: string;
@@ -131,9 +132,14 @@ export class AppGateway {
 
   private async authenticateSocket(client: Socket): Promise<SocketUser> {
     const token = this.extractToken(client);
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      throw new UnauthorizedException('JWT_SECRET is not configured.');
+    }
+
     const payload = await this.jwtService.verifyAsync(token, {
-      secret:
-        process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+      secret: jwtSecret,
     });
 
     const user = await this.prisma.user.findUnique({

@@ -2,7 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { DashboardFiltersDto } from './dto/dashboard-filters.dto';
-import { Prisma, ProductStatus } from '@prisma/client';
+import { Prisma, ProductStatus, StockReservationStatus } from '@prisma/client';
 
 @Injectable()
 export class DashboardService {
@@ -55,6 +55,35 @@ export class DashboardService {
           where: { ...where, status: ProductStatus.IN_STORAGE },
         }),
       ]);
+
+      const stockReservationWhere = companyId ? { companyId } : {};
+      const [reservedStock, reservationCount] = await Promise.all([
+        this.prisma.stockReservation.aggregate({
+          _sum: { quantity: true },
+          where: {
+            ...stockReservationWhere,
+            status: {
+              in: [
+                StockReservationStatus.RESERVED,
+                StockReservationStatus.CONFIRMED,
+              ],
+            },
+          },
+        }),
+        this.prisma.stockReservation.count({
+          where: stockReservationWhere,
+        }),
+      ]);
+      const totalReservedQuantity = reservedStock._sum.quantity ?? 0;
+      const totalProductQuantity =
+        (await this.prisma.product.aggregate({
+          _sum: { quantity: true },
+          where,
+        }))._sum.quantity ?? 0;
+      const totalAvailableQuantity = Math.max(
+        0,
+        totalProductQuantity - totalReservedQuantity,
+      );
 
       // 2. PRODUCTS BY STATUS (for pie chart)
 
@@ -120,6 +149,9 @@ export class DashboardService {
         totalTransports,
         vehiclesAvailable,
         productsInStorage,
+        reservationCount,
+        reservedQuantity: totalReservedQuantity,
+        availableQuantity: totalAvailableQuantity,
         productsByStatus,
         summary,
         percentages,

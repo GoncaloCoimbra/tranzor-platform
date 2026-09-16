@@ -52,7 +52,7 @@ describe('StockReservationsService', () => {
             },
             $transaction: jest.fn(),
             transport: {
-              findFirst: jest.fn(),
+              findFirst: jest.fn().mockResolvedValue({ id: 'transport-1' }),
             },
           },
         },
@@ -123,7 +123,7 @@ describe('StockReservationsService', () => {
     expect(result.status).toBe(StockReservationStatus.RESERVED);
     expect(appGateway.emitToCompany).toHaveBeenCalledWith(
       'company-1',
-      'reservation:created',
+      'stock:reservation-created',
       expect.objectContaining({
         companyId: 'company-1',
         reservationId: 'res-1',
@@ -224,7 +224,7 @@ describe('StockReservationsService', () => {
 
     const reservationCreatedEvents = appGateway.emitToCompany.mock.calls.filter(
       ([companyId, event]) =>
-        companyId === 'company-1' && event === 'reservation:created',
+        companyId === 'company-1' && event === 'stock:reservation-created',
     );
 
     expect(reservationCreatedEvents).toHaveLength(1);
@@ -276,7 +276,7 @@ describe('StockReservationsService', () => {
     expect(result.status).toBe(StockReservationStatus.CONFIRMED);
     expect(appGateway.emitToCompany).toHaveBeenCalledWith(
       'company-1',
-      'reservation:confirmed',
+      'stock:reservation-confirmed',
       expect.objectContaining({
         reservationId: 'res-1',
         productId: 'product-1',
@@ -334,7 +334,7 @@ describe('StockReservationsService', () => {
     expect(result.status).toBe(StockReservationStatus.RELEASED);
     expect(appGateway.emitToCompany).toHaveBeenCalledWith(
       'company-1',
-      'reservation:released',
+      'stock:reservation-released',
       expect.objectContaining({
         reservationId: 'res-1',
         productId: 'product-1',
@@ -579,7 +579,7 @@ describe('StockReservationsService', () => {
     expect(appGateway.emitToCompany).toHaveBeenCalledTimes(4);
     expect(appGateway.emitToCompany).toHaveBeenCalledWith(
       'company-1',
-      'reservation:expired',
+      'stock:reservation-expired',
       expect.objectContaining({
         reservationId: 'res-1',
         status: StockReservationStatus.EXPIRED,

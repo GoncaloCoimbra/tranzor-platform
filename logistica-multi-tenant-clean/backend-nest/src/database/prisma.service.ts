@@ -1,4 +1,4 @@
-﻿import {
+import {
   Injectable,
   OnModuleInit,
   OnModuleDestroy,
@@ -81,7 +81,7 @@ export class PrismaService
   private shouldInjectCompanyId(model?: string): boolean {
     // Models that have companyId field
     const tenantModels = [
-      'Company',
+      'ApiKey',
       'User',
       'Supplier',
       'Product',

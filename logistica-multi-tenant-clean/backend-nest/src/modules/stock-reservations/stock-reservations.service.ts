@@ -100,6 +100,19 @@ export class StockReservationsService {
     let lockToken: string | null = null;
 
     try {
+      if (transportId) {
+        const transport = await prismaClient.transport.findFirst({
+          where: { id: transportId, companyId },
+          select: { id: true },
+        });
+
+        if (!transport) {
+          throw new NotFoundException(
+            `Transport ${transportId} not found for company ${companyId}.`,
+          );
+        }
+      }
+
       lockToken = await this.redisLockService.acquireLock(lockKey);
 
       if (!lockToken) {
@@ -137,7 +150,7 @@ export class StockReservationsService {
 
       if (this.isRootClient(prismaClient)) {
         await this.emitReservationEvent(
-          'reservation:created',
+          'stock:reservation-created',
           reservation,
           companyId,
         );
@@ -239,7 +252,7 @@ export class StockReservationsService {
 
     if (this.isRootClient(prismaClient)) {
       await this.emitReservationEvent(
-        'reservation:confirmed',
+        'stock:reservation-confirmed',
         updatedReservation,
         companyId,
       );
@@ -288,7 +301,7 @@ export class StockReservationsService {
 
     if (this.isRootClient(prismaClient)) {
       await this.emitReservationEvent(
-        'reservation:released',
+        'stock:reservation-released',
         updatedReservation,
         companyId,
       );
@@ -368,7 +381,7 @@ export class StockReservationsService {
 
     for (const reservation of expiredReservations) {
       await this.emitReservationEvent(
-        'reservation:expired',
+        'stock:reservation-expired',
         reservation,
         reservation.companyId,
       );
@@ -388,10 +401,10 @@ export class StockReservationsService {
 
   async emitReservationEvent(
     event:
-      | 'reservation:created'
-      | 'reservation:confirmed'
-      | 'reservation:released'
-      | 'reservation:expired',
+      | 'stock:reservation-created'
+      | 'stock:reservation-confirmed'
+      | 'stock:reservation-released'
+      | 'stock:reservation-expired',
     reservation: {
       id: string;
       companyId: string;

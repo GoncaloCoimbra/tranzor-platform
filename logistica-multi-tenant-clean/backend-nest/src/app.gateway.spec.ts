@@ -1,6 +1,14 @@
 import { AppGateway, StockUpdatedPayload } from './app.gateway';
 
 describe('AppGateway tenant rooms', () => {
+  beforeEach(() => {
+    process.env.JWT_SECRET = 'test-secret';
+  });
+
+  afterEach(() => {
+    delete process.env.JWT_SECRET;
+  });
+
   it('does not deliver company B events to a company A socket', async () => {
     const jwtService = {
       verifyAsync: jest.fn().mockImplementation(async (token: string) => ({

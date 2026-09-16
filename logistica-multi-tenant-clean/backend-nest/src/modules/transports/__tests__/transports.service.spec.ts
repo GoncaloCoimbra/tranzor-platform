@@ -290,9 +290,7 @@ describe('TransportsService', () => {
     );
     (prismaService.transport.count as jest.Mock).mockResolvedValue(11);
 
-    await expect(
-      service.findAll('company-1', query),
-    ).resolves.toEqual({
+    await expect(service.findAll('company-1', query)).resolves.toEqual({
       data: transports,
       total: 11,
       page: 2,
@@ -364,7 +362,10 @@ describe('TransportsService', () => {
             product: {
               update: jest
                 .fn()
-                .mockResolvedValue({ status: 'DISPATCHED', quantity: stockQuantity }),
+                .mockResolvedValue({
+                  status: 'DISPATCHED',
+                  quantity: stockQuantity,
+                }),
             },
             productMovement: { create: jest.fn() },
             vehicle: { update: jest.fn() },
@@ -414,7 +415,9 @@ describe('TransportsService', () => {
       expect(failedCreates).toHaveLength(2);
       expect(reservedQuantity).toBe(6);
       expect(committedTransports).toHaveLength(1);
-      expect(stockReservationsService.createReservation).toHaveBeenCalledTimes(3);
+      expect(stockReservationsService.createReservation).toHaveBeenCalledTimes(
+        3,
+      );
     });
 
     it('fails transport creation when stock reservation creation fails', async () => {
@@ -446,7 +449,9 @@ describe('TransportsService', () => {
         quantity: 10,
         internalCode: 'SKU-1',
       });
-      stockReservationsService.createReservation.mockRejectedValue(stockConflict);
+      stockReservationsService.createReservation.mockRejectedValue(
+        stockConflict,
+      );
       (prismaService.$transaction as jest.Mock).mockImplementation(
         async (callback) => callback(tx),
       );
@@ -483,7 +488,9 @@ describe('TransportsService', () => {
         },
         transportProduct: { create: jest.fn() },
         product: {
-          update: jest.fn().mockResolvedValue({ status: 'DISPATCHED', quantity: 10 }),
+          update: jest
+            .fn()
+            .mockResolvedValue({ status: 'DISPATCHED', quantity: 10 }),
         },
         productMovement: { create: jest.fn() },
         vehicle: { update: jest.fn() },
@@ -585,9 +592,9 @@ describe('TransportsService', () => {
         quantity: 10,
         internalCode: 'SKU-1',
       });
-      (prismaService.stockReservation.findMany as jest.Mock).mockResolvedValue(
-        [reservation],
-      );
+      (prismaService.stockReservation.findMany as jest.Mock).mockResolvedValue([
+        reservation,
+      ]);
       stockReservationsService.emitReservationEvent.mockImplementation(
         async (event, persistedReservation, companyId) => {
           appGateway.emitToCompany(companyId, event, {
@@ -619,10 +626,11 @@ describe('TransportsService', () => {
         'user-1',
       );
 
-      const reservationCreatedEvents = appGateway.emitToCompany.mock.calls.filter(
-        ([companyId, event]) =>
-          companyId === 'company-1' && event === 'reservation:created',
-      );
+      const reservationCreatedEvents =
+        appGateway.emitToCompany.mock.calls.filter(
+          ([companyId, event]) =>
+            companyId === 'company-1' && event === 'stock:reservation-created',
+        );
 
       expect(reservationCreatedEvents).toHaveLength(1);
       expect(stockReservationsService.createReservation).toHaveBeenCalledWith(
@@ -649,7 +657,10 @@ describe('TransportsService', () => {
         vehicleId: 'vehicle-1',
         products: [],
       };
-      const updatedTransport = { ...transport, status: TransportStatus.IN_TRANSIT };
+      const updatedTransport = {
+        ...transport,
+        status: TransportStatus.IN_TRANSIT,
+      };
       const tx = {
         transport: { update: jest.fn().mockResolvedValue(updatedTransport) },
       };
@@ -671,7 +682,7 @@ describe('TransportsService', () => {
       ).toHaveBeenCalledWith('transport-1', 'company-1', tx);
       expect(appGateway.emitToCompany).toHaveBeenCalledWith(
         'company-1',
-        'transport:status-changed',
+        'transport:updated',
         expect.objectContaining({
           transportId: 'transport-1',
           previousStatus: TransportStatus.PENDING,
@@ -688,7 +699,10 @@ describe('TransportsService', () => {
         vehicleId: 'vehicle-1',
         products: [],
       };
-      const updatedTransport = { ...transport, status: TransportStatus.CANCELED };
+      const updatedTransport = {
+        ...transport,
+        status: TransportStatus.CANCELED,
+      };
       const tx = {
         transport: {
           update: jest.fn().mockResolvedValue({
@@ -718,7 +732,7 @@ describe('TransportsService', () => {
       ).toHaveBeenCalledWith('transport-1', 'company-1', tx);
       expect(appGateway.emitToCompany).toHaveBeenCalledWith(
         'company-1',
-        'transport:status-changed',
+        'transport:updated',
         expect.objectContaining({
           transportId: 'transport-1',
           previousStatus: TransportStatus.PENDING,

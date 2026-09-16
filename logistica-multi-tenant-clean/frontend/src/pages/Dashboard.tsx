@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { AxiosError } from 'axios';
 import { useDashboardProductStats, useDashboardActivity } from '../hooks/useDashboard';
+import { useRealtimeDashboard } from '../hooks/useRealtimeDashboard';
 import { useSuppliers } from '../hooks/useSuppliers';
 import { statusLabels, statusColors } from '../theme.config';
 import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
@@ -212,6 +213,8 @@ const Dashboard: React.FC = () => {
     useDashboardProductStats('30d', calendarDate || undefined, calendarDate || undefined);
   const { data: activity } = useDashboardActivity(10);
   const { data: suppliers }  = useSuppliers();
+
+  useRealtimeDashboard(user?.companyId);
 
   const [showSuppliersModal, setShowSuppliersModal] = useState(false);
   const [allSuppliers, setAllSuppliers]             = useState<any[]>([]);

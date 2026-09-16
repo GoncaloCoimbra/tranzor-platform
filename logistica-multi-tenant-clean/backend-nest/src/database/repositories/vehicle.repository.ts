@@ -6,25 +6,19 @@ import { Vehicle, Prisma } from '@prisma/client';
 export class VehicleRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(companyId?: string): Promise<Vehicle[]> {
-    const where = companyId ? { companyId } : {};
-
-    return this.prisma.vehicle.findMany({ where });
+  async findAll(companyId: string): Promise<Vehicle[]> {
+    return this.prisma.vehicle.findMany({ where: { companyId } });
   }
 
-  async findById(id: string, companyId?: string): Promise<Vehicle | null> {
-    const where = companyId ? { id, companyId } : { id };
-
+  async findById(id: string, companyId: string): Promise<Vehicle | null> {
     return this.prisma.vehicle.findFirst({
-      where,
+      where: { id, companyId },
     });
   }
 
-  async findOne(id: string, companyId?: string): Promise<Vehicle | null> {
-    const where = companyId ? { id, companyId } : { id };
-
+  async findOne(id: string, companyId: string): Promise<Vehicle | null> {
     return this.prisma.vehicle.findFirst({
-      where,
+      where: { id, companyId },
     });
   }
 
@@ -42,17 +36,15 @@ export class VehicleRepository {
 
   async findByLicensePlate(
     licensePlate: string,
-    companyId?: string,
+    companyId: string,
   ): Promise<Vehicle | null> {
-    const where = companyId ? { licensePlate, companyId } : { licensePlate };
-
     return this.prisma.vehicle.findFirst({
-      where,
+      where: { licensePlate, companyId },
     });
   }
 
-  async findAvailable(companyId?: string): Promise<Vehicle[]> {
-    const where: Prisma.VehicleWhereInput = companyId ? { companyId } : {};
+  async findAvailable(companyId: string): Promise<Vehicle[]> {
+    const where: Prisma.VehicleWhereInput = { companyId };
 
     return this.prisma.vehicle.findMany({ where });
   }

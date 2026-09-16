@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   ParseUUIDPipe,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -14,6 +16,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { StockReservationsService } from './stock-reservations.service';
 import { ListStockReservationsDto } from './dto/list-stock-reservations.dto';
+import { CreateStockReservationDto } from './dto/create-stock-reservation.dto';
 
 @ApiTags('Reservations')
 @ApiBearerAuth()
@@ -23,6 +26,21 @@ export class StockReservationsController {
   constructor(
     private readonly stockReservationsService: StockReservationsService,
   ) {}
+
+  @Post()
+  @Roles(Role.ADMIN, Role.OPERATOR)
+  @ApiOperation({ summary: 'Criar uma reserva para a company autenticada' })
+  create(
+    @Body() body: CreateStockReservationDto,
+    @CurrentUser() user: { companyId: string },
+  ) {
+    return this.stockReservationsService.createReservation(
+      user.companyId,
+      body.productId,
+      body.quantity,
+      body.transportId,
+    );
+  }
 
   @Get()
   @Roles(Role.ADMIN, Role.OPERATOR)

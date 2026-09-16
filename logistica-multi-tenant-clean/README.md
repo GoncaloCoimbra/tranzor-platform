@@ -3,6 +3,7 @@
 Este é o diretório ativo do módulo de logística para este workspace.
 
 ## Início rápido
+
 ```bash
 cd logistica-multi-tenant-clean
 npm install
@@ -11,6 +12,7 @@ npm run start-all
 ```
 
 ## Variáveis de ambiente
+
 ```bash
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/logistica
 JWT_SECRET=replace-with-a-secure-random-secret
@@ -32,50 +34,81 @@ Integrações autenticadas devem receber credenciais através de variáveis de a
 - Eventos em tempo real para atualizações de transportes e reservas, quando o gateway WebSocket está ativo.
 
 ## Testes
+
 ```bash
 npm run build-all
 npm run test-all
 ```
 
+## Estado de implementação e validação
+
+Implementado no backend ativo:
+
+- API keys com hash e isolamento por `companyId` para integrações.
+- Modelo `StockReservation` com estados `RESERVED`, `CONFIRMED`, `RELEASED` e `EXPIRED`.
+- Reservas ligadas à criação, despacho e cancelamento de transportes.
+- Rooms WebSocket autenticadas por tenant.
+- Dashboard com quantidade reservada e stock disponível.
+
+Validação executada localmente:
+
+- Endpoint de stock por SKU com SKU real e API key tenant-scoped: `200`.
+- PostgreSQL e Redis locais ativos durante a suite de integração.
+- Suite backend completa: `13` suites e `77` testes passados.
+- Build backend Nest passado.
+- Cliente frontend Socket.IO tenant-aware ligado ao Dashboard.
+- Typecheck frontend passado (`tsc --noEmit`).
+- Build frontend de produção passado com `GENERATE_SOURCEMAP=false`.
+
+Uma feature só deve ser marcada como validada depois de o comando correspondente ser executado e o resultado registado.
+
 ## Teste de carga
+
 Com o backend em execução, o teste mede pedidos concorrentes e termina com erro se houver respostas HTTP não-2xx ou falhas de rede:
+
 ```powershell
 cd backend-nest
 npm run load-test -- --help
 $env:LOAD_PATH='/health'; $env:LOAD_DURATION_SECONDS='30'; $env:LOAD_CONCURRENCY='10'; npm run load-test
 ```
+
 Para um endpoint autenticado, defina também `$env:LOAD_TOKEN` e use, por exemplo, `$env:LOAD_PATH='/api/dashboard/stats'`. Execute primeiro em staging, com dados representativos, e aumente a concorrência gradualmente. Registe p95, taxa de erros e CPU/RAM/PostgreSQL antes de declarar uma capacidade de produção.
 
 ## Observação importante
+
 - A pasta [logistica-multi-tenant](../logistica-multi-tenant) permanece apenas como referência histórica e não é a fonte principal para o trabalho atual.
 - Se o backend não iniciar, confirme o `DATABASE_URL` e rode `npx prisma generate` em [logistica-multi-tenant-clean/backend-nest](backend-nest).
 
- - Legacy refactor scripts: scripts in the `scripts/legacy-refactor/` directory are one-time migration/refactor tools kept for historical reference and should not be considered part of the active build or runtime workflow.
+- Legacy refactor scripts: scripts in the `scripts/legacy-refactor/` directory are one-time migration/refactor tools kept for historical reference and should not be considered part of the active build or runtime workflow.
 
 ### Data Layer
-| Service | Technology | Version | Purpose |
-|---------|-----------|---------|---------|
-| **Database** | PostgreSQL | 15 | Relational database |
-| **Migrations** | Prisma Migrate | 5.0+ | Type-safe schema versioning |
-| **ORM Adapter** | Prisma Client | 5.0+ | Auto-generated query builder |
+
+| Service         | Technology     | Version | Purpose                      |
+| --------------- | -------------- | ------- | ---------------------------- |
+| **Database**    | PostgreSQL     | 15      | Relational database          |
+| **Migrations**  | Prisma Migrate | 5.0+    | Type-safe schema versioning  |
+| **ORM Adapter** | Prisma Client  | 5.0+    | Auto-generated query builder |
 
 ### Infrastructure Configuration
-| Component | Technology | Status |
-|-----------|-----------|--------|
-| **Containerization** | Docker | Configured, not deployed |
-| **Composition** | Docker Compose | Local dev environment |
+
+| Component                | Technology     | Status                                 |
+| ------------------------ | -------------- | -------------------------------------- |
+| **Containerization**     | Docker         | Configured, not deployed               |
+| **Composition**          | Docker Compose | Local dev environment                  |
 | **Kubernetes Manifests** | k8s YAML files | Present, not validated in live cluster |
-| **CI/CD** | GitHub Actions | Configured |
-| **Package Manager** | npm | Working |
+| **CI/CD**                | GitHub Actions | Configured                             |
+| **Package Manager**      | npm            | Working                                |
 
 ### DevOps & Infrastructure
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Reverse Proxy** | Nginx | Static file serving |
-| **Load Balancing** | — | Not configured |
-| **Monitoring** | — | Not configured |
+
+| Component          | Technology | Purpose             |
+| ------------------ | ---------- | ------------------- |
+| **Reverse Proxy**  | Nginx      | Static file serving |
+| **Load Balancing** | —          | Not configured      |
+| **Monitoring**     | —          | Not configured      |
 
 ### Security Frameworks
+
 - **JWT Authentication** with refresh token rotation ✅
 - **Multi-tenant Isolation** via Guards & Row-Level Filter ✅
 - **Role-Based Access Control (RBAC)** — 3 roles (Super Admin, Administrator, Operator) ✅
@@ -167,12 +200,12 @@ Para um endpoint autenticado, defina também `$env:LOAD_TOKEN` e use, por exempl
 
 ### Multi-Tenant Isolation Strategy
 
-| Layer | Isolation Method | Implementation |
-|-------|------------------|-----------------|
-| **Frontend** | Context & State | User company stored in AuthContext |
-| **API Gateway** | Route Guards | TenantGuard extracts companyId from JWT |
-| **Database** | Row-Level Security | WHERE company_id = $userId filters in every query |
-| **Audit** | Automatic Logging | AuditLog tracks user & company for each operation |
+| Layer           | Isolation Method   | Implementation                                    |
+| --------------- | ------------------ | ------------------------------------------------- |
+| **Frontend**    | Context & State    | User company stored in AuthContext                |
+| **API Gateway** | Route Guards       | TenantGuard extracts companyId from JWT           |
+| **Database**    | Row-Level Security | WHERE company_id = $userId filters in every query |
+| **Audit**       | Automatic Logging  | AuditLog tracks user & company for each operation |
 
 ### Product State Machine
 
@@ -184,7 +217,7 @@ Para um endpoint autenticado, defina também `$env:LOAD_TOKEN` e use, por exempl
      │     Rejected             │ Approved
      │      │                   │
      │      └─〉[UnderReturn]    └─〉[InStorage]
-     │           │                   │      
+     │           │                   │
      │           └─ Received        │
      │                              │  Preparation
      │                              ├──────────────┐
@@ -208,6 +241,7 @@ Para um endpoint autenticado, defina também `$env:LOAD_TOKEN` e use, por exempl
 ### Prerequisites
 
 Before you begin, ensure you have:
+
 - **Node.js 18+** ([download](https://nodejs.org/))
 - **PostgreSQL 15** ([download](https://www.postgresql.org/)) or Docker
 - **Git** ([download](https://git-scm.com/))
@@ -215,6 +249,7 @@ Before you begin, ensure you have:
 ### Installation & Setup
 
 **Step 1: Clone & Install**
+
 ```bash
 git clone https://github.com/GoncaloCoimbra/logistica-multi-tenant.git
 cd logistica-multi-tenant
@@ -222,6 +257,7 @@ npm install
 ```
 
 **Step 2: Configure Environment**
+
 ```bash
 cd backend-nest
 cp .env.example .env  # Or create .env manually
@@ -230,6 +266,7 @@ cp .env.example .env  # Or create .env manually
 **Step 3: Database Setup**
 
 **Option A: With Docker (Recommended)**
+
 ```bash
 docker-compose up -d  # Starts PostgreSQL
 npx prisma migrate deploy
@@ -237,6 +274,7 @@ npx prisma generate
 ```
 
 **Option B: Manual PostgreSQL**
+
 ```bash
 createdb logistica  # Create database
 npx prisma migrate deploy
@@ -244,12 +282,14 @@ npx prisma generate
 ```
 
 **Step 4: Start Application**
+
 ```bash
 # From root directory
 npm run start-all
 ```
 
 Open:
+
 - 🖥️ **Frontend:** http://localhost:3001
 - 🔧 **API Docs:** http://localhost:3000/api/docs
 - 📊 **Database Studio:** `npm run prisma:studio` in backend-nest
@@ -266,12 +306,15 @@ npm run seed:demo  # Populates 10+ suppliers & 12 products
 **👉 For detailed demo walkthrough, see [DEMO.md](./DEMO.md)**
 
 ---
+
 npm run dev
 
 # Terminal 2 — Frontend
+
 cd frontend
 npm run dev
-```
+
+````
 
 **Production mode:**
 ```bash
@@ -283,7 +326,7 @@ npm run build && npm start
 cd frontend
 npm run build
 # Serve the build/ folder with nginx or similar
-```
+````
 
 ### Access
 
@@ -419,12 +462,14 @@ logistica-multi-tenant/
 ### Key Directories Explained
 
 **`backend-nest/src/`** — Core API Logic
+
 - **auth/** : JWT token generation, refresh logic, login/register endpoints
 - **modules/** : Feature-specific business logic organized by domain
 - **common/** : Shared Guards (TenantGuard, RolesGuard), Filters, DTOs, Exceptions
 - **database/** : Prisma interactions, transactions, connection management
 
 **`frontend/src/`** — React Application Structure
+
 - **api/** : Axios instance with interceptors, error handling, API calls
 - **contexts/** : AuthContext (user, company), TenantContext
 - **hooks/** : useAuth(), useProducts(), useAsync() custom React hooks
@@ -440,6 +485,7 @@ logistica-multi-tenant/
 #### Example 1: Creating a Product (Backend)
 
 **Service Layer** (`backend-nest/src/products/products.service.ts`):
+
 ```typescript
 @Injectable()
 export class ProductsService {
@@ -448,7 +494,7 @@ export class ProductsService {
   async create(input: CreateProductDto, companyId: string) {
     // Validate supplier exists in this company
     const supplier = await this.prisma.supplier.findFirst({
-      where: { id: input.supplierId, companyId }
+      where: { id: input.supplierId, companyId },
     });
     if (!supplier) throw new BadRequestException('Supplier not found');
 
@@ -460,9 +506,9 @@ export class ProductsService {
         quantity: input.quantity,
         companyId,
         supplierId: input.supplierId,
-        state: 'RECEIVED',  // Initial state
-        location: input.location || 'Warehouse A'
-      }
+        state: 'RECEIVED', // Initial state
+        location: input.location || 'Warehouse A',
+      },
     });
   }
 
@@ -470,13 +516,14 @@ export class ProductsService {
   async findByCompany(companyId: string) {
     return this.prisma.product.findMany({
       where: { companyId },
-      include: { supplier: true }
+      include: { supplier: true },
     });
   }
 }
 ```
 
 **Controller Layer** (`backend-nest/src/controllers/products.controller.ts`):
+
 ```typescript
 @Controller('api/products')
 @UseGuards(JwtAuthGuard, RolesGuard, TenantGuard)
@@ -487,7 +534,7 @@ export class ProductsController {
   @Roles('ADMIN', 'OPERATOR')
   async create(
     @Body() input: CreateProductDto,
-    @Req() req: any  // Contains companyId injected by TenantGuard
+    @Req() req: any // Contains companyId injected by TenantGuard
   ) {
     const product = await this.service.create(input, req.user.companyId);
     this.logger.log(`Product created: ${product.code}`, 'ProductsController');
@@ -505,6 +552,7 @@ export class ProductsController {
 #### Example 2: Listing Products (Frontend)
 
 **Hook** (`frontend/src/hooks/useProducts.ts`):
+
 ```typescript
 export const useProducts = () => {
   const [products, setProducts] = useState([]);
@@ -532,6 +580,7 @@ export const useProducts = () => {
 ```
 
 **Component** (`frontend/src/pages/ProductList.tsx`):
+
 ```tsx
 export const ProductList = () => {
   const { products, loading, error } = useProducts();
@@ -546,7 +595,7 @@ export const ProductList = () => {
       <button>Novo Produto</button>
       <table>
         <tbody>
-          {products.map(p => (
+          {products.map((p) => (
             <tr key={p.id}>
               <td>{p.code}</td>
               <td>{p.state}</td>
@@ -638,12 +687,14 @@ npm test
 ```
 
 **Test Coverage Notes:**
+
 - Mocks cover all database operations (product, productMovement, user, notifications)
 - Tests verify both status changes AND notification triggers
 - Best-effort notification system: product state changes always succeed, notification delivery is non-blocking (documented catch with WARN-level logging)
 - Mock cleanup between tests prevents cross-test contamination
 
 Example (`backend-nest/src/products/products.service.spec.ts`):
+
 ```typescript
 describe('ProductsService', () => {
   let service: ProductsService;
@@ -653,8 +704,8 @@ describe('ProductsService', () => {
     const module = Test.createTestingModule({
       providers: [
         ProductsService,
-        { provide: PrismaService, useValue: { product: { create: jest.fn() } } }
-      ]
+        { provide: PrismaService, useValue: { product: { create: jest.fn() } } },
+      ],
     }).compile();
     service = module.get(ProductsService);
     prisma = module.get(PrismaService);
@@ -662,7 +713,10 @@ describe('ProductsService', () => {
 
   it('should create a product', async () => {
     jest.spyOn(prisma.product, 'create').mockResolvedValue({
-      id: '1', code: 'TEST-001', state: 'RECEIVED', companyId: 'co1'
+      id: '1',
+      code: 'TEST-001',
+      state: 'RECEIVED',
+      companyId: 'co1',
     });
 
     const result = await service.create({ code: 'TEST-001' }, 'co1');
@@ -684,17 +738,19 @@ npm run test:e2e
 ```
 
 **To run E2E tests locally:**
+
 1. Start Redis: `docker run -d -p 6379:6379 redis:7`
 2. Run: `npm run test:e2e`
 
 Example (`backend-nest/test/products.e2e-spec.ts`):
+
 ```typescript
 describe('Products E2E', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [AppModule]
+      imports: [AppModule],
     }).compile();
     app = module.createNestApplication();
     await app.init();
@@ -733,38 +789,45 @@ npm test
 ### Basic Operation Flow
 
 #### 1. Register a Company
+
 1. Go to **http://localhost:5173/register**
 2. Fill in company name, tax ID, email, phone, address, and administrator credentials
 3. Log in with the newly created credentials
 
 #### 2. Login
+
 - **URL**: http://localhost:5173/login
 - Test credentials (after seed):
   - **Admin**: `admin@example.com` / `admin123`
   - **Operator**: `operator@example.com` / `operator123`
 
 #### 3. Add a Product
+
 1. Go to **Products** → **New Product**
 2. Fill in: unique code, description, quantity, unit, supplier, location (optional)
 3. Product is automatically created in the **Received** state
 
 #### 4. Manage States
+
 1. Click a product in the list
 2. Click **Change State**
 3. Select the next permitted state (transitions are validated automatically)
 4. Add notes if required and confirm
 
 **Example flow:**
+
 ```
 Received → Under Review → Approved → In Storage → In Preparation → In Shipment → Delivered
 ```
 
 #### 5. View History
+
 - Click a product to see all its movements
 - Or go to **History** for a full system-wide operations log
 - Filter by date, action, entity, or user
 
 #### 6. Dashboard
+
 - View inventory summary by state
 - Analyse distribution with charts
 - Monitor recent movements
@@ -776,91 +839,92 @@ Received → Under Review → Approved → In Storage → In Preparation → In 
 
 ### Authentication
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/auth/register` | Register company & admin | — |
-| POST | `/api/auth/login` | Login | — |
-| GET | `/api/auth/me` | Current user data | ✅ |
+| Method | Endpoint             | Description              | Auth |
+| ------ | -------------------- | ------------------------ | ---- |
+| POST   | `/api/auth/register` | Register company & admin | —    |
+| POST   | `/api/auth/login`    | Login                    | —    |
+| GET    | `/api/auth/me`       | Current user data        | ✅   |
 
 ### Products
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/products` | List products | ✅ |
-| GET | `/api/products/:id` | Product details | ✅ |
-| POST | `/api/products` | Create product | ✅ |
-| PUT | `/api/products/:id` | Update product | ✅ |
-| DELETE | `/api/products/:id` | Delete product | ✅ Admin |
-| POST | `/api/products/:id/transition` | Change state | ✅ |
-| GET | `/api/products/:id/history` | Movement history | ✅ |
+| Method | Endpoint                       | Description      | Auth     |
+| ------ | ------------------------------ | ---------------- | -------- |
+| GET    | `/api/products`                | List products    | ✅       |
+| GET    | `/api/products/:id`            | Product details  | ✅       |
+| POST   | `/api/products`                | Create product   | ✅       |
+| PUT    | `/api/products/:id`            | Update product   | ✅       |
+| DELETE | `/api/products/:id`            | Delete product   | ✅ Admin |
+| POST   | `/api/products/:id/transition` | Change state     | ✅       |
+| GET    | `/api/products/:id/history`    | Movement history | ✅       |
 
 ### Dashboard
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/dashboard/stats` | General statistics | ✅ |
-| GET | `/api/dashboard/by-status` | Distribution by state | ✅ |
+| Method | Endpoint                   | Description           | Auth |
+| ------ | -------------------------- | --------------------- | ---- |
+| GET    | `/api/dashboard/stats`     | General statistics    | ✅   |
+| GET    | `/api/dashboard/by-status` | Distribution by state | ✅   |
 
 ### Suppliers
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/suppliers` | List suppliers | ✅ |
-| POST | `/api/suppliers` | Create supplier | ✅ |
-| PUT | `/api/suppliers/:id` | Update supplier | ✅ |
+| Method | Endpoint             | Description     | Auth     |
+| ------ | -------------------- | --------------- | -------- |
+| GET    | `/api/suppliers`     | List suppliers  | ✅       |
+| POST   | `/api/suppliers`     | Create supplier | ✅       |
+| PUT    | `/api/suppliers/:id` | Update supplier | ✅       |
 | DELETE | `/api/suppliers/:id` | Delete supplier | ✅ Admin |
 
 ### Vehicles
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/vehicles` | List vehicles | ✅ |
-| POST | `/api/vehicles` | Create vehicle | ✅ |
-| PUT | `/api/vehicles/:id` | Update vehicle | ✅ |
+| Method | Endpoint            | Description    | Auth     |
+| ------ | ------------------- | -------------- | -------- |
+| GET    | `/api/vehicles`     | List vehicles  | ✅       |
+| POST   | `/api/vehicles`     | Create vehicle | ✅       |
+| PUT    | `/api/vehicles/:id` | Update vehicle | ✅       |
 | DELETE | `/api/vehicles/:id` | Delete vehicle | ✅ Admin |
 
 ### Transports
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/transports` | List transports | ✅ |
-| POST | `/api/transports` | Create transport | ✅ |
-| PUT | `/api/transports/:id` | Update transport | ✅ |
+| Method | Endpoint              | Description      | Auth     |
+| ------ | --------------------- | ---------------- | -------- |
+| GET    | `/api/transports`     | List transports  | ✅       |
+| POST   | `/api/transports`     | Create transport | ✅       |
+| PUT    | `/api/transports/:id` | Update transport | ✅       |
 | DELETE | `/api/transports/:id` | Delete transport | ✅ Admin |
 
 ### Audit Log
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/auditlog` | List audit logs | ✅ |
+| Method | Endpoint        | Description     | Auth |
+| ------ | --------------- | --------------- | ---- |
+| GET    | `/api/auditlog` | List audit logs | ✅   |
 
 ### Notifications
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/notifications` | List notifications | ✅ |
-| PUT | `/api/notifications/:id/read` | Mark as read | ✅ |
-| PUT | `/api/notifications/read-all` | Mark all as read | ✅ |
+| Method | Endpoint                      | Description        | Auth |
+| ------ | ----------------------------- | ------------------ | ---- |
+| GET    | `/api/notifications`          | List notifications | ✅   |
+| PUT    | `/api/notifications/:id/read` | Mark as read       | ✅   |
+| PUT    | `/api/notifications/read-all` | Mark all as read   | ✅   |
 
 ---
 
 ## 🔄 Product States
 
-| State | Description | Allowed Next States |
-|-------|-------------|---------------------|
-| **Received** | Product just arrived at the warehouse | Under Review |
-| **Under Review** | Product being inspected | Approved, Rejected |
-| **Approved** | Product cleared for storage | In Storage |
-| **Rejected** | Non-conforming product | Under Return |
-| **In Storage** | Product stored in the warehouse | In Preparation, In Shipment |
-| **In Preparation** | Product being prepared for dispatch | In Shipment, Cancelled |
-| **In Shipment** | Product in transit | Delivered |
-| **Delivered** | Product delivered to customer *(final)* | — |
-| **Under Return** | Product being returned | Received, Disposed |
-| **Cancelled** | Preparation cancelled | In Storage |
-| **Disposed** | Product discarded *(final)* | — |
+| State              | Description                             | Allowed Next States         |
+| ------------------ | --------------------------------------- | --------------------------- |
+| **Received**       | Product just arrived at the warehouse   | Under Review                |
+| **Under Review**   | Product being inspected                 | Approved, Rejected          |
+| **Approved**       | Product cleared for storage             | In Storage                  |
+| **Rejected**       | Non-conforming product                  | Under Return                |
+| **In Storage**     | Product stored in the warehouse         | In Preparation, In Shipment |
+| **In Preparation** | Product being prepared for dispatch     | In Shipment, Cancelled      |
+| **In Shipment**    | Product in transit                      | Delivered                   |
+| **Delivered**      | Product delivered to customer _(final)_ | —                           |
+| **Under Return**   | Product being returned                  | Received, Disposed          |
+| **Cancelled**      | Preparation cancelled                   | In Storage                  |
+| **Disposed**       | Product discarded _(final)_             | —                           |
 
 **Rules:**
+
 - Only valid transitions are permitted (validated on the backend)
 - Some states require mandatory notes
 - Transition history is **immutable** and always recorded
@@ -871,19 +935,22 @@ Received → Under Review → Approved → In Storage → In Preparation → In 
 ## 🔐 Permissions
 
 ### Super Admin
+
 - Manage all companies
 - Create global users
 - Access aggregated dashboards
 - System-wide configuration
 
-### Administrator *(per company)*
+### Administrator _(per company)_
+
 - Full access within their company
 - Approve or reject products
 - Change any state
 - Manage company users
 - Delete products, suppliers, vehicles
 
-### Operator *(per company)*
+### Operator _(per company)_
+
 - Manage inventory and movements
 - **Cannot** approve or reject products
 - **Cannot** delete records
@@ -894,6 +961,7 @@ Received → Under Review → Approved → In Storage → In Preparation → In 
 ## ✅ Implementation Status
 
 ### Validated (tested locally with real output)
+
 - [x] Company-scoped routes and tenant-aware access patterns ✅
 - [x] Product, supplier, transport, and notification modules ✅
 - [x] Backend and frontend startup flow ✅
@@ -904,6 +972,7 @@ Received → Under Review → Approved → In Storage → In Preparation → In 
 - [x] Pagination and filtering contracts are implemented for the main list endpoints
 
 ### Not Yet Validated
+
 - [ ] E2E tests (requires Redis infrastructure)
 - [ ] Production deployment
 - [ ] Kubernetes deployment (YAML files present but not tested in live cluster)
@@ -913,6 +982,7 @@ Received → Under Review → Approved → In Storage → In Preparation → In 
 - [ ] Full CI/CD execution for the current schema and module set
 
 ### Not Included (Not in This Repository)
+
 - Production certification of the Redis lock and reservation workflow
 - BullMQ queue processor (present in Commerce backend, not in logistics)
 - Checkout/saga pattern orchestration (present in Commerce backend, not in logistics)
@@ -924,10 +994,13 @@ Received → Under Review → Approved → In Storage → In Preparation → In 
 ### Database Issues
 
 **Problem: "Database connection refused"**
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:5432
 ```
+
 **Solution:**
+
 ```bash
 # Check if PostgreSQL is running
 docker-compose ps
@@ -940,10 +1013,13 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/logistica
 ```
 
 **Problem: "Prisma migrations pending"**
+
 ```
 Error: The database schema is not in sync with the Prisma schema.
 ```
+
 **Solution:**
+
 ```bash
 cd backend-nest
 npx prisma migrate deploy  # Apply pending migrations
@@ -951,6 +1027,7 @@ npx prisma generate       # Regenerate Prisma client
 ```
 
 **Problem: "No database named 'logistica'"**
+
 ```bash
 # Manual PostgreSQL (without Docker)
 createdb logistica
@@ -964,6 +1041,7 @@ npx prisma migrate deploy
 ### Backend Issues
 
 **Problem: "Port 3000 already in use"**
+
 ```bash
 # Find & kill process using port 3000
 lsof -i :3000        # macOS/Linux
@@ -975,6 +1053,7 @@ taskkill /PID <PID> /F  # Windows
 ```
 
 **Problem: "Cannot find module '@nestjs/core'"**
+
 ```bash
 cd backend-nest
 npm install
@@ -982,6 +1061,7 @@ npm run build
 ```
 
 **Problem: "Swagger docs not loading at /api/docs"**
+
 - Ensure backend is running: `npm run start`
 - Check firewall allows localhost:3000
 - Try clearing browser cache (Ctrl+Shift+Delete)
@@ -991,6 +1071,7 @@ npm run build
 ### Frontend Issues
 
 **Problem: "Frontend stuck on 'Loading...' at 3001"**
+
 ```bash
 # Check if backend is running
 curl http://localhost:3000/api/docs
@@ -1003,6 +1084,7 @@ Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)
 ```
 
 **Problem: "Cannot find module 'react'"**
+
 ```bash
 cd frontend
 npm install
@@ -1010,6 +1092,7 @@ npm run dev
 ```
 
 **Problem: "Vite dev server port 3001 already in use"**
+
 ```bash
 # Kill process
 lsof -i :3001
@@ -1028,11 +1111,13 @@ export default {
 ### Authentication Issues
 
 **Problem: "401 Unauthorized — Invalid token"**
+
 - Token expired? Login again
 - Browser local storage cleared? Login again
 - Check JWT_SECRET matches between frontend & backend
 
 **Problem: "Cannot login — server error"**
+
 ```bash
 # Check backend logs for details
 npm run dev  # See console output
@@ -1042,6 +1127,7 @@ npx prisma studio  # Browse Users table
 ```
 
 **Problem: "No login credentials after seed"**
+
 ```bash
 # Run the seed script again
 cd backend-nest
@@ -1058,11 +1144,13 @@ npm run seed:demo
 ### Performance Issues
 
 **Problem: "API calls very slow"**
+
 1. Check database connection: `npx prisma studio`
 2. Look for N+1 query problems in logs
 3. Ensure indexes exist: `npx prisma db execute -- "CREATE INDEX idx_products_company ON products(company_id);"`
 
 **Problem: "Frontend freezes after clicking buttons"**
+
 - Open DevTools Network tab & check for hanging requests
 - Look for errors in browser console
 - Check if backend API is responding: `curl http://localhost:3000/api/products`
@@ -1072,6 +1160,7 @@ npm run seed:demo
 ### Docker Issues
 
 **Problem: "docker-compose up fails with error"**
+
 ```bash
 # Remove old containers and volumes
 docker-compose down -v
@@ -1089,6 +1178,7 @@ docker-compose logs backend-nest
 ### Git & Deployment Issues
 
 **Problem: "Cannot push to GitHub"**
+
 ```bash
 # Check remote URL is correct
 git remote -v
@@ -1114,11 +1204,13 @@ git push origin main
 ## 🔗 Useful Resources
 
 ### Documentation
+
 - [DEMO.md](./DEMO.md) — Complete demo walkthrough
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — Detailed system design
 - [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) — Production deployment guide
 
-### Official Documentation  
+### Official Documentation
+
 - [NestJS Docs](https://docs.nestjs.com/)
 - [Prisma Docs](https://www.prisma.io/docs/)
 - [React Docs](https://react.dev/)
@@ -1126,6 +1218,7 @@ git push origin main
 - [PostgreSQL Docs](https://www.postgresql.org/docs/)
 
 ### Community
+
 - [NestJS Discord](https://discord.gg/G7Qnnhy)
 - [Prisma Community](https://www.prisma.io/community)
 - [React Community](https://react.dev/community)
@@ -1133,6 +1226,7 @@ git push origin main
 ---
 
 ### Recommended Next Steps
+
 1. Configure and run E2E tests with Redis in CI/CD.
 2. Test Docker image builds and container startup.
 3. Document deployment flow for production environments.
@@ -1146,18 +1240,19 @@ git push origin main
 ## 📚 Updated Documentation (June 2026)
 
 ### Design System & Frontend Refactoring
+
 - **[IMPLEMENTATION_COMPLETE.md](./frontend/IMPLEMENTATION_COMPLETE.md)** — Complete refactoring guide (32 pages)
 - **[START_HERE.md](./frontend/START_HERE.md)** — Quick start for design system
 - **[PAGE_MIGRATION_EXAMPLE.md](./frontend/PAGE_MIGRATION_EXAMPLE.md)** — Before/after examples
 - **[REFACTORING_CHECKLIST.md](./frontend/REFACTORING_CHECKLIST.md)** — Component mapping reference
 
-
-
 ### Project Documentation
+
 - **[FINAL_COMPLETION_REPORT.md](../FINAL_COMPLETION_REPORT.md)** — Full project summary
 - **[QUICK_START.md](../QUICK_START.md)** — 5-minute quick reference
 
 ### API Documentation
+
 - **Live Swagger Docs**: `http://localhost:3000/api/docs` (when running)
 - **[API.md](./docs/API.md)** — Complete endpoint reference
 
