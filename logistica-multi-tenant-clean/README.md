@@ -19,11 +19,32 @@ NODE_ENV=development
 CORS_ORIGIN=http://localhost:3001
 ```
 
+Integrações autenticadas devem receber credenciais através de variáveis de ambiente ou de um gestor de secrets. Não coloque chaves reais no código, neste README ou no controlo de versões.
+
+## Capacidades atuais
+
+- API REST NestJS com autenticação JWT, RBAC e isolamento por `companyId`.
+- Gestão de produtos, transportes, veículos, fornecedores, notificações e auditoria.
+- Paginação e filtros para listagens de produtos, transportes e reservas.
+- Reservas de stock com estados `RESERVED`, `CONFIRMED`, `RELEASED` e `EXPIRED`.
+- Lock Redis para reduzir conflitos concorrentes nas operações de reserva. A eficácia em produção ainda requer validação no ambiente de destino.
+- API keys para integrações de serviço. As chaves devem ser fornecidas por secret manager ou variável protegida e nunca documentadas com o seu valor.
+- Eventos em tempo real para atualizações de transportes e reservas, quando o gateway WebSocket está ativo.
+
 ## Testes
 ```bash
 npm run build-all
 npm run test-all
 ```
+
+## Teste de carga
+Com o backend em execução, o teste mede pedidos concorrentes e termina com erro se houver respostas HTTP não-2xx ou falhas de rede:
+```powershell
+cd backend-nest
+npm run load-test -- --help
+$env:LOAD_PATH='/health'; $env:LOAD_DURATION_SECONDS='30'; $env:LOAD_CONCURRENCY='10'; npm run load-test
+```
+Para um endpoint autenticado, defina também `$env:LOAD_TOKEN` e use, por exemplo, `$env:LOAD_PATH='/api/dashboard/stats'`. Execute primeiro em staging, com dados representativos, e aumente a concorrência gradualmente. Registe p95, taxa de erros e CPU/RAM/PostgreSQL antes de declarar uma capacidade de produção.
 
 ## Observação importante
 - A pasta [logistica-multi-tenant](../logistica-multi-tenant) permanece apenas como referência histórica e não é a fonte principal para o trabalho atual.
@@ -579,7 +600,7 @@ npm run start-all          # Both servers + hot-reload
 - ✅ Write tests for critical business logic
 - ✅ Never hardcode secrets — use environment variables
 - ✅ Handle errors gracefully and return meaningful messages
-- ✅ Implement proper pagination for large datasets
+- ✅ Pagination and filtering are implemented for the main product, transport, and reservation listings
 - ✅ Use proper HTTP status codes (201 for create, 204 for delete, etc)
 - ✅ Add JSDoc comments to public functions
 
@@ -589,7 +610,7 @@ npm run start-all          # Both servers + hot-reload
 
 ### Unit Tests (Backend) — PASSING ✅
 
-**Result**: 43 tests passed, 0 failed
+Os testes unitários cobrem produtos, transportes, reservas, isolamento por tenant e middleware Prisma. O número de testes deve ser obtido da execução atual e não é fixado aqui, porque muda quando novos casos são adicionados.
 
 ```
  PASS  src/app.controller.spec.ts
@@ -701,9 +722,9 @@ npm test
 
 ### Current Test Coverage
 
-- Unit Tests: **43/43 passing** ✅
-- E2E Tests: 3/15 passing (requires Redis infrastructure)
-- Test execution time: ~5 seconds (unit), ~11 seconds (e2e)
+- Unit Tests: executar `npm test` para obter o resultado atual da suite.
+- E2E Tests: dependem da infraestrutura configurada, incluindo Redis e uma base de dados de teste; os resultados devem ser atualizados após cada alteração de schema ou módulos.
+- Load tests: o script existe, mas os resultados dependem do endpoint, dos dados, da infraestrutura e da concorrência utilizados.
 
 ---
 
@@ -876,22 +897,23 @@ Received → Under Review → Approved → In Storage → In Preparation → In 
 - [x] Company-scoped routes and tenant-aware access patterns ✅
 - [x] Product, supplier, transport, and notification modules ✅
 - [x] Backend and frontend startup flow ✅
-- [x] Unit test suite (43 tests passing, proper mock coverage) ✅
+- [x] Unit tests for core services, reservations, transport flows, and tenant middleware are present
 - [x] Authentication and role-based access control (3 roles) ✅
 - [x] Audit logging and operation tracking ✅
 - [x] Notification system integration (best-effort, non-blocking) ✅
+- [x] Pagination and filtering contracts are implemented for the main list endpoints
 
 ### Not Yet Validated
 - [ ] E2E tests (requires Redis infrastructure)
 - [ ] Production deployment
 - [ ] Kubernetes deployment (YAML files present but not tested in live cluster)
-- [ ] Load testing or resilience benchmarks
+- [ ] Production-scale load testing or resilience benchmarks
 - [ ] End-to-end UX testing with real users
 - [ ] Docker image builds and runtime behavior
-- [ ] GitHub Actions CI/CD (not configured)
+- [ ] Full CI/CD execution for the current schema and module set
 
 ### Not Included (Not in This Repository)
-- Race condition prevention via Redis locks (present in Commerce backend, not in logistics)
+- Production certification of the Redis lock and reservation workflow
 - BullMQ queue processor (present in Commerce backend, not in logistics)
 - Checkout/saga pattern orchestration (present in Commerce backend, not in logistics)
 
