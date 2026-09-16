@@ -293,35 +293,6 @@ const Login: React.FC = () => {
             Create New Account
           </button>
 
-          {/* Dev credentials – collapsible */}
-          <details className="mt-8">
-            <summary
-              className="text-xs cursor-pointer text-center select-none transition-colors"
-              style={{ color: ds.textMuted }}
-            >
-              Test Credentials
-            </summary>
-            <div className="mt-3 space-y-2">
-              {[
-                'superadmin@sistema.com / superadmin123',
-                'admin@logistica.com / admin123',
-                'operator@logistica.com / operator123',
-              ].map(cred => (
-                <p
-                  key={cred}
-                  className="text-xs px-3 py-2 rounded-lg"
-                  style={{
-                    fontFamily: "'DM Mono', monospace",
-                    color: ds.textMuted,
-                    background: ds.bgCard,
-                    border: `1px solid ${ds.border}`,
-                  }}
-                >
-                  {cred}
-                </p>
-              ))}
-            </div>
-          </details>
         </div>
       </div>
     </div>

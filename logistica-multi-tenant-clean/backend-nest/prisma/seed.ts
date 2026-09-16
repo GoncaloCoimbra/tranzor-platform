@@ -7,17 +7,29 @@ const prisma = new PrismaClient();
 async function main() {
   const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
   const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+  const demoAdminPassword = process.env.DEMO_ADMIN_PASSWORD;
+  const demoOperatorPassword = process.env.DEMO_OPERATOR_PASSWORD;
+  const demoUserPassword = process.env.DEMO_USER_PASSWORD;
 
-  if (!superAdminEmail || !superAdminPassword || !isStrongPassword(superAdminPassword)) {
-    throw new Error('SUPER_ADMIN_EMAIL and a strong SUPER_ADMIN_PASSWORD are required to run the seed');
+  if (
+    !superAdminEmail ||
+    !superAdminPassword ||
+    !demoAdminPassword ||
+    !demoOperatorPassword ||
+    !demoUserPassword ||
+    [superAdminPassword, demoAdminPassword, demoOperatorPassword, demoUserPassword].some(
+      (password) => !isStrongPassword(password),
+    )
+  ) {
+    throw new Error('Super admin and demo account credentials must be provided as strong environment variables');
   }
 
   await prisma.$executeRawUnsafe(`TRUNCATE TABLE "Referral", "Task", "RefreshToken", "Notification", "Settings", "AuditLog", "StockReservation", "TransportProduct", "Transport", "ProductMovement", "Product", "Vehicle", "Supplier", "User", "ApiKey", "Company" RESTART IDENTITY CASCADE`);
 
-  const passwordHash = await bcrypt.hash('UserPass1', 10);
+  const passwordHash = await bcrypt.hash(demoUserPassword, 10);
   const superAdminHash = await bcrypt.hash(superAdminPassword, 10);
-  const legacyAdminHash = await bcrypt.hash('admin123', 10);
-  const legacyOperatorHash = await bcrypt.hash('operator123', 10);
+  const demoAdminHash = await bcrypt.hash(demoAdminPassword, 10);
+  const demoOperatorHash = await bcrypt.hash(demoOperatorPassword, 10);
 
   const logistics = await prisma.company.create({
     data: {
@@ -51,7 +63,7 @@ async function main() {
     data: {
       name: 'Admin Demo',
       email: 'admin@logistica.com',
-      password: legacyAdminHash,
+      password: demoAdminHash,
       role: Role.ADMIN,
       companyId: logistics.id,
     },
@@ -60,7 +72,7 @@ async function main() {
     data: {
       name: 'Operator Demo',
       email: 'operator@logistica.com',
-      password: legacyOperatorHash,
+      password: demoOperatorHash,
       role: Role.OPERATOR,
       companyId: logistics.id,
     },
@@ -142,8 +154,8 @@ async function main() {
     vehicles: 2,
     loginUsers: [
       superAdminEmail,
-      'admin@logistica.com / admin123',
-      'operator@logistica.com / operator123',
+      'admin@logistica.com',
+      'operator@logistica.com',
       logisticsUser.email,
       'user@transporto.com',
     ],
