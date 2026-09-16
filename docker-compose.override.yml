@@ -57,7 +57,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres_logistica:5432/logistica
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: replace-with-a-secure-random-secret
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       PORT: 3000
       NODE_ENV: development
     depends_on:

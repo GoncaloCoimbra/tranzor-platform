@@ -7,12 +7,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { TenantGuard } from './guards/tenant.guard';
+import { getJwtSecret } from '../../config/jwt-secret';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'replace-with-a-secure-random-secret',
+      secret: getJwtSecret(),
       signOptions: {
         expiresIn: '7d',
       } as any,

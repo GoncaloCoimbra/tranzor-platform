@@ -3,12 +3,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { RegistrationController } from './controllers/registration.controller';
 import { RegistrationService } from './registration.service';
 import { DatabaseModule } from '../database/database.module';
+import { getJwtSecret } from '../config/jwt-secret';
 
 @Module({
   imports: [
     DatabaseModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'replace-with-a-secure-random-secret',
+      secret: getJwtSecret(),
       signOptions: { expiresIn: '7d' },
     }),
   ],

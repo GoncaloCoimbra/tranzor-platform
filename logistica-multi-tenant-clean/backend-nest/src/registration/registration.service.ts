@@ -9,6 +9,7 @@ import { PrismaService } from '../database/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
+import { getJwtSecret } from '../config/jwt-secret';
 
 interface RegisterCompanyDto {
   companyName: string;
@@ -233,12 +234,12 @@ export class RegistrationService {
     };
 
     const token = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET || 'replace-with-a-secure-random-secret',
+      secret: getJwtSecret(),
       expiresIn: '7d',
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.JWT_SECRET || 'replace-with-a-secure-random-secret',
+      secret: getJwtSecret(),
       expiresIn: '30d',
     });
 
