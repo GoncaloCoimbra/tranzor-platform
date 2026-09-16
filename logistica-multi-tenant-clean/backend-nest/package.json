@@ -24,8 +24,10 @@
     "prisma:studio": "prisma studio",
     "seed": "ts-node prisma/seed.ts",
     "seed:demo": "ts-node seed-demo-data.ts",
+    "security:rotate-super-admin": "ts-node scripts/rotate-super-admin-password.ts",
     "staging:validate": "bash scripts/validate-staging.sh",
-    "staging:start": "bash scripts/start-staging.sh"
+    "staging:start": "bash scripts/start-staging.sh",
+    "load-test": "node scripts/load-test.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
