@@ -2,6 +2,8 @@ import { prisma } from './prismaClient';
 import { publishPortfolioEvent } from './redisClient';
 
 const LOGISTICS_URL = process.env.LOGISTICS_URL || 'http://logistica-backend:3000';
+// TODO: fill LOGISTICS_API_KEY manually with a generated key until a key management endpoint exists.
+const LOGISTICS_API_KEY = process.env.LOGISTICS_API_KEY || '';
 const LOGISTICS_FETCH_TIMEOUT_MS = 5000;
 const LOGISTICS_FETCH_RETRY_COUNT = 3;
 const LOGISTICS_FETCH_RETRY_DELAY_MS = 1000;
@@ -117,8 +119,18 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutM
     throw new Error('fetch is not available');
   }
 
+  const headers =
+    options.headers instanceof Headers
+      ? Object.fromEntries(options.headers.entries())
+      : (options.headers as Record<string, string> | undefined) || {};
+
+  const mergedHeaders = {
+    ...headers,
+    ...(LOGISTICS_API_KEY ? { 'X-API-Key': LOGISTICS_API_KEY } : {}),
+  };
+
   try {
-    return await fetchFn(url, { ...options, signal: controller.signal });
+    return await fetchFn(url, { ...options, headers: mergedHeaders, signal: controller.signal });
   } finally {
     clearTimeout(timeout);
   }

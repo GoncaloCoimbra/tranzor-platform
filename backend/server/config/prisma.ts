@@ -150,6 +150,7 @@ const createProductAdapter = () => ({
 
 const fallbackAdapter = { product: createProductAdapter() } as any;
 
+export const productAdapter = fallbackAdapter.product;
 export const prisma = primaryPrisma ?? fallbackAdapter;
 export const readPrisma = replicaPrisma ?? fallbackAdapter;
 

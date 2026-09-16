@@ -28,6 +28,11 @@ class EmailService {
 	}
 
 	async sendEmail(options: EmailOptions): Promise<void> {
+		if (env.EMAIL_PROVIDER === 'console') {
+			logger.info(`Email suppressed in console provider: ${options.subject} -> ${options.to}`);
+			return;
+		}
+
 		try {
 			const fromAddress = env.SMTP_FROM || `no-reply@${new URL(env.FRONTEND_URL).hostname}`;
 			await this.transporter.sendMail({

@@ -153,20 +153,23 @@ router.post('/register', validate(registerSchema), asyncHandler(async (req: Requ
 
 		await user.save();
 
-		try {
-			await sendEmail({
-				to: email,
-				subject: 'Verifique seu email - Tranzor.pt',
-				html: `
-					<h2>Bem-vindo ao Tranzor.pt!</h2>
-					<p>Clique no link abaixo para verificar seu email:</p>
-					<a href="${env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}">Verificar Email</a>
-					<p>Este link expira em 24 horas.</p>
-				`
-			});
-		} catch (emailError) {
-			// Email send failed — do not fail the registration. Log and continue.
-			logger.warn(`Email sending failed for: ${email}`, emailError);
+		if (env.SKIP_EMAIL_VERIFICATION || env.EMAIL_PROVIDER === 'console') {
+			logger.info(`Email verification skipped for: ${email}`);
+		} else {
+			try {
+				await sendEmail({
+					to: email,
+					subject: 'Verifique seu email - Tranzor.pt',
+					html: `
+						<h2>Bem-vindo ao Tranzor.pt!</h2>
+						<p>Clique no link abaixo para verificar seu email:</p>
+						<a href="${env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}">Verificar Email</a>
+						<p>Este link expira em 24 horas.</p>
+					`
+				});
+			} catch (emailError) {
+				logger.warn(`Email sending failed for: ${email}`, emailError);
+			}
 		}
 
 		const token = generateToken(user._id.toString(), user.email, user.role);

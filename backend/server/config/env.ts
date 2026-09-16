@@ -25,6 +25,8 @@ const envSchema = z.object({
 	SMTP_USER: z.string().optional(),
 	SMTP_PASS: z.string().optional(),
 	SMTP_FROM: z.string().email().optional(),
+	EMAIL_PROVIDER: z.enum(['smtp', 'console']).default('smtp'),
+	SKIP_EMAIL_VERIFICATION: z.enum(['true', 'false']).transform((value) => value === 'true').default('false'),
 	LOG_LEVEL: z.enum(['error', 'warn', 'info', 'debug']).default('info'),
 	CORS_ORIGIN: z.string().default('http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174'),
 	RATE_LIMIT_WINDOW_MS: z.string().pipe(z.coerce.number()).default('900000'),

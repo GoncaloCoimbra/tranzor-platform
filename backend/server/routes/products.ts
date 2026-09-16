@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { prisma, readPrisma } from '../config/prisma';
+import { prisma, productAdapter } from '../config/prisma';
 import { AuthRequest, authenticate, authorize, optionalAuth } from '../middleware/auth';
 import { UserRole } from '@prisma/client';
 import { clearCacheByPrefix } from '../utils/cache';
@@ -9,7 +9,7 @@ import { logger } from '../config/logger';
 
 const router = Router();
 const sortFields = ['createdAt', 'price', 'name', 'salesCount', 'viewCount'] as const;
-const productReadClient = readPrisma?.product ?? prisma.product;
+const productClient = productAdapter ?? prisma.product;
 
 const normalizeSort = (field: string) => {
   return sortFields.includes(field as any) ? field : 'createdAt';
@@ -56,7 +56,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([
-      productReadClient.findMany({
+      productClient.findMany({
         where,
         skip,
         take: limit,
@@ -69,7 +69,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
           },
         },
       }),
-      productReadClient.count({ where }),
+      productClient.count({ where }),
     ]);
 
     res.json({
@@ -100,7 +100,7 @@ router.get('/', optionalAuth, async (req: AuthRequest, res) => {
 // Get product by ID
 router.get('/:id', async (req, res) => {
   try {
-    const product = await productReadClient.findUnique({
+    const product = await productClient.findUnique({
       where: { id: req.params.id },
       include: {
         images: true,
@@ -142,7 +142,7 @@ router.post('/', authenticate, authorize(UserRole.ADMIN, UserRole.MANAGER), asyn
   try {
     const data = productCreateSchema.parse(req.body);
 
-    const product = await prisma.product.create({
+    const product = await productClient.create({
       data: {
         ...data,
         status: 'ACTIVE',
@@ -178,7 +178,7 @@ router.post('/', authenticate, authorize(UserRole.ADMIN, UserRole.MANAGER), asyn
 // Update product (admin only)
 router.put('/:id', authenticate, authorize(UserRole.ADMIN, UserRole.MANAGER), async (req: AuthRequest, res) => {
   try {
-    const product = await prisma.product.update({
+    const product = await productClient.update({
       where: { id: req.params.id },
       data: req.body,
       include: { category: true },
@@ -211,7 +211,7 @@ router.put('/:id', authenticate, authorize(UserRole.ADMIN, UserRole.MANAGER), as
 // Delete product (admin only)
 router.delete('/:id', authenticate, authorize(UserRole.ADMIN), async (req: AuthRequest, res) => {
   try {
-    await prisma.product.delete({
+    await productClient.delete({
       where: { id: req.params.id },
     });
 
