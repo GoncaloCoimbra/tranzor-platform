@@ -40,8 +40,19 @@ export class LogisticsRedisSubscriber {
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        const client = new Redis(redisUrl, { lazyConnect: true });
-        await client.connect();
+        const client = new Redis(redisUrl, {
+          lazyConnect: true,
+          connectTimeout: 5000,
+        });
+        await Promise.race([
+          client.connect(),
+          new Promise<never>((_, reject) =>
+            setTimeout(
+              () => reject(new Error('Redis connection timed out after 5000ms')),
+              5000,
+            ),
+          ),
+        ]);
         await client.ping();
 
         this.subscriber = client;

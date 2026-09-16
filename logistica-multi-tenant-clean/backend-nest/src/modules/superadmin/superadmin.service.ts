@@ -1,6 +1,7 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+﻿import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { isStrongPassword } from '../../utils/password';
 
 @Injectable()
 export class SuperadminService {
@@ -70,6 +71,51 @@ export class SuperadminService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        company: { select: { id: true, name: true, nif: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createUser(data: any) {
+    const { password, ...userData } = data;
+    if (await this.prisma.user.findUnique({ where: { email: userData.email } })) {
+      throw new ConflictException('Email is already in use');
+    }
+    if (!isStrongPassword(password)) {
+      throw new BadRequestException('Password must be at least 8 characters and contain one uppercase letter and one number');
+    }
+    return this.prisma.user.create({
+      data: { ...userData, password: await bcrypt.hash(password, 10) },
+      select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true, company: true },
+    });
+  }
+
+  async updateUser(id: string, data: any) {
+    const { password, ...userData } = data;
+    if (password !== undefined && !isStrongPassword(password)) {
+      throw new BadRequestException('Password must be at least 8 characters and contain one uppercase letter and one number');
+    }
+    return this.prisma.user.update({
+      where: { id },
+      data: { ...userData, ...(password ? { password: await bcrypt.hash(password, 10) } : {}) },
+      select: { id: true, name: true, email: true, role: true, isActive: true, createdAt: true, company: true },
+    });
+  }
+
+  async deleteUser(id: string) {
+    return this.prisma.user.delete({ where: { id }, select: { id: true } });
   }
 
   async createCompany(data: any) {

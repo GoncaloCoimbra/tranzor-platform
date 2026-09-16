@@ -4,9 +4,11 @@ import { TransportsController } from '../modules/transports/controllers/transpor
 import { TransportRepository } from '../database/repositories/transport.repository';
 import { PrismaService } from '../database/prisma.service';
 import { NotificationsModule } from '../modules/notifications/notifications.module';
+import { StockReservationsModule } from '../modules/stock-reservations/stock-reservations.module';
+import { RealtimeModule } from '../modules/realtime/realtime.module';
 
 @Module({
-  imports: [NotificationsModule],
+  imports: [NotificationsModule, StockReservationsModule, RealtimeModule],
   controllers: [TransportsController],
   providers: [TransportsService, TransportRepository, PrismaService],
   exports: [TransportsService],

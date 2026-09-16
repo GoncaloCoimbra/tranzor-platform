@@ -370,6 +370,7 @@ export class VehiclesService {
       const activeTransports = await this.prisma.transport.findMany({
         where: {
           vehicleId: id,
+          ...(companyId ? { companyId } : {}),
           status: {
             in: [TransportStatus.PENDING, TransportStatus.IN_TRANSIT],
           },
@@ -411,6 +412,7 @@ export class VehiclesService {
       const finishedTransportsCount = await this.prisma.transport.count({
         where: {
           vehicleId: id,
+          ...(companyId ? { companyId } : {}),
           status: {
             in: [TransportStatus.DELIVERED, TransportStatus.CANCELED],
           },

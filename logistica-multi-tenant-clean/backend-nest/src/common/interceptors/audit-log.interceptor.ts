@@ -72,6 +72,13 @@ export class AuditLogInterceptor implements NestInterceptor {
 
           const ipAddress = request.ip || request.connection?.remoteAddress;
 
+          if (!user.companyId) {
+            this.logger.debug(
+              '[AUDIT] Skipping tenant audit for a global super-admin action without companyId',
+            );
+            return;
+          }
+
           // Registra no audit log
           console.log('[INTERCEPTOR] Calling auditLogService.createLog...');
           await this.auditLogService.createLog({

@@ -6,19 +6,25 @@ import { Vehicle, Prisma } from '@prisma/client';
 export class VehicleRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<Vehicle[]> {
-    return this.prisma.vehicle.findMany();
+  async findAll(companyId?: string): Promise<Vehicle[]> {
+    const where = companyId ? { companyId } : {};
+
+    return this.prisma.vehicle.findMany({ where });
   }
 
-  async findById(id: string): Promise<Vehicle | null> {
-    return this.prisma.vehicle.findUnique({
-      where: { id },
+  async findById(id: string, companyId?: string): Promise<Vehicle | null> {
+    const where = companyId ? { id, companyId } : { id };
+
+    return this.prisma.vehicle.findFirst({
+      where,
     });
   }
 
-  async findOne(id: string): Promise<Vehicle | null> {
-    return this.prisma.vehicle.findUnique({
-      where: { id },
+  async findOne(id: string, companyId?: string): Promise<Vehicle | null> {
+    const where = companyId ? { id, companyId } : { id };
+
+    return this.prisma.vehicle.findFirst({
+      where,
     });
   }
 
@@ -34,9 +40,14 @@ export class VehicleRepository {
     });
   }
 
-  async findByLicensePlate(licensePlate: string): Promise<Vehicle | null> {
+  async findByLicensePlate(
+    licensePlate: string,
+    companyId?: string,
+  ): Promise<Vehicle | null> {
+    const where = companyId ? { licensePlate, companyId } : { licensePlate };
+
     return this.prisma.vehicle.findFirst({
-      where: { licensePlate },
+      where,
     });
   }
 

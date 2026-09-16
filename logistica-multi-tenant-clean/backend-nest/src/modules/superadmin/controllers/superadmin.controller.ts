@@ -6,10 +6,17 @@
   Delete,
   Body,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { SuperadminService } from '../superadmin.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('superadmin')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.SUPER_ADMIN)
 export class SuperAdminController {
   // ← Mudei aqui de SuperadminController para SuperAdminController
   constructor(private readonly superadminService: SuperadminService) {}
@@ -22,6 +29,26 @@ export class SuperAdminController {
   @Get('companies')
   async getAllCompanies() {
     return this.superadminService.getAllCompanies();
+  }
+
+  @Get('users')
+  async getAllUsers() {
+    return this.superadminService.getAllUsers();
+  }
+
+  @Post('users')
+  async createUser(@Body() data: any) {
+    return this.superadminService.createUser(data);
+  }
+
+  @Patch('users/:id')
+  async updateUser(@Param('id') id: string, @Body() data: any) {
+    return this.superadminService.updateUser(id, data);
+  }
+
+  @Delete('users/:id')
+  async deleteUser(@Param('id') id: string) {
+    return this.superadminService.deleteUser(id);
   }
 
   @Get('companies/:id')
