@@ -21,8 +21,9 @@ async function main() {
     where: { id: user.id },
     data: { password: await bcrypt.hash(password, 12) },
   });
+  await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
 
-  console.log(`Rotated password for ${email}`);
+  console.log(`Rotated password and revoked refresh tokens for ${email}`);
 }
 
 main()
