@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage, translateText, TRANSLATIONS } from '../../i18n';
 import { SITE_FULL_NAME } from '../../site.config';
@@ -8,29 +8,43 @@ import './UnifiedHeader.css';
 
 interface UnifiedHeaderProps {
   variant?: 'admin' | 'public';
-  darkMode?: boolean;
-  onThemeToggle?: () => void;
 }
 
-const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({ variant = 'admin', darkMode = false, onThemeToggle }) => {
+const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({ variant = 'admin' }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const profilePath = user?.role === 'SUPER_ADMIN' ? '/superadmin/profile' : '/profile';
+  const homePath = user?.role === 'SUPER_ADMIN' ? '/superadmin-home' : '/dashboard';
   const [showMenu, setShowMenu] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const { language, setLanguage } = useLanguage();
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    return () => document.removeEventListener('mousedown', closeOnOutsideClick);
+  }, []);
 
   return (
     <header className="unified-header">
       <div className="header-content">
         {/* Brand */}
         <div className="brand-section">
-          <Link to="/dashboard" className="brand-link flex items-center gap-3">
-            <div className="brand-logo h-10 w-10 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 shadow-lg flex items-center justify-center text-black font-black">
+          <Link to={homePath} className="brand-link flex items-center gap-3">
+            <div className="brand-logo h-10 w-10 rounded-2xl bg-gradient-to-br from-red-600 to-red-800 shadow-lg flex items-center justify-center text-white font-black">
               L
             </div>
             <div>
               <div className="text-lg font-bold text-white">{SITE_FULL_NAME}</div>
-              <div className="text-xs uppercase tracking-[0.35em] text-amber-300">Logistics Platform</div>
+              <div className="text-xs uppercase tracking-[0.35em] text-red-300">Logistics Platform</div>
             </div>
           </Link>
         </div>
@@ -39,15 +53,22 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({ variant = 'admin', darkMo
         <div className="header-actions">
           <NotificationPanel />
 
-          <div className="language-menu">
+          <div
+            className="language-menu"
+            onMouseEnter={() => setShowLanguageMenu(true)}
+            onMouseLeave={() => setShowLanguageMenu(false)}
+          >
             <button
               type="button"
               className="language-current"
+              aria-expanded={showLanguageMenu}
+              aria-haspopup="menu"
+              onClick={() => setShowLanguageMenu((isOpen) => !isOpen)}
               title={language === 'pt' ? 'Português' : language === 'en' ? 'English' : 'Español'}
             >
               {language.toUpperCase()}
             </button>
-            <div className="language-dropdown">
+            <div className={`language-dropdown${showLanguageMenu ? ' is-open' : ''}`} role="menu">
               {(['pt', 'en', 'es'] as const)
                 .filter((lang) => lang !== language)
                 .map((lang) => (
@@ -55,7 +76,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({ variant = 'admin', darkMo
                     key={lang}
                     type="button"
                     className="language-option"
-                    onClick={() => setLanguage(lang)}
+                    onClick={() => {
+                      setLanguage(lang);
+                      setShowLanguageMenu(false);
+                    }}
                     title={lang === 'pt' ? 'Português' : lang === 'en' ? 'English' : 'Español'}
                   >
                     {lang.toUpperCase()}
@@ -64,31 +88,15 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({ variant = 'admin', darkMo
             </div>
           </div>
 
-          <button
-            type="button"
-            className="header-btn icon-button theme-toggle"
-            onClick={onThemeToggle}
-            title={t('themeToggleTitle')}
-            aria-label={t('themeToggleTitle')}
+          <div
+            className="header-user"
+            ref={userMenuRef}
           >
-            {darkMode ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79Z" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2M12 20v2M4 12h2M18 12h2M5.64 5.64l1.42 1.42M17.66 17.66l1.42 1.42M5.64 18.36l1.42-1.42M17.66 6.34l1.42-1.42" />
-              </svg>
-            )}
-          </button>
-
-          <div className="header-user">
             {user && <span className="user-name">{user.name || user.email}</span>}
             <button
               type="button"
               className="header-btn icon-button user-menu-btn"
-              onClick={() => setShowMenu(!showMenu)}
+              onClick={() => setShowMenu((isOpen) => !isOpen)}
               title={t('userMenuTitle')}
               aria-label={t('userMenuTitle')}
             >
@@ -100,8 +108,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({ variant = 'admin', darkMo
 
             {showMenu && (
               <div className="user-dropdown">
-                <Link to="/profile" className="dropdown-item">{t('headerProfile')}</Link>
-                <Link to="/configuracoes" className="dropdown-item">{t('headerSettings')}</Link>
+                <Link to={profilePath} className="dropdown-item">{t('headerProfile')}</Link>
+                {user?.role !== 'SUPER_ADMIN' && (
+                  <Link to="/configuracoes" className="dropdown-item">{t('headerSettings')}</Link>
+                )}
                 <hr className="dropdown-divider" />
                 <button
                   type="button"

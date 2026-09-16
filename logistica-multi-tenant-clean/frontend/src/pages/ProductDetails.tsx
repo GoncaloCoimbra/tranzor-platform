@@ -235,7 +235,7 @@ const ProductDetails: React.FC = () => {
   }
 
   return (
-    <div className="p-8 bg-gradient-to-br from-[#0f172a] to-[#1e293b] min-h-screen text-amber-100">
+    <div className="product-page p-8 bg-gradient-to-br from-[#0f172a] to-[#1e293b] min-h-screen text-amber-100">
       {/* Back Button */}
       <div className="flex justify-between items-center mb-6">
         <button

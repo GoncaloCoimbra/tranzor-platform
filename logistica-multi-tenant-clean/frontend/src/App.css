@@ -172,11 +172,11 @@ button[class*="bg-gradient-to-r"],
 
 
 .gradient-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #d90429 0%, #8a0118 100%);
 }
 
 .gradient-green {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #6b6460 100%);
 }
 
 .gradient-purple {

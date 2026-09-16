@@ -27,14 +27,14 @@ export const theme = {
     
     // Cores de estado com sombras melhoradas
     success: {
-      bg: 'bg-gradient-to-br from-green-50 to-emerald-50',
+      bg: 'bg-emerald-900/20',
       text: 'text-green-600',
       border: 'border-green-500',
       light: '',
     },
     
     warning: {
-      bg: 'bg-gradient-to-br from-yellow-50 to-amber-50',
+      bg: 'bg-amber-900/20',
       text: 'text-yellow-600',
       border: 'border-yellow-500',
       light: '',
@@ -60,7 +60,7 @@ export const theme = {
   buttons: {
     primary: 'px-6 py-3 bg-gradient-to-r from-[#dc2626] to-[#b91c1c] text-white rounded-lg hover:from-[#b91c1c] hover:to-[#991b1b] transition-all duration-300 font-bold shadow-lg hover:shadow-xl active:scale-95',
     secondary: 'px-6 py-3 bg-[#1e293b] border-2 border-[#334155] text-[#cbd5e1] rounded-lg hover:border-[#dc2626] hover:bg-[#334155] transition-all duration-300 font-bold shadow-md focus:ring-2 focus:ring-[#dc2626]/50',
-    success: 'px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-bold shadow-lg hover:shadow-xl',
+    success: 'px-6 py-3 bg-gradient-to-r from-[#d90429] to-[#8a0118] text-white rounded-lg hover:from-[#ff0a35] hover:to-[#d90429] transition-all duration-300 font-bold shadow-lg hover:shadow-xl',
     danger: 'px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 font-bold shadow-lg hover:shadow-xl',
     outline: 'px-6 py-3 border-2 border-[#dc2626]/50 text-[#dc2626] rounded-lg hover:bg-[#dc2626]/10 transition-all duration-300 font-bold hover:border-[#dc2626]',
     icon: 'p-2 hover:bg-[#dc2626]/20 rounded-lg transition-all duration-300 text-[#dc2626] hover:text-[#b91c1c]',
@@ -74,7 +74,7 @@ export const theme = {
     base: 'w-full px-4 py-3 bg-[#0a0e17] border-2 border-[#1a2234] text-[#f0f4ff] rounded-lg focus:ring-2 focus:ring-[#dc2626]/50 focus:border-[#dc2626] transition-all duration-200 placeholder-[#3a4d63] font-medium shadow-sm',
     error: 'w-full px-4 py-3 bg-[#0a0e17] border-2 border-red-500/70 text-[#f0f4ff] rounded-lg focus:ring-2 focus:ring-red-500/50 focus:border-red-400 transition-all duration-200 placeholder-[#3a4d63] shadow-sm',
     disabled: 'w-full px-4 py-3 border-2 border-[#1a2234] rounded-lg bg-[#07090f] cursor-not-allowed text-[#3a4d63] font-medium opacity-60',
-    success: 'w-full px-4 py-3 bg-[#0a0e17] border-2 border-emerald-500/70 text-[#f0f4ff] rounded-lg focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all duration-200 placeholder-[#3a4d63]',
+    success: 'w-full px-4 py-3 bg-[#0a0e17] border-2 border-[#d90429]/70 text-[#f0f4ff] rounded-lg focus:ring-2 focus:ring-[#d90429]/50 focus:border-[#ff0a35] transition-all duration-200 placeholder-[#3a4d63]',
   },
 
   
@@ -251,34 +251,34 @@ export const statusLabels = {
 
 export const statusColors = {
   product: {
-    'RECEIVED': '#021b44ff',
-    'IN_ANALYSIS': '#d97706',
+    'RECEIVED': '#6b6460',
+    'IN_ANALYSIS': '#ff0a35',
     'REJECTED': '#dc2626',
-    'APPROVED': '#059669',
-    'IN_STORAGE': '#334155',
-    'IN_PREPARATION': '#b45309',
-    'IN_SHIPPING': '#d97706',
-    'DELIVERED': '#10b981',
-    'IN_RETURN': '#979797ff',
-    'ELIMINATED': '#002782ff',
+    'APPROVED': '#ffffff',
+    'IN_STORAGE': '#6b6460',
+    'IN_PREPARATION': '#d90429',
+    'IN_SHIPPING': '#ff0a35',
+    'DELIVERED': '#ffffff',
+    'IN_RETURN': '#b0aaa7',
+    'ELIMINATED': '#000000',
     'CANCELLED': '#991b1b',
-    'DISPATCHED': '#d97706',
+    'DISPATCHED': '#d90429',
   } as Record<string, string>,
   vehicle: {
-    'available': '#059669',
-    'in_use': '#d97706',
-    'maintenance': '#334155',
+    'available': '#ffffff',
+    'in_use': '#d90429',
+    'maintenance': '#6b6460',
   } as Record<string, string>,
   transport: {
-    'PENDING': '#d97706',
-    'IN_TRANSIT': '#d97706',
-    'DELIVERED': '#059669',
+    'PENDING': '#ff0a35',
+    'IN_TRANSIT': '#d90429',
+    'DELIVERED': '#ffffff',
     'CANCELLED': '#dc2626',
   } as Record<string, string>,
   user: {
     'SUPER_ADMIN': '#dc2626',
     'ADMIN': '#b91c1c',
-    'OPERATOR': '#00245fff',
+    'OPERATOR': '#6b6460',
   } as Record<string, string>,
 };
 

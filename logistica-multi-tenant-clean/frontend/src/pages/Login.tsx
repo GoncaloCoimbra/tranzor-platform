@@ -144,7 +144,7 @@ const Login: React.FC = () => {
         </div>
 
         <div className="relative z-10 text-xs" style={{ color: ds.textMuted }}>
-          © 2025 Tranzor Logistics · All rights reserved
+          © {new Date().getFullYear()} Tranzor Logistics · All rights reserved
         </div>
       </div>
 

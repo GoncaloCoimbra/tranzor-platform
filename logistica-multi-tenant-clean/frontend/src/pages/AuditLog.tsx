@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
@@ -27,6 +28,8 @@ interface AuditStats {
 }
 
 const AuditLog: React.FC = () => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [stats, setStats] = useState<AuditStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,7 +111,7 @@ const AuditLog: React.FC = () => {
     } catch (error: any) {
       console.error('Error clearing history:', error);
       
-      // Garantir que errorMsg é sempre uma string
+      // Garantir que errorMsg ï¿½ sempre uma string
       let errorMsg = 'Error clearing history. Please try again later.';
       
       if (error.response?.data) {
@@ -272,20 +275,21 @@ const AuditLog: React.FC = () => {
 
   if (loading && page === 1) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b]">
+      <div className="loading-page flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto"></div>
-          <p className="mt-4 text-amber-300">Loading history...</p>
+          <p className="loading-message mt-4">{t('loadingHistory')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 bg-gradient-to-br from-[#0f172a] to-[#1e293b] min-h-screen">
+    <div className="history-page operations-page min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Operation History</h1>
+        <h1 className="text-3xl font-bold text-white">{t('history')}</h1>
         <p className="mt-2 text-amber-300/70">Complete record of all actions performed in the system</p>
 
       {/* Clear All Button */}
@@ -439,7 +443,7 @@ const AuditLog: React.FC = () => {
                       <svg className="w-12 h-12 text-amber-500/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      <p className="text-amber-300/70">No records found</p>
+                      <p className="text-amber-300/70">{t('noRecords')}</p>
                     </div>
                   </td>
                 </tr>
@@ -630,6 +634,7 @@ const AuditLog: React.FC = () => {
           <span>History cleared successfully!</span>
         </div>
       )}
+      </div>
     </div>
   );
 };

@@ -78,10 +78,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({ user, onClose, onSuccess 
 
       if (user) {
         // Edit existing user
-        await api.put(`/users/${user.id}`, payload);
+        await api.patch(`/superadmin/users/${user.id}`, payload);
       } else {
         // Create new user
-        await api.post('/users', payload);
+        await api.post('/superadmin/users', payload);
       }
 
       onSuccess();

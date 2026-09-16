@@ -39,27 +39,27 @@ const PAL = {
   bg:          'bg-gradient-to-br from-slate-800 to-slate-900',
   bgSolid:     '#0f172a',
   card:        'bg-gradient-to-br from-slate-800 to-slate-900',
-  border:      'border-amber-500/30',
-  borderHov:   'hover:border-amber-500/60',
-  amber:       '#f59e0b',
-  amberDim:    'rgba(245,158,11,0.12)',
-  amberBright: '#fbbf24',
+  border:      'border-red-500/30',
+  borderHov:   'hover:border-red-500/60',
+  amber:       '#d90429',
+  amberDim:    'rgba(217,4,41,0.12)',
+  amberBright: '#ff0a35',
   blue:        '#dc2626',
-  emerald:     '#34d399',
+  emerald:     '#ffffff',
   red:         '#f87171',
-  purple:      '#a855f7',
-  orange:      '#fb923c',
-  tPrimary:    '#f0f4ff',
-  tSecondary:  '#94a3b8',
-  tMuted:      '#475569',
+  purple:      '#d90429',
+  orange:      '#8a0118',
+  tPrimary:    '#ffffff',
+  tSecondary:  '#b0aaa7',
+  tMuted:      '#6b6460',
 };
 
 // --- Bar colours keyed by category ------------------------------------------
 const BAR_COLORS = [
   { fill: '#dc2626',  glow: 'rgba(59,130,246,0.35)' },
-  { fill: '#f59e0b',  glow: 'rgba(245,158,11,0.35)' },
-  { fill: '#a855f7',  glow: 'rgba(168,85,247,0.35)' },
-  { fill: '#34d399',  glow: 'rgba(52,211,153,0.35)' },
+  { fill: '#ff0a35',  glow: 'rgba(255,10,53,0.35)' },
+  { fill: '#8a0118',  glow: 'rgba(138,1,24,0.35)' },
+  { fill: '#ffffff',  glow: 'rgba(255,255,255,0.25)' },
   { fill: '#f87171',  glow: 'rgba(248,113,113,0.35)' },
 ];
 
@@ -205,9 +205,11 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { language } = useLanguage();
   const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
+  const [calendarDate, setCalendarDate] = useState('');
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const { data: stats, isLoading: loading, error, refetch: refetchStats } =
-    useDashboardProductStats();
+    useDashboardProductStats('30d', calendarDate || undefined, calendarDate || undefined);
   const { data: activity } = useDashboardActivity(10);
   const { data: suppliers }  = useSuppliers();
 
@@ -217,7 +219,7 @@ const Dashboard: React.FC = () => {
 
   // -- Export --
   const handleExportReport = () => {
-    if (!stats || stats.totalProducts === 0) { alert('No date to export'); return; }
+    if (!stats) return;
     const csv = [
       ['Performance Report - Tranzor Logística'],
       ['Date', new Date().toLocaleDateString('en-US')],
@@ -251,6 +253,7 @@ const Dashboard: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   };
 
   const loadAllSuppliers = () => {
@@ -376,7 +379,7 @@ const Dashboard: React.FC = () => {
   const rankColors = ['#f59e0b', '#dc2626', '#34d399', '#a855f7', '#fb923c'];
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#1e293b', fontFamily: "'Outfit', sans-serif" }}>
+    <div className="dashboard-page" style={{ minHeight: '100vh', backgroundColor: '#1e293b', fontFamily: "'Outfit', sans-serif" }}>
 
       {/* -- Header ----------------------------------------------------------- */}
       <div className="bg-gradient-to-r from-slate-900 to-black border-b-2 border-amber-500/20">
@@ -387,17 +390,62 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             {/* Period badge */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm bg-slate-800 border-2 border-amber-500/20 text-slate-300">
+            <div className="flex items-center rounded-xl bg-slate-800 border-2 border-amber-500/20 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => {
+                  setCalendarOpen((open) => !open);
+                }}
+                className="p-2 text-amber-400 hover:bg-amber-900/20 transition-all"
+                title={t('selectDate')}
+                aria-label={t('selectDate')}
+              >
               <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              {t('last30Days')}
+              </button>
+              <span className="px-3 py-2 text-sm text-slate-300" title={t('last30Days')}>
+                {calendarDate || t('last30Days')}
+              </span>
             </div>
+            {calendarOpen && (
+              <div className="absolute mt-14 right-40 z-30 rounded-xl bg-slate-900 border border-amber-500/30 p-4 shadow-2xl">
+                <label className="block text-xs text-slate-300 mb-2" htmlFor="dashboard-date">
+                  {t('selectDate')}
+                </label>
+                <input
+                  id="dashboard-date"
+                  type="date"
+                  value={calendarDate}
+                  onChange={(event) => {
+                    setCalendarDate(event.target.value);
+                    setCalendarOpen(false);
+                  }}
+                  className="rounded-lg bg-slate-800 border border-slate-600 text-white px-3 py-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCalendarDate('');
+                    setCalendarOpen(false);
+                    refetchStats();
+                  }}
+                  className="block mt-3 text-xs text-amber-400 hover:text-amber-300"
+                >
+                  {t('last30Days')}
+                </button>
+              </div>
+            )}
             {/* Refresh */}
             <button
-              onClick={() => refetchStats()}
-              title="Refresh"
+              onClick={() => {
+                setCalendarDate('');
+                setCalendarOpen(false);
+                refetchStats();
+              }}
+              title={t('last30Days')}
+              aria-label={t('last30Days')}
               className="p-2 rounded-xl bg-slate-800 border-2 border-amber-500/20 hover:border-amber-500/50 transition-all"
             >
               <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

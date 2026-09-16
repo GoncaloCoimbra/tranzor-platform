@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/api';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme, statusLabels, getStatusBadgeClass } from '../theme.config';
 
 const Profile: React.FC = () => {
+  const navigate = useNavigate();
   const { user, updateUserData } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
   
@@ -37,13 +39,20 @@ const Profile: React.FC = () => {
     try {
       const response = await api.put('/auth/profile', { name, email });
       updateUserData(response.data.user);
-      setProfileSuccess('Profile updated successfully!');
-      setTimeout(() => setProfileSuccess(''), 3000);
+      setProfileSuccess('Profile updated successfully. Returning to dashboard...');
+      setTimeout(() => navigate('/dashboard'), 2000);
     } catch (error: any) {
       setProfileError(error.response?.data?.error || 'Error updating profile');
     } finally {
       setProfileLoading(false);
     }
+  };
+
+  const cancelProfileEdit = () => {
+    setName(user?.name || '');
+    setEmail(user?.email || '');
+    setProfileError('');
+    setProfileSuccess('');
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -161,7 +170,16 @@ const Profile: React.FC = () => {
     <div className={theme.backgrounds.page}>
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 relative">
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="absolute right-0 top-0 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+            aria-label="Close profile"
+            title="Close"
+          >
+            <span className="text-2xl leading-none">×</span>
+          </button>
           <h1 className="text-3xl font-bold text-white">My Profile</h1>
           <p className={theme.colors.secondary.text}>Manage your personal information</p>
         </div>
@@ -295,7 +313,10 @@ const Profile: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-3">
+                    <button type="button" onClick={cancelProfileEdit} className={theme.buttons.secondary} disabled={profileLoading}>
+                      Cancel
+                    </button>
                     <button
                       type="submit"
                       disabled={profileLoading}

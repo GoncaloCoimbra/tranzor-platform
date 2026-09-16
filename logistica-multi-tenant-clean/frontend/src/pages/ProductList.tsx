@@ -6,9 +6,12 @@ import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
 import FilterSelector from '../components/FilterSelector';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 const ProductList: React.FC = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const { activeFilters, addFilter, removeFilter, clearAllFilters, getFilter } = useFilters();
   
   const [searchTerm, setSearchTerm] = useState(getFilter('search'));
@@ -104,7 +107,7 @@ const ProductList: React.FC = () => {
       <div style={{ padding: 'var(--space-2xl)', minHeight: '100vh', backgroundColor: 'var(--color-surface)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '256px' }}>
           <div style={{ animation: 'spin 1s linear infinite', width: '32px', height: '32px', borderRadius: '50%', borderTop: '2px solid var(--color-brand-red)' }}></div>
-          <span style={{ marginLeft: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Carregando produtos...</span>
+          <span style={{ marginLeft: 'var(--space-md)', color: 'var(--color-text-muted)' }}>{t('loadingProducts')}</span>
         </div>
       </div>
     );
@@ -119,25 +122,25 @@ const ProductList: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: 'var(--space-2xl)', minHeight: '100vh', backgroundColor: 'var(--color-surface)', color: 'var(--color-text)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-        <h1 style={{ fontSize: 'var(--fs-3xl)', fontWeight: 'bold', color: 'var(--color-text)' }}>Produtos</h1>
-        <Button variant="primary" onClick={() => navigate('/products/new')}>+ Novo Produto</Button>
+    <div className="products-page" style={{ padding: 'var(--space-lg)', minHeight: '100vh', backgroundColor: '#111827', color: 'var(--color-text)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)', padding: '0 var(--space-md)' }}>
+        <h1 style={{ fontSize: 'var(--fs-3xl)', fontWeight: 'bold', color: 'var(--color-text)' }}>{t('products')}</h1>
+        <Button variant="primary" onClick={() => navigate('/products/new')}>+ {t('newProduct')}</Button>
       </div>
 
       <FilterChips filters={activeFilters} onRemove={removeFilter} onClearAll={clearAllFilters} />
 
-      <Card header={<h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: '600' }}>Filtros Avançados</h2>}>
+      <Card style={{ marginBottom: 'var(--space-lg)' }} header={<h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: '600' }}>{t('advancedFilters')}</h2>}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-lg)' }}>
-          <Input label="Localização" placeholder="Ex: Corredor A" value={filterLocation} onChange={(e) => handleLocationChange(e.target.value)} />
-          <Input label="De (Data)" type="date" value={filterDateFrom} onChange={(e) => handleDateFromChange(e.target.value)} />
-          <Input label="Até (Data)" type="date" value={filterDateTo} onChange={(e) => handleDateToChange(e.target.value)} />
+          <Input label={t('location')} placeholder="Ex: Aisle A" value={filterLocation} onChange={(e) => handleLocationChange(e.target.value)} />
+          <Input label={t('fromDate')} type="date" value={filterDateFrom} onChange={(e) => handleDateFromChange(e.target.value)} />
+          <Input label={t('toDate')} type="date" value={filterDateTo} onChange={(e) => handleDateToChange(e.target.value)} />
         </div>
       </Card>
 
-      <Card header={<h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: '600' }}>Pesquisa e Status</h2>}>
+      <Card style={{ marginBottom: 'var(--space-lg)' }} header={<h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: '600' }}>{t('searchAndStatus')}</h2>}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-lg)' }}>
-          <Input label="Pesquisar" placeholder="Código, descrição..." value={searchTerm} onChange={(e) => handleSearchChange(e.target.value)} />
+          <Input label={t('search')} placeholder={t('searchProduct')} value={searchTerm} onChange={(e) => handleSearchChange(e.target.value)} />
           <div>
             <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: '500', marginBottom: 'var(--space-sm)', color: 'var(--color-text-muted)' }}>Status</label>
             <select
@@ -154,7 +157,7 @@ const ProductList: React.FC = () => {
                 fontFamily: 'var(--font-body)',
               }}
             >
-              <option value="">Todos</option>
+              <option value="">{t('allStatuses')}</option>
               {Object.entries(statusLabels.product).map(([key, value]) => (
                 <option key={key} value={key}>{value}</option>
               ))}
@@ -163,12 +166,12 @@ const ProductList: React.FC = () => {
         </div>
       </Card>
 
-      <Card header={<h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: '600' }}>Produtos</h2>}>
+      <Card style={{ marginBottom: 'var(--space-lg)' }} header={<h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: '600' }}>{t('products')}</h2>}>
         {products.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 'var(--space-2xl)' }}>
-            <p style={{ fontSize: 'var(--fs-lg)', fontWeight: '600', marginBottom: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Nenhum produto encontrado</p>
+            <p style={{ fontSize: 'var(--fs-lg)', fontWeight: '600', marginBottom: 'var(--space-md)', color: 'var(--color-text-muted)' }}>{t('noProducts')}</p>
             {activeFilters.length === 0 && (
-              <Button variant="secondary" onClick={() => navigate('/products/new')}>Criar Primeiro Produto</Button>
+              <Button variant="secondary" onClick={() => navigate('/products/new')}>{t('createFirstProduct')}</Button>
             )}
           </div>
         ) : (
@@ -176,12 +179,12 @@ const ProductList: React.FC = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
-                  <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>Código</th>
+                  <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>{t('code')}</th>
                   <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>Descrição</th>
-                  <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>Qtd</th>
+                  <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>{t('unitQuantity')}</th>
                   <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>Fornecedor</th>
                   <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>Status</th>
-                  <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>Local</th>
+                  <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>{t('location')}</th>
                   <th style={{ padding: 'var(--space-md)', textAlign: 'left', fontSize: 'var(--fs-sm)', fontWeight: '600', color: 'var(--color-text-muted)' }}>Data</th>
                 </tr>
               </thead>
@@ -216,7 +219,7 @@ const ProductList: React.FC = () => {
       </Card>
 
       <div style={{ marginTop: 'var(--space-md)', fontSize: 'var(--fs-sm)', color: 'var(--color-text-muted)' }}>
-        Exibindo {products.length} produto{products.length !== 1 ? 's' : ''}
+        {t('showingProducts')} {products.length} {products.length !== 1 ? t('productsLower') : t('product')}
       </div>
     </div>
   );

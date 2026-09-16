@@ -63,6 +63,15 @@
   z-index: 10;
 }
 
+.language-menu::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 0.5rem;
+}
+
 .language-current {
   border: 1px solid var(--color-border);
   border-radius: 999px;
@@ -95,7 +104,8 @@
   min-width: 5rem;
 }
 
-.language-menu:hover .language-dropdown {
+.language-menu:hover .language-dropdown,
+.language-dropdown.is-open {
   display: flex;
 }
 
@@ -186,7 +196,7 @@
 
 .user-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 0.25rem);
   right: 0;
   margin-top: var(--space-sm);
   background-color: var(--color-surface);

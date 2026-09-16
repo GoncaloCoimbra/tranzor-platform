@@ -11,11 +11,12 @@ export function useDashboardOverview() {
   });
 }
 
-export function useDashboardProductStats() {
+export function useDashboardProductStats(period = '30d', startDate?: string, endDate?: string) {
   return useQuery({
-    queryKey: ['dashboard', 'products', 'stats'],
+    queryKey: ['dashboard', 'products', 'stats', period, startDate, endDate],
     queryFn: async () => {
-      const response = await apiClient.get('/dashboard/stats');
+      const params = startDate && endDate ? { startDate, endDate } : { period };
+      const response = await apiClient.get('/dashboard/stats', { params });
       return response.data;
     },
   });

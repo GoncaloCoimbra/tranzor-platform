@@ -8,6 +8,7 @@ import ProductSelector from '../components/ProductSelector';
 import { Package, Trash2, Play } from 'lucide-react';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme, statusLabels, getStatusBadgeClass } from '../theme.config';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface Transport {
   id: string;
@@ -91,7 +92,16 @@ const extractErrorMessage = (error: any, defaultMessage: string = 'Error process
   return defaultMessage;
 };
 
+const asList = <T,>(payload: any): T[] => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+};
+
 const TransportList: React.FC = () => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const {
     activeFilters,
     hasFilters,
@@ -157,7 +167,7 @@ const TransportList: React.FC = () => {
   const loadCompanies = async () => {
     try {
       const response = await api.get('/companies');
-      setCompanies(response.data);
+      setCompanies(asList<Company>(response.data));
     } catch (error) {
       console.error('Error loading companies:', error);
     }
@@ -175,7 +185,7 @@ const TransportList: React.FC = () => {
       if (getFilter('dateTo')) params.set('dateTo', getFilter('dateTo')!);
       
       const response = await api.get(`/transports?${params.toString()}`);
-      setTransports(response.data.data);
+      setTransports(asList<Transport>(response.data));
     } catch (error: any) {
       console.error('Error loading transports:', error);
       setError(extractErrorMessage(error, 'Error loading transports'));
@@ -187,7 +197,7 @@ const TransportList: React.FC = () => {
   const loadVehicles = async () => {
     try {
       const response = await api.get('/vehicles');
-      setVehicles(response.data);
+      setVehicles(asList<Vehicle>(response.data));
     } catch (error: any) {
       console.error('Error loading vehicles:', error);
       setError(extractErrorMessage(error, 'Error loading vehicles'));
@@ -429,21 +439,21 @@ const TransportList: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`${theme.backgrounds.page} flex items-center justify-center min-h-screen`}>
+      <div className="loading-page flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-[#cbd5e1]">Loading...</p>
+          <p className="loading-message">{t('loadingVehicles')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`${theme.backgrounds.page} p-6 min-h-screen`}>
+    <div className={`operations-page ${theme.backgrounds.page} p-6 min-h-screen`}>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Transports</h1>
-          <p className="text-sm text-[#cbd5e1] mt-1">Management of transports and deliveries</p>
+          <h1 className="text-3xl font-bold text-white">{t('transports')}</h1>
+          <p className="text-sm text-[#cbd5e1] mt-1">{t('transportManagement')}</p>
         </div>
         <button
           onClick={() => {
@@ -921,7 +931,7 @@ const TransportList: React.FC = () => {
             <svg className="w-16 h-16 mx-auto mb-4 text-amber-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-lg font-bold text-amber-400">Nenhum transport cadastrado</p>
+            <p className="text-lg font-bold text-amber-400">{t('noRecords')}</p>
             <p className="text-sm mt-1">Click "New Transport" to get started</p>
           </div>
         )}

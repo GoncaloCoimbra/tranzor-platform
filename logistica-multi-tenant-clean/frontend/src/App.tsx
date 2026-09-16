@@ -35,7 +35,6 @@ import VehicleList from './pages/VehicleList';
 import TransportList from './pages/TransportList';
 
 // SuperAdmin (SEM MainLayout)
-import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import SuperAdminHome from './pages/SuperAdminHome';
 import SuperAdminProfile from './pages/SuperAdminProfile';
 
@@ -100,23 +99,27 @@ function App() {
                 SUPER ADMIN ROUTES (WITHOUT MainLayout)
                 Home page: /superadmin-home
             =================== */}
-            <Route 
-              path="/superadmin-home" 
+            <Route
+              path="/superadmin-home"
               element={
                 <PrivateRoute requireSuperAdmin>
-                  <SuperAdminHome />
+                  <UnifiedLayout />
                 </PrivateRoute>
-              } 
-            />
+              }
+            >
+              <Route index element={<SuperAdminHome />} />
+            </Route>
 
-            <Route 
-              path="/superadmin/profile" 
+            <Route
+              path="/superadmin"
               element={
                 <PrivateRoute requireSuperAdmin>
-                  <SuperAdminProfile />
+                  <UnifiedLayout />
                 </PrivateRoute>
-              } 
-            />
+              }
+            >
+              <Route path="profile" element={<SuperAdminProfile />} />
+            </Route>
 
             {/* ===================
                 PRIVATE ROUTES (WITH UnifiedLayout)
@@ -155,14 +158,7 @@ function App() {
                   </PrivateRoute>
                 } 
               />
-              <Route 
-                path="empresas"
-                element={
-                  <PrivateRoute>
-                    <CompanyManagement />
-                  </PrivateRoute>
-                } 
-              />
+              <Route path="empresas" element={<Navigate to="/companies" replace />} />
 
               {/* Vehicles - English & Portuguese */}
               <Route path="vehicles" element={<VehicleList />} />
@@ -213,7 +209,8 @@ function App() {
               />
 
               {/* History - Accessible to all authenticated users */}
-              <Route path="historico" element={<AuditLog />} />
+              <Route path="history" element={<AuditLog />} />
+              <Route path="historico" element={<Navigate to="/history" replace />} />
 
               {/* Profile */}
               <Route path="profile" element={<Profile />} />
@@ -234,16 +231,6 @@ function App() {
                     <Settings />
                   </PrivateRoute>
                 }
-              />
-
-              {/* SuperAdmin Dashboard (dentro do MainLayout) */}
-              <Route 
-                path="superadmin" 
-                element={
-                  <PrivateRoute requireSuperAdmin>
-                    <SuperAdminDashboard />
-                  </PrivateRoute>
-                } 
               />
 
               {/* Role-specific home routes (can be expanded in the future) */}

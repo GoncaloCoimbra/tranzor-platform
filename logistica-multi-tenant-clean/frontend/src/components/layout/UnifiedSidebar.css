@@ -52,6 +52,7 @@
   font-size: var(--fs-sm);
   font-weight: 600;
   white-space: nowrap;
+  min-height: 52px;
 }
 
 .nav-item:hover {
@@ -67,16 +68,23 @@
 }
 
 .nav-icon {
-  width: 24px;
-  min-width: 24px;
+  width: 28px;
+  min-width: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .nav-icon svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
+  stroke-width: 1.8;
+}
+
+.sidebar-lucide-icon {
+  width: 21px;
+  height: 21px;
+  stroke-width: 1.8;
 }
 
 .nav-label {

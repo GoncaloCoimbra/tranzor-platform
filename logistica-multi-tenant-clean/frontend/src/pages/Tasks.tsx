@@ -4,6 +4,7 @@ import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
 import FilterSelector from '../components/FilterSelector';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 const extractErrorMessage = (error: any, defaultMessage: string = 'Error processing request'): string => {
   if (!error) return defaultMessage;
@@ -46,7 +47,16 @@ interface Company {
   name: string;
 }
 
+const extractList = <T,>(payload: any): T[] => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+};
+
 const Tasks: React.FC = () => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const [user, setUser] = useState<User | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
@@ -95,7 +105,7 @@ const Tasks: React.FC = () => {
   const loadCompanies = async () => {
     try {
       const response = await api.get('/companies');
-      setCompanies(response.data);
+      setCompanies(extractList<Company>(response.data));
     } catch (error: any) {
       console.error('Error loading companies:', error);
     }
@@ -113,7 +123,7 @@ const Tasks: React.FC = () => {
       }
 
       const response = await api.get(`/tasks?${params.toString()}`);
-      setTasks(response.data);
+      setTasks(extractList<Task>(response.data));
     } catch (err: any) {
       console.error('Error loading tasks:', err);
       setTasksError(extractErrorMessage(err, 'Error loading tasks'));
@@ -124,11 +134,11 @@ const Tasks: React.FC = () => {
 
   const handleCreateTask = async () => {
     if (!formData.title || !formData.description || !formData.dueDate) {
-      alert('Please fill in all required fields!');
+      alert(t('requiredFields'));
       return;
     }
     if (user?.role === 'SUPER_ADMIN' && !selectedCompanyId) {
-      alert('Please select a company first.');
+      alert(t('selectCompanyFirst'));
       return;
     }
 
@@ -140,7 +150,7 @@ const Tasks: React.FC = () => {
     try {
       setSavingTask(true);
       await api.post('/tasks', dataToSend);
-      setTaskMessage('Task created successfully!');
+      setTaskMessage(t('taskCreated'));
       await loadTasks();
       setShowCreateModal(false);
       resetForm();
@@ -155,14 +165,14 @@ const Tasks: React.FC = () => {
 
   const handleEditTask = async () => {
     if (!formData.title || !formData.description || !formData.dueDate) {
-      alert('Please fill in all required fields!');
+      alert(t('requiredFields'));
       return;
     }
     if (selectedTask) {
       try {
         setSavingTask(true);
         await api.patch(`/tasks/${selectedTask.id}`, formData);
-        setTaskMessage('Task updated successfully!');
+        setTaskMessage(t('taskUpdated'));
         await loadTasks();
         setShowEditModal(false);
         setSelectedTask(null);
@@ -183,7 +193,7 @@ const Tasks: React.FC = () => {
     const newStatus = task.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
     try {
       await api.patch(`/tasks/${taskId}/status`, { status: newStatus });
-      setTaskMessage('Task status updated!');
+      setTaskMessage(t('taskStatusUpdated'));
       await loadTasks();
       setTimeout(() => setTaskMessage(''), 3000);
     } catch (err: any) {
@@ -196,7 +206,7 @@ const Tasks: React.FC = () => {
     try {
       setDeletingTaskId(taskId);
       await api.delete(`/tasks/${taskId}`);
-      setTaskMessage('Task deleted successfully!');
+      setTaskMessage(t('taskDeleted'));
       await loadTasks();
       setTimeout(() => setTaskMessage(''), 4000);
     } catch (err: any) {
@@ -240,9 +250,9 @@ const Tasks: React.FC = () => {
 
   const getTaskStatusBadgeClass = (status: Task['status']) => {
     switch (status) {
-      case 'PENDING':     return 'bg-gradient-to-r from-amber-900/30 to-amber-800/20 border-2 border-amber-500 text-amber-300';
+      case 'PENDING':     return 'bg-gradient-to-r from-red-900/30 to-red-800/20 border-2 border-red-500 text-red-300';
       case 'IN_PROGRESS': return 'bg-gradient-to-r from-red-900/30 to-red-800/20 border-2 border-red-500 text-red-300';
-      case 'COMPLETED':   return 'bg-gradient-to-r from-emerald-900/30 to-emerald-800/20 border-2 border-emerald-500 text-emerald-300';
+      case 'COMPLETED':   return 'bg-gradient-to-r from-white/10 to-gray-900/20 border-2 border-white text-white';
       case 'CANCELLED':   return 'bg-gradient-to-r from-red-900/30 to-red-800/20 border-2 border-red-500 text-red-300';
       default:            return 'bg-gray-800 border-gray-600 text-gray-300';
     }
@@ -251,33 +261,33 @@ const Tasks: React.FC = () => {
   const getPriorityBadgeClass = (priority: Task['priority']) => {
     switch (priority) {
       case 'URGENT': return 'bg-gradient-to-r from-red-900/30 to-red-800/20 border-2 border-red-500 text-red-300';
-      case 'HIGH':   return 'bg-gradient-to-r from-orange-900/30 to-orange-800/20 border-2 border-orange-500 text-orange-300';
-      case 'MEDIUM': return 'bg-gradient-to-r from-amber-900/30 to-amber-800/20 border-2 border-amber-500 text-amber-300';
-      case 'LOW':    return 'bg-gradient-to-r from-emerald-900/30 to-emerald-800/20 border-2 border-emerald-500 text-emerald-300';
+      case 'HIGH':   return 'bg-gradient-to-r from-red-900/30 to-red-800/20 border-2 border-red-500 text-red-300';
+      case 'MEDIUM': return 'bg-gradient-to-r from-red-900/20 to-gray-900/20 border-2 border-red-400 text-red-200';
+      case 'LOW':    return 'bg-gradient-to-r from-white/10 to-gray-900/20 border-2 border-white text-white';
       default:       return 'bg-gray-800 border-gray-600 text-gray-300';
     }
   };
 
   const getPriorityLabel = (priority: Task['priority']) => {
-    const labels = { URGENT: 'Urgent', HIGH: 'High', MEDIUM: 'Medium', LOW: 'Low' };
+    const labels = { URGENT: t('urgent'), HIGH: t('high'), MEDIUM: t('medium'), LOW: t('low') };
     return labels[priority];
   };
 
   const getStatusLabel = (status: Task['status']) => {
-    const labels = { PENDING: 'Pending', IN_PROGRESS: 'In Progress', COMPLETED: 'Completed', CANCELLED: 'Cancelled' };
+    const labels = { PENDING: t('pending'), IN_PROGRESS: t('inProgress'), COMPLETED: t('completed'), CANCELLED: t('cancelled') };
     return labels[status];
   };
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US');
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString(language === 'pt' ? 'pt-PT' : language === 'es' ? 'es-ES' : 'en-US');
 
   const inputCls = 'w-full px-4 py-2 bg-slate-900 border-2 border-amber-500/30 rounded-lg text-white focus:border-amber-500 focus:outline-none';
 
   if (loadingTasks) {
     return (
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center min-h-screen">
+      <div className="loading-page flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4" />
-          <p className="text-slate-300">Loading tasks...</p>
+          <p className="loading-message">{t('loadingTasks')}</p>
         </div>
       </div>
     );
@@ -289,19 +299,19 @@ const Tasks: React.FC = () => {
   });
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#1e293b', padding: '1.5rem' }}>
+    <div className="operations-page" style={{ minHeight: '100vh', backgroundColor: '#111214', padding: '1.5rem' }}>
 
       {/* -- Page Header -- */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Tasks</h1>
-          <p className="text-sm text-slate-300 mt-1">Task and activity management</p>
+      <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-3xl font-bold text-white">{t('tasks')}</h1>
+          <p className="text-sm text-slate-300 mt-1">{t('taskManagement')}</p>
 
           {user?.role === 'SUPER_ADMIN' && (
             <div className="mt-3 bg-gradient-to-r from-red-900/20 to-red-800/10 border-2 border-red-500/30 rounded-lg p-3">
               <div className="flex items-center gap-2 mb-2">
                 <span className="px-2 py-1 bg-red-500/20 text-red-300 text-xs font-bold rounded">SUPER ADMIN</span>
-                <span className="text-sm text-slate-300 font-medium">Select a company to view tasks</span>
+                <span className="text-sm text-slate-300 font-medium">{t('selectCompanyTask')}</span>
               </div>
               <select value={selectedCompanyId} onChange={(e) => setSelectedCompanyId(e.target.value)}
                 className="w-full md:w-auto px-4 py-2 bg-slate-900 border-2 border-red-500/30 rounded-lg text-white focus:border-red-500 focus:outline-none">
@@ -324,24 +334,24 @@ const Tasks: React.FC = () => {
         </div>
 
         <button onClick={() => setShowCreateModal(true)}
-          className="px-6 py-3 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:via-amber-700 hover:to-amber-800 text-white rounded-lg transition-all font-bold shadow-lg hover:shadow-xl flex items-center gap-2">
+          className="shrink-0 w-full sm:w-auto px-4 sm:px-6 py-3 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 hover:from-amber-600 hover:via-amber-700 hover:to-amber-800 text-white rounded-lg transition-all font-bold shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          New Task
+          {t('newTask')}
         </button>
       </div>
 
       {/* -- Stats -- */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Tasks',  value: filteredTasks.length, color: 'amber',
+          { label: t('totalTasks'),  value: filteredTasks.length, color: 'red',
             icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
-          { label: 'In Progress',  value: filteredTasks.filter(t => t.status === 'IN_PROGRESS').length, color: 'blue',
+          { label: t('inProgress'),  value: filteredTasks.filter(t => t.status === 'IN_PROGRESS').length, color: 'red',
             icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
-          { label: 'Completed',    value: filteredTasks.filter(t => t.status === 'COMPLETED').length, color: 'emerald',
+          { label: t('completed'),    value: filteredTasks.filter(t => t.status === 'COMPLETED').length, color: 'white',
             icon: 'M5 13l4 4L19 7' },
-          { label: 'Urgent',       value: filteredTasks.filter(t => t.priority === 'URGENT').length, color: 'red',
+          { label: t('urgent'),       value: filteredTasks.filter(t => t.priority === 'URGENT').length, color: 'red',
             icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z' },
         ].map((s, i) => (
           <div key={i} className={`bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-${s.color}-500/30 rounded-xl p-4`}>
@@ -366,7 +376,7 @@ const Tasks: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gradient-to-r from-slate-900 to-black">
               <tr>
-                {['Task', 'Priority', 'Status', 'Due Date', 'Assignee', 'Actions'].map((h, i) => (
+                {[t('task'), t('priority'), t('status'), t('dueDate'), t('assignee'), t('actions')].map((h, i) => (
                   <th key={h} className={`px-8 py-4 ${i === 5 ? 'text-right' : 'text-left'} text-xs font-black text-amber-400 uppercase tracking-widest border-b-2 border-amber-500/30`}>
                     {h}
                   </th>
@@ -386,7 +396,7 @@ const Tasks: React.FC = () => {
                       <div className="ml-3">
                         <div className="text-sm font-bold text-white">{task.title}</div>
                         <div className="text-xs text-amber-300 mt-1">{task.description}</div>
-                        <div className="text-xs text-gray-400 mt-1">Created: {formatDate(task.createdAt)}</div>
+                        <div className="text-xs text-gray-400 mt-1">{t('created')}: {formatDate(task.createdAt)}</div>
                       </div>
                     </div>
                   </td>
@@ -403,7 +413,7 @@ const Tasks: React.FC = () => {
                   <td className="px-8 py-4">
                     <div className="text-sm font-bold text-white">{formatDate(task.dueDate)}</div>
                     <div className={`text-xs ${new Date(task.dueDate) < new Date() && task.status !== 'COMPLETED' ? 'text-red-400' : 'text-gray-400'}`}>
-                      {new Date(task.dueDate) < new Date() && task.status !== 'COMPLETED' ? 'Overdue' : 'On track'}
+                      {new Date(task.dueDate) < new Date() && task.status !== 'COMPLETED' ? t('overdue') : t('onTrack')}
                     </div>
                   </td>
                   <td className="px-8 py-4">
@@ -451,24 +461,24 @@ const Tasks: React.FC = () => {
             <svg className="w-16 h-16 mx-auto mb-4 text-amber-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <p className="text-lg font-bold text-amber-400">No tasks found</p>
-            <p className="text-sm mt-1">Click "New Task" to get started</p>
+            <p className="text-lg font-bold text-amber-400">{t('noTasks')}</p>
+            <p className="text-sm mt-1">{t('clickNewTask')}</p>
           </div>
         )}
       </div>
 
       {/* -- Create Modal -- */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-amber-400 mb-4">New Task</h2>
+        <div className="fixed inset-0 bg-black/70 flex items-start sm:items-center justify-center z-[9999] px-4 pt-24 pb-6 sm:py-4 overflow-y-auto">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 rounded-xl p-6 max-w-md w-full max-h-[calc(100vh-8rem)] sm:max-h-[calc(100vh-2rem)] overflow-y-auto my-0">
+            <h2 className="text-2xl font-bold text-amber-400 mb-4">{t('newTask')}</h2>
             {user?.role === 'SUPER_ADMIN' && (
               <div className="mb-4 bg-gradient-to-r from-red-900/20 to-red-800/10 border-2 border-red-500/30 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="px-2 py-1 bg-red-500/20 text-red-300 text-xs font-bold rounded">SUPER ADMIN</span>
-                  <span className="text-sm text-slate-300 font-medium">Select the company to create the task for</span>
+                  <span className="text-sm text-slate-300 font-medium">{t('selectCompanyCreate')}</span>
                 </div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Company *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('company')} *</label>
                 <select required value={selectedCompanyId} onChange={(e) => setSelectedCompanyId(e.target.value)}
                   className="w-full px-4 py-2 bg-slate-900 border-2 border-red-500/30 rounded-lg text-white focus:border-red-500 focus:outline-none">
                   <option value="">Select a company...</option>
@@ -478,43 +488,43 @@ const Tasks: React.FC = () => {
             )}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Title *</label>
-                <Input type="text"  value={formData.title} placeholder="Enter task title"
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('title')} *</label>
+                <Input type="text"  value={formData.title} placeholder={t('enterTaskTitle')}
                   onChange={(e) => setFormData({...formData, title: e.target.value})} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Description *</label>
-                <textarea value={formData.description} rows={3} placeholder="Enter task description"
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('description')} *</label>
+                <textarea value={formData.description} rows={3} placeholder={t('enterTaskDescription')}
                   onChange={(e) => setFormData({...formData, description: e.target.value})} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Priority *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('priority')} *</label>
                 <select value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value as Task['priority']})} className={inputCls}>
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                  <option value="URGENT">Urgent</option>
+                  <option value="LOW">{t('low')}</option>
+                  <option value="MEDIUM">{t('medium')}</option>
+                  <option value="HIGH">{t('high')}</option>
+                  <option value="URGENT">{t('urgent')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Due Date *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('dueDate')} *</label>
                 <input type="date" value={formData.dueDate}
                   onChange={(e) => setFormData({...formData, dueDate: e.target.value})} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Assignee</label>
-                <Input type="text"  value={formData.assignedTo} placeholder="Assignee name"
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('assignee')}</label>
+                <Input type="text"  value={formData.assignedTo} placeholder={t('assignee')}
                   onChange={(e) => setFormData({...formData, assignedTo: e.target.value})} className={inputCls} />
               </div>
             </div>
-            <div className="flex gap-2 mt-6">
+            <div className="flex flex-col sm:flex-row gap-2 mt-6">
               <button onClick={handleCreateTask} disabled={savingTask}
-                className={`flex-1 px-4 py-2 ${savingTask ? 'bg-amber-400/60 cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'} text-white rounded-lg transition-all font-bold`}>
-                {savingTask ? 'Creating...' : 'Create Task'}
+                className={`w-full sm:flex-1 px-4 py-2 ${savingTask ? 'bg-amber-400/60 cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'} text-white rounded-lg transition-all font-bold`}>
+                {savingTask ? t('creatingTask') : t('createTask')}
               </button>
               <button onClick={() => { setShowCreateModal(false); resetForm(); }}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all font-bold">
-                Cancel
+                className="w-full sm:flex-1 px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all font-bold">
+                {t('cancel')}
               </button>
             </div>
           </div>
@@ -523,44 +533,44 @@ const Tasks: React.FC = () => {
 
       {/* -- Edit Modal -- */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] p-4">
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-amber-400 mb-4">Edit Task</h2>
+            <h2 className="text-2xl font-bold text-amber-400 mb-4">{t('editTask')}</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Title *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('title')} *</label>
                 <Input type="text"  value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Description *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('description')} *</label>
                 <textarea value={formData.description} rows={3} onChange={(e) => setFormData({...formData, description: e.target.value})} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Priority *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('priority')} *</label>
                 <select value={formData.priority} onChange={(e) => setFormData({...formData, priority: e.target.value as Task['priority']})} className={inputCls}>
-                  <option value="LOW">Low</option>
-                  <option value="MEDIUM">Medium</option>
-                  <option value="HIGH">High</option>
-                  <option value="URGENT">Urgent</option>
+                  <option value="LOW">{t('low')}</option>
+                  <option value="MEDIUM">{t('medium')}</option>
+                  <option value="HIGH">{t('high')}</option>
+                  <option value="URGENT">{t('urgent')}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Due Date *</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('dueDate')} *</label>
                 <input type="date" value={formData.dueDate} onChange={(e) => setFormData({...formData, dueDate: e.target.value})} className={inputCls} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Assignee</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">{t('assignee')}</label>
                 <Input type="text"  value={formData.assignedTo} onChange={(e) => setFormData({...formData, assignedTo: e.target.value})} className={inputCls} />
               </div>
             </div>
             <div className="flex gap-2 mt-6">
               <button onClick={handleEditTask} disabled={savingTask}
                 className={`flex-1 px-4 py-2 ${savingTask ? 'bg-amber-400/60 cursor-not-allowed' : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'} text-white rounded-lg transition-all font-bold`}>
-                {savingTask ? 'Saving...' : 'Save Changes'}
+                {savingTask ? t('saving') : t('saveChanges')}
               </button>
               <button onClick={() => { setShowEditModal(false); setSelectedTask(null); resetForm(); }}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all font-bold">
-                Cancel
+                {t('cancel')}
               </button>
             </div>
           </div>
@@ -569,10 +579,10 @@ const Tasks: React.FC = () => {
 
       {/* -- View Modal -- */}
       {showViewModal && selectedTask && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] p-4">
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/30 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-amber-400">Task Details</h2>
+              <h2 className="text-2xl font-bold text-amber-400">{t('taskDetails')}</h2>
               <button onClick={() => confirmDelete(selectedTask.id)} title="Delete task"
                 className="p-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -582,48 +592,48 @@ const Tasks: React.FC = () => {
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-1">Title</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">{t('title')}</label>
                 <p style={{ color: 'var(--color-text)' }}>{selectedTask.title}</p>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-1">Description</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">{t('description')}</label>
                 <p style={{ color: 'var(--color-text)' }}>{selectedTask.description}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-300 mb-1">Status</label>
+                  <label className="block text-sm font-bold text-slate-300 mb-1">{t('status')}</label>
                   <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getTaskStatusBadgeClass(selectedTask.status)}`}>
                     {getStatusLabel(selectedTask.status)}
                   </span>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-300 mb-1">Priority</label>
+                  <label className="block text-sm font-bold text-slate-300 mb-1">{t('priority')}</label>
                   <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getPriorityBadgeClass(selectedTask.priority)}`}>
                     {getPriorityLabel(selectedTask.priority)}
                   </span>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-1">Due Date</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">{t('dueDate')}</label>
                 <p style={{ color: 'var(--color-text)' }}>{formatDate(selectedTask.dueDate)}</p>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-1">Assignee</label>
-                <p style={{ color: 'var(--color-text)' }}>{selectedTask.assignedTo || 'Unassigned'}</p>
+                <label className="block text-sm font-bold text-slate-300 mb-1">{t('assignee')}</label>
+                <p style={{ color: 'var(--color-text)' }}>{selectedTask.assignedTo || t('unassigned')}</p>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-1">Created on</label>
+                <label className="block text-sm font-bold text-slate-300 mb-1">{t('createdOn')}</label>
                 <p style={{ color: 'var(--color-text)' }}>{formatDate(selectedTask.createdAt)}</p>
               </div>
             </div>
             <div className="flex gap-2 mt-6">
               <button onClick={() => { setShowViewModal(false); openEditModal(selectedTask); }}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all font-bold">
-                Edit
+                {t('edit')}
               </button>
               <button onClick={() => { setShowViewModal(false); setSelectedTask(null); }}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all font-bold">
-                Close
+                {t('close')}
               </button>
             </div>
           </div>
@@ -632,7 +642,7 @@ const Tasks: React.FC = () => {
 
       {/* -- Delete Confirm Modal -- */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] p-4">
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-red-500/30 rounded-xl p-6 max-w-md w-full">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
@@ -641,19 +651,19 @@ const Tasks: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-red-400">Confirm Deletion</h2>
-                <p className="text-sm text-slate-300">This action cannot be undone</p>
+                <h2 className="text-xl font-bold text-red-400">{t('confirmDeletion')}</h2>
+                <p className="text-sm text-slate-300">{t('cannotUndo')}</p>
               </div>
             </div>
-            <p className="text-slate-300 mb-6">Are you sure you want to delete this task?</p>
+            <p className="text-slate-300 mb-6">{t('deleteTaskQuestion')}</p>
             <div className="flex gap-2">
               <button onClick={() => taskToDelete && handleDeleteTask(taskToDelete)} disabled={!!deletingTaskId}
                 className={`flex-1 px-4 py-2 ${deletingTaskId ? 'bg-red-400/60 cursor-not-allowed' : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'} text-white rounded-lg transition-all font-bold`}>
-                {deletingTaskId ? 'Deleting...' : 'Delete'}
+                {deletingTaskId ? t('deleting') : t('deleteTask')}
               </button>
               <button onClick={() => { setShowDeleteConfirm(false); setTaskToDelete(null); }}
                 className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all font-bold">
-                Cancel
+                {t('cancel')}
               </button>
             </div>
           </div>

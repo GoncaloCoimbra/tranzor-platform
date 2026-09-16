@@ -27,6 +27,13 @@ interface ProductSelectorProps {
   alreadySelected: SelectedProduct[];
 }
 
+const extractList = <T,>(payload: any): T[] => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+};
+
 const ProductSelector: React.FC<ProductSelectorProps> = ({
   open,
   onClose,
@@ -57,7 +64,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
       const response = await api.get('/products');
       
       console.log('[ProductSelector] Backend response:', response.data);
-      const products = response.data.data;
+      const products = extractList<Product>(response.data);
       console.log('[ProductSelector] Total products:', products.length);
       
       // Filter only products available for transport

@@ -2,7 +2,7 @@
 
 /* ═══════════════════════════════════════════════════════════════
    UNIFIED DESIGN SYSTEM — All Modules (Commerce, Logistics, ChatOps)
-   Palette: Red #d90429 | White | Dark #1a1b1e
+  Palette: Red | White | Operational semantic colors | Dark #111214
    Fonts: Outfit (display) | DM Sans (body) | DM Mono (code)
 ═══════════════════════════════════════════════════════════════ */
 
@@ -13,29 +13,36 @@
   --color-brand-red-dark: #8a0118;
   --color-brand-red-soft: rgba(217, 4, 41, 0.07);
 
-  /* ── Light Mode ── */
-  --color-bg: #ffffff;
-  --color-surface: #faf9f8;
-  --color-surface-hover: #f4f2f1;
-  --color-border: #e8e3e1;
-  --color-text: #0e0e0e;
-  --color-text-muted: #6b6460;
-  --color-text-faint: #b0aaa7;
+  /* ── Logistics surfaces ── */
+  --color-bg: #111214;
+  --color-surface: #1a1b1e;
+  --color-surface-hover: #25272c;
+  --color-border: #3f4247;
+  --color-text: #ffffff;
+  --color-text-muted: #d1d5db;
+  --color-text-faint: #9ca3af;
 
   /* ── Dark Mode ── */
-  --color-bg-dark: #1a1b1e;
-  --color-surface-dark: #141517;
-  --color-surface-hover-dark: #111214;
-  --color-border-dark: rgba(255, 255, 255, 0.09);
-  --color-text-dark: #e8e4e1;
-  --color-text-muted-dark: rgba(232, 228, 225, 0.55);
-  --color-text-faint-dark: rgba(232, 228, 225, 0.28);
+  --color-bg-dark: #111214;
+  --color-surface-dark: #1a1b1e;
+  --color-surface-hover-dark: #25272c;
+  --color-border-dark: #3f4247;
+  --color-text-dark: #ffffff;
+  --color-text-muted-dark: #d1d5db;
+  --color-text-faint-dark: #9ca3af;
 
   /* ── Semântico ── */
   --color-success: #10b981;
   --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #dc2626;
+  --color-error: #dc2626;
+  --color-info: #3b82f6;
+  --color-inactive: #9ca3af;
+  --chart-1: #d90429;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #3b82f6;
+  --chart-5: #8b5cf6;
+  --chart-6: #06b6d4;
 
   /* ── Tipografia ── */
   --font-display: 'Outfit', sans-serif;
@@ -305,12 +312,127 @@ button:disabled {
 }
 
 .layout-footer {
-  background-color: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  padding: var(--space-lg);
-  text-align: center;
-  color: var(--color-text-muted);
+  background-color: #141517;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 32px var(--space-lg) 0;
+  color: rgba(255, 255, 255, 0.7);
   font-size: var(--fs-sm);
+}
+
+.footer-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+  padding-bottom: 32px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.footer-logo {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-brand-red);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.footer-brand strong,
+.footer-links strong,
+.footer-contact strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #ffffff;
+  font-size: var(--fs-sm);
+}
+
+.footer-brand p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  max-width: 220px;
+}
+
+.footer-links {
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  flex: 1;
+}
+
+.footer-links > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 110px;
+}
+
+.footer-links a,
+.footer-contact a,
+.footer-contact span {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: var(--fs-sm);
+}
+
+.footer-links a:hover,
+.footer-contact a:hover { color: var(--color-brand-red-light); }
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.footer-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.footer-status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-brand-red);
+}
+
+.footer-bottom {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 18px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .footer-content { flex-direction: column; gap: 28px; }
+  .footer-links { width: 100%; gap: 24px; flex-wrap: wrap; }
+  .footer-contact { min-width: 100%; }
+  .footer-bottom { flex-direction: column; }
+}
+
+.unified-header {
+  background-color: #141517 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.09) !important;
+  color: #e8e4e1;
 }
 
 /* ══ Cards ══════════════════════════════════════ */
@@ -364,12 +486,12 @@ button:disabled {
 }
 
 .badge-success {
-  background-color: rgba(16, 185, 129, 0.1);
+  background-color: rgba(255, 255, 255, 0.12);
   color: var(--color-success);
 }
 
 .badge-warning {
-  background-color: rgba(245, 158, 11, 0.1);
+  background-color: var(--color-brand-red-soft);
   color: var(--color-warning);
 }
 
@@ -379,7 +501,7 @@ button:disabled {
 }
 
 .badge-info {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(217, 4, 41, 0.1);
   color: var(--color-info);
 }
 
@@ -464,5 +586,182 @@ tr:hover {
   .layout-main {
     padding: var(--space-md);
   }
+}
+
+/* Logistics palette bridge for legacy utility classes. */
+.product-page {
+  background-color: var(--color-bg) !important;
+  background-image: none !important;
+  color: var(--color-text) !important;
+}
+
+.products-page {
+  background-color: #111827 !important;
+  background-image: none !important;
+  color: var(--color-text) !important;
+}
+
+.history-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #111827 !important;
+  background-image: none !important;
+}
+
+.loading-page {
+  background-color: var(--color-surface) !important;
+  background-image: none !important;
+  color: var(--color-text) !important;
+}
+
+.loading-message {
+  color: var(--color-brand-red) !important;
+  font-weight: 600;
+}
+
+.operations-page {
+  /* Matches ProductList's var(--color-surface) page background. */
+  background-color: #111827 !important;
+  background-image: none !important;
+  color: var(--color-text) !important;
+}
+
+.operations-page [class*="from-slate-"],
+.operations-page [class*="to-slate-"],
+.operations-page [class*="from-gray-"],
+.operations-page [class*="to-gray-"],
+.operations-page [class*="from-[#0f172a]"],
+.operations-page [class*="to-[#0f172a]"],
+.operations-page [class*="from-[#1e293b]"],
+.operations-page [class*="to-[#1e293b]"],
+.operations-page [class*="bg-slate-"],
+.operations-page [class*="bg-gray-"] {
+  background-color: #162039 !important;
+  background-image: none !important;
+}
+
+.dashboard-page [class*="border-amber-"],
+.dashboard-page [class*="border-yellow-"],
+.dashboard-page [class*="border-orange-"] {
+  border-color: var(--color-brand-red) !important;
+}
+
+.dashboard-page [class*="from-amber-"],
+.dashboard-page [class*="to-amber-"] {
+  background-color: var(--color-brand-red) !important;
+  background-image: none !important;
+}
+
+.operations-page [class*="text-slate-"],
+.operations-page [class*="text-gray-"] {
+  color: var(--color-text-muted) !important;
+}
+
+.operations-page [class*="border-slate-"],
+.operations-page [class*="border-gray-"] {
+  border-color: var(--color-border) !important;
+}
+
+/* Products-style brand treatment: no gold accents on operational pages. */
+.operations-page [class*="text-amber-"],
+.operations-page [class*="text-yellow-"],
+.operations-page [class*="text-orange-"] {
+  color: var(--color-brand-red) !important;
+}
+
+.operations-page [class*="border-amber-"],
+.operations-page [class*="border-yellow-"],
+.operations-page [class*="border-orange-"] {
+  border-color: var(--color-brand-red) !important;
+}
+
+.operations-page [class*="bg-amber-"],
+.operations-page [class*="bg-yellow-"],
+.operations-page [class*="bg-orange-"] {
+  background-color: var(--color-brand-red-soft) !important;
+  background-image: none !important;
+}
+
+.operations-page [class*="from-amber-"],
+.operations-page [class*="to-amber-"],
+.operations-page [class*="from-yellow-"],
+.operations-page [class*="to-yellow-"],
+.operations-page [class*="from-orange-"],
+.operations-page [class*="to-orange-"] {
+  background-color: var(--color-brand-red) !important;
+  background-image: none !important;
+}
+
+.operations-page [class*="bg-[#07090f]"],
+.operations-page [class*="bg-[#0f172a]"],
+.operations-page [class*="bg-[#1e293b]"] {
+  background-color: var(--color-surface) !important;
+  background-image: none !important;
+}
+
+.operations-page [style*="#f59e0b"],
+.operations-page [style*="#fbbf24"],
+.operations-page [style*="#d97706"] {
+  color: var(--color-brand-red) !important;
+  border-color: var(--color-brand-red) !important;
+  background: var(--color-brand-red) !important;
+}
+
+/* Product forms use white copy and red brand accents for readable contrast. */
+.product-page [class*="text-amber-"],
+.product-page [class*="text-yellow-"],
+.product-page [class*="text-orange-"] {
+  color: #ffffff !important;
+}
+
+.product-page [class*="border-amber-"],
+.product-page [class*="border-yellow-"],
+.product-page [class*="border-orange-"] {
+  border-color: var(--color-brand-red) !important;
+}
+
+.product-page [class*="bg-amber-"],
+.product-page [class*="bg-yellow-"],
+.product-page [class*="bg-orange-"] {
+  background-color: var(--color-brand-red) !important;
+  background-image: none !important;
+}
+
+[class*="text-amber-"], [class*="text-yellow-"], [class*="text-orange-"] { color: var(--color-warning) !important; }
+[class*="border-amber-"], [class*="border-yellow-"], [class*="border-orange-"] { border-color: var(--color-warning) !important; }
+[class*="bg-amber-"], [class*="bg-yellow-"], [class*="bg-orange-"] { background-color: rgba(245, 158, 11, 0.16) !important; background-image: none !important; }
+
+[class*="text-green-"], [class*="text-emerald-"] { color: var(--color-success) !important; }
+[class*="border-green-"], [class*="border-emerald-"] { border-color: var(--color-success) !important; }
+[class*="bg-green-"], [class*="bg-emerald-"] { background-color: rgba(16, 185, 129, 0.16) !important; background-image: none !important; }
+
+[class*="text-blue-"], [class*="text-sky-"], [class*="text-cyan-"] { color: var(--color-info) !important; }
+[class*="border-blue-"], [class*="border-sky-"], [class*="border-cyan-"] { border-color: var(--color-info) !important; }
+[class*="bg-blue-"], [class*="bg-sky-"], [class*="bg-cyan-"] { background-color: rgba(59, 130, 246, 0.16) !important; background-image: none !important; }
+
+[class*="text-purple-"], [class*="text-indigo-"], [class*="text-violet-"] { color: var(--chart-5) !important; }
+[class*="border-purple-"], [class*="border-indigo-"], [class*="border-violet-"] { border-color: var(--chart-5) !important; }
+[class*="bg-purple-"], [class*="bg-indigo-"], [class*="bg-violet-"] { background-color: rgba(139, 92, 246, 0.16) !important; background-image: none !important; }
+
+[style*="#f59e0b"], [style*="#fbbf24"] { color: var(--color-warning) !important; border-color: var(--color-warning) !important; background: var(--color-warning) !important; }
+[style*="#10b981"], [style*="#34d399"] { color: var(--color-success) !important; border-color: var(--color-success) !important; background: var(--color-success) !important; }
+[style*="#667eea"], [style*="#764ba2"] { color: var(--color-info) !important; border-color: var(--color-info) !important; background: var(--color-info) !important; }
+
+/* Neutralize legacy navy gradients used by the Tasks and History pages. */
+[class*="from-[#0f172a]"],
+[class*="to-[#0f172a]"],
+[class*="from-[#1e293b]"],
+[class*="to-[#1e293b]"] {
+  background-color: var(--color-surface) !important;
+  background-image: none !important;
+}
+
+/* Loading indicators always use the primary red brand color. */
+[class*="animate-spin"][class*="border-amber-"],
+[class*="animate-spin"][class*="border-yellow-"],
+[class*="animate-spin"][class*="border-orange-"],
+[class*="animate-spin"][class*="border-emerald-"] {
+  border-bottom-color: var(--color-brand-red) !important;
+  border-left-color: transparent !important;
 }
 

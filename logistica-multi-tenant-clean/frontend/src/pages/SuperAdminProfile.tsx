@@ -1,7 +1,6 @@
 ﻿import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Footer from '../components/Footer';
 import api from '../api/api';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme } from '../theme.config';
@@ -155,8 +154,8 @@ const SuperAdminProfile: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header - Tema escuro */}
-      <header className={`${theme.backgrounds.header} px-6 py-4 flex items-center justify-between border-b border-slate-700`}>
+      {/* Profile content uses the shared header, including language and account actions. */}
+      <div className="hidden">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/superadmin-home')}
@@ -208,13 +207,22 @@ const SuperAdminProfile: React.FC = () => {
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Conteúdo Principal - Perfil com tema escuro */}
       <main className={`flex-1 ${theme.backgrounds.page} py-8 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-4xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 relative">
+            <button
+              type="button"
+              onClick={() => navigate('/superadmin-home')}
+              className="absolute right-0 top-0 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              aria-label="Close profile"
+              title="Close"
+            >
+              <span className="text-2xl leading-none">×</span>
+            </button>
             <h1 className="text-3xl font-bold text-white">Meu Perfil</h1>
             <p className="text-slate-400 mt-2">Gerir as suas informações pessoais</p>
           </div>
@@ -454,7 +462,6 @@ const SuperAdminProfile: React.FC = () => {
 
       {/* Footer - Ajustar para tema escuro */}
       <div className={`${theme.backgrounds.header} border-t border-slate-700`}>
-        <Footer />
       </div>
     </div>
   );

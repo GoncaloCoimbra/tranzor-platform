@@ -63,7 +63,7 @@
 
 @layer components {
   .card {
-    @apply bg-gradient-to-br from-white to-[#fafafa] border border-[#ececec] rounded-xl shadow-lg transition-all duration-300;
+    @apply bg-gradient-to-br from-white to-slate-50 border border-slate-200 rounded-xl shadow-lg transition-all duration-300 text-slate-900;
   }
 
   .card:hover {
@@ -71,11 +71,19 @@
   }
 
   .input {
-    @apply w-full px-4 py-3 bg-white border-2 border-[#ececec] text-gray-900 rounded-lg focus:ring-2 focus:ring-[#d90429]/30 focus:border-[#d90429] transition-all placeholder-gray-400 font-medium;
+    @apply w-full px-4 py-3 bg-white border-2 border-slate-200 text-slate-900 rounded-lg focus:ring-2 focus:ring-[#d90429]/30 focus:border-[#d90429] transition-all placeholder-slate-400 font-medium;
   }
 
   .input:focus {
     @apply border-[#d90429] shadow-md;
+  }
+
+  .dark-mode .card {
+    @apply bg-gradient-to-br from-[#172033] to-[#0f172a] border-[#334155] text-[#f0f4ff];
+  }
+
+  .dark-mode .input {
+    @apply bg-[#0a0e17] border-[#334155] text-[#f0f4ff] placeholder-[#94a3b8];
   }
 
   .button-primary {

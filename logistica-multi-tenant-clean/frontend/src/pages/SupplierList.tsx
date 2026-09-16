@@ -3,6 +3,7 @@ import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface Supplier {
   id: string;
@@ -27,6 +28,13 @@ interface Company {
   id: string;
   name: string;
 }
+
+const asList = <T,>(payload: any): T[] => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  return [];
+};
 
 // 🔧 FUNÇÃO MELHORADA para extrair mensagens de error do backend
 const getErrorMessage = (error: any, defaultMessage: string): string => {
@@ -110,6 +118,8 @@ const getErrorMessage = (error: any, defaultMessage: string): string => {
 };
 
 const SupplierList: React.FC = () => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const { activeFilters, addFilter, removeFilter, clearAllFilters, getFilter } = useFilters();
   
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -159,7 +169,7 @@ const SupplierList: React.FC = () => {
   const loadCompanies = async () => {
     try {
       const response = await api.get('/companies');
-      setCompanies(response.data);
+      setCompanies(asList<Company>(response.data));
     } catch (error) {
       console.error('Error loading companies:', error);
     }
@@ -178,7 +188,7 @@ const SupplierList: React.FC = () => {
       const url = `/suppliers${queryString ? `?${queryString}` : ''}`;
       
       const response = await api.get(url);
-      setSuppliers(response.data);
+      setSuppliers(asList<Supplier>(response.data));
     } catch (error: any) {
       console.error('Error loading suppliers:', error);
       setError(getErrorMessage(error, 'Error loading suppliers'));
@@ -305,18 +315,18 @@ const SupplierList: React.FC = () => {
       <div style={{ padding: 'var(--space-2xl)', minHeight: '100vh', backgroundColor: 'var(--color-surface)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '256px' }}>
           <div style={{ animation: 'spin 1s linear infinite', width: '32px', height: '32px', borderRadius: '50%', borderTop: '2px solid var(--color-brand-red)' }}></div>
-          <span style={{ marginLeft: 'var(--space-md)', color: 'var(--color-text-muted)' }}>Loading...</span>
+          <span style={{ marginLeft: 'var(--space-md)', color: 'var(--color-text-muted)' }}>{t('loadingVehicles')}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 'var(--space-lg)', minHeight: '100vh', backgroundColor: 'var(--color-surface)' }}>
+    <div className="operations-page" style={{ padding: 'var(--space-lg)', minHeight: '100vh', backgroundColor: 'var(--color-surface)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
         <div>
-          <h1 style={{ fontSize: 'var(--fs-3xl)', fontWeight: 'bold', color: 'var(--color-text)', margin: 0 }}>Suppliers</h1>
-          <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--color-text-muted)', marginTop: 'var(--space-xs)' }}>Company supplier management</p>
+          <h1 style={{ fontSize: 'var(--fs-3xl)', fontWeight: 'bold', color: 'var(--color-text)', margin: 0 }}>{t('suppliers')}</h1>
+          <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--color-text-muted)', marginTop: 'var(--space-xs)' }}>{t('supplierManagement')}</p>
         </div>
         <Button
           onClick={() => {
@@ -560,7 +570,7 @@ const SupplierList: React.FC = () => {
             <svg style={{ width: '64px', height: '64px', marginLeft: 'auto', marginRight: 'auto', marginBottom: 'var(--space-md)', opacity: '0.5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
-            <p style={{ fontSize: 'var(--fs-lg)', fontWeight: 'bold', color: 'var(--color-text)' }}>No suppliers found</p>
+            <p style={{ fontSize: 'var(--fs-lg)', fontWeight: 'bold', color: 'var(--color-text)' }}>{t('noRecords')}</p>
             {activeFilters.length > 0 ? (
               <p style={{ fontSize: 'var(--fs-sm)', marginTop: 'var(--space-xs)' }}>No suppliers match your filters</p>
             ) : (

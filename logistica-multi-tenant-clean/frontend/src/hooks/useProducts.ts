@@ -61,7 +61,11 @@ export function useProducts(filters?: { status?: string; supplierId?: string; se
       try {
         const response = await apiClient.get<PaginatedResponse<Product>>('/products', { params: cleanFilters });
         console.log('[useProducts] Success:', response.data);
-        return response.data.data;
+        const payload = response.data as any;
+        if (Array.isArray(payload)) return payload;
+        if (Array.isArray(payload?.data)) return payload.data;
+        if (Array.isArray(payload?.items)) return payload.items;
+        return [];
       } catch (err: any) {
         console.error('[useProducts] Error:', {
           message: err.message,

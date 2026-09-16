@@ -5,6 +5,7 @@ import CreateCompanyModal from '../components/CreateCompanyModal';
 import EditCompanyModal from '../components/EditCompanyModal';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme } from '../theme.config';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface Company {
   id: string;
@@ -26,6 +27,8 @@ interface Company {
 
 const CompanyManagement: React.FC = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,11 +59,11 @@ const CompanyManagement: React.FC = () => {
 
   const handleDelete = async (company: Company) => {
     if (company._count.users > 0 || company._count.products > 0) {
-      alert(`Cannot delete. The company has ${company._count.users} user(s) and ${company._count.products} product(s) associated.`);
+      alert(`${company._count.users} ${t('userCount')}, ${company._count.products} ${t('productCount')}`);
       return;
     }
 
-    if (window.confirm(`Are you sure you want to delete the company "${company.name}"?`)) {
+    if (window.confirm(`${t('delete')} ${company.name}?`)) {
       try {
         await api.delete(`/superadmin/companies/${company.id}`);
         await loadCompanies();
@@ -100,8 +103,8 @@ const CompanyManagement: React.FC = () => {
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">Company Management</h1>
-                <p className="text-sm text-slate-400 mt-1">{companies.length} companies registered</p>
+                <h1 className="text-2xl font-bold text-white">{t('companyManagement')}</h1>
+                <p className="text-sm text-slate-400 mt-1">{companies.length} {t('companyCount')}</p>
               </div>
             </div>
             <button
@@ -111,7 +114,7 @@ const CompanyManagement: React.FC = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              New Company
+              {t('newCompany')}
             </button>
           </div>
         </div>
@@ -127,7 +130,7 @@ const CompanyManagement: React.FC = () => {
               </svg>
             </div>
             <Input type="text" 
-              placeholder="Search by name, NIF or email..."
+              placeholder={t('searchCompany')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`${theme.inputs.base} pl-10 w-full`}
@@ -142,22 +145,22 @@ const CompanyManagement: React.FC = () => {
               <thead className="bg-slate-800/50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Company
+                    {t('company')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
                     NIF
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Contact
+                    {t('contact')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Statistics
+                    {t('statistics')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Creation Date
+                    {t('creationDate')}
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">
-                    Actions
+                    {t('actions')}
                   </th>
                 </tr>
               </thead>
@@ -169,8 +172,8 @@ const CompanyManagement: React.FC = () => {
                         <svg className="w-16 h-16 mb-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
-                        <p className="text-lg font-medium text-slate-400">No companies found</p>
-                        <p className="text-sm text-slate-500">Create a new company to get started</p>
+                        <p className="text-lg font-medium text-slate-400">{t('noCompanies')}</p>
+                        <p className="text-sm text-slate-500">{t('createCompanyHint')}</p>
                       </div>
                     </td>
                   </tr>
@@ -220,7 +223,7 @@ const CompanyManagement: React.FC = () => {
                           <button
                             onClick={() => handleEdit(company)}
                             className="text-red-400 hover:text-red-300 transition-colors p-1 hover:bg-red-900/20 rounded"
-                            title="Edit"
+                            title={t('edit')}
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -229,7 +232,7 @@ const CompanyManagement: React.FC = () => {
                           <button
                             onClick={() => handleDelete(company)}
                             className="text-red-400 hover:text-red-300 transition-colors p-1 hover:bg-red-900/20 rounded"
-                            title="Delete"
+                            title={t('delete')}
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

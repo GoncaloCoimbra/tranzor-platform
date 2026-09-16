@@ -6,6 +6,7 @@ import RouteSimulator from '../components/RouteSimulator';
 import { Trash2, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface Vehicle {
   id: string;
@@ -93,6 +94,8 @@ interface Event {
 }
 
 const LiveTrackingRouteOptimization: React.FC = () => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [geofences, setGeofences] = useState<Geofence[]>([]);
@@ -156,7 +159,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
 
         let anyData = false;
         if (vRes?.data && Array.isArray(vRes.data) && vRes.data.length > 0) {
-          // Ensure ID is always string para evitar problemas de comparação
+          // Ensure ID is always string para evitar problemas de comparaï¿½ï¿½o
           const vehiclesClean = vRes.data.map((v: any) => ({ ...v, id: String(v.id) }));
           setVehicles(vehiclesClean);
           anyData = true;
@@ -166,7 +169,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
         if (aRes?.data && Array.isArray(aRes.data) && aRes.data.length > 0) { setActiveAlerts(aRes.data); anyData = true; }
         if (eRes?.data && Array.isArray(eRes.data) && eRes.data.length > 0) { setEvents(eRes.data); anyData = true; }
         if (!anyData) {
-          setLiveDataError('Real date not available — no local date. Configure the backend.');
+          setLiveDataError('Real date not available ï¿½ no local date. Configure the backend.');
         } else {
           setLiveDataError('');
         }
@@ -201,7 +204,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     }
   }, [vehicles, selectedVehicleId]);
 
-  // Switch tab based on query string (útil para links de footer/sidebar)
+  // Switch tab based on query string (ï¿½til para links de footer/sidebar)
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
@@ -256,14 +259,14 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     loadTrackingRoutes();
   }, []);
 
-  // Se há transport id na querystring, selecionar route correspondente
+  // Se hï¿½ transport id na querystring, selecionar route correspondente
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const transportId = params.get('transport');
     const vehicleId = params.get('vehicle');
     
     if (transportId && trackingRoutes.length > 0) {
-      // Procurar pela route usando várias propriedades possíveis (id, transportId, transport.id)
+      // Procurar pela route usando vï¿½rias propriedades possï¿½veis (id, transportId, transport.id)
       const match = trackingRoutes.find(r =>
         String(r.id) === String(transportId) ||
         String((r as any).transportId) === String(transportId) ||
@@ -272,7 +275,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
 
       if (match) {
         setSelectedTrackingRoute(match.id);
-        setActiveTab('history'); // Mudar para aba de histórico/rastreamento
+        setActiveTab('history'); // Mudar para aba de histï¿½rico/rastreamento
         console.log('?? Transport route found for simulation:', match.id);
         console.log('?? Origin:', match.origin, '? Destination:', match.destination);
         console.log('?? Locations:', match.locations?.length || 0);
@@ -310,7 +313,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     }
   };
 
-  // Deletar rastreamento de uma route específica
+  // Deletar rastreamento de uma route especï¿½fica
   const handleDeleteRoute = async (routeId: string) => {
     try {
       await api.delete(`/transports/tracking-routes/${routeId}`);
@@ -521,7 +524,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     : vehicles.filter(v => v.status === statusFilter);
 
   return (
-    <div style={{ fontFamily: "'Outfit', -apple-system, sans-serif", background: '#07090f', minHeight: '100vh' }}>
+    <div className="operations-page" style={{ fontFamily: "'Outfit', -apple-system, sans-serif", background: '#111214', minHeight: '100vh' }}>
       {/* Page Header */}
       <div style={{ background: '#0d1117', borderBottom: '1px solid #1a2234' }}>
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
@@ -530,7 +533,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
               GPS Tracking & Route Optimization
             </h1>
             <p className="text-sm mt-0.5" style={{ color: '#3a4d63' }}>
-              Real-time monitoring · Route intelligence
+              {t('tracking')} Â· Route intelligence
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -703,7 +706,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                 <div className="space-y-6">
                   <div className="flex flex-wrap justify-between items-center gap-4">
                     <div>
-                      <h3 className="text-xl font-bold text-white">Real-time Monitoring</h3>
+                      <h3 className="text-xl font-bold text-white">{t('tracking')}</h3>
                       <p className="text-sm text-slate-400">View GPS tracking routes</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -840,7 +843,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                             <div className="text-center">
                               <p className="text-slate-400">Temperature</p>
                               <p className={`font-bold ${vehicle.temperature > 90 ? 'text-red-400' : 'text-white'}`}>
-                                {vehicle.temperature}°C
+                                {vehicle.temperature}ï¿½C
                               </p>
                             </div>
                             <div className="text-center">
@@ -958,7 +961,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                                 <div className="flex justify-between mb-1">
                                   <span className="text-xs text-slate-400">Engine Temperature</span>
                                   <span className={`text-xs font-bold ${selectedVehicle.temperature > 90 ? 'text-red-400' : 'text-emerald-400'}`}>
-                                    {selectedVehicle.temperature}°C
+                                    {selectedVehicle.temperature}ï¿½C
                                   </span>
                                 </div>
                                 <div className="w-full bg-slate-700 rounded-full h-1.5">
@@ -1134,7 +1137,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                     >
                       CALCULATE OPTIMIZED ROUTE
                       <div className="text-sm font-normal opacity-90 mt-1">
-                        Estimated savings: 20–30% on operational costs
+                        Estimated savings: 20ï¿½30% on operational costs
                       </div>
                     </button>
                   </div>
@@ -1173,7 +1176,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                               <h5 className="font-bold text-white text-lg">
                                 {route.origin} ? {route.destination}
                               </h5>
-                              <p className="text-sm text-slate-400">Vehicle: {route.assignedVehicle} · {route.stops.length} stops</p>
+                              <p className="text-sm text-slate-400">Vehicle: {route.assignedVehicle} ï¿½ {route.stops.length} stops</p>
                             </div>
                             <div className="text-right">
                               <p className="text-2xl font-bold text-emerald-400">{route.savings}%</p>

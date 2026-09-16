@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 import CreateGlobalUserModal from '../components/CreateGlobalUserModal';
 import EditGlobalUserModal from '../components/EditGlobalUserModal';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
@@ -56,6 +57,8 @@ const extractErrorMessage = (err: any, fallback: string): string => {
 
 const GlobalUserManagement: React.FC = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const [users, setUsers] = useState<User[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,8 +132,7 @@ const GlobalUserManagement: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${theme.backgrounds.page}`}>
-      {/* Header */}
-      <div className={theme.backgrounds.header}>
+      <div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
@@ -143,8 +145,8 @@ const GlobalUserManagement: React.FC = () => {
                 </svg>
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-white">Global User Management</h1>
-                <p className="text-sm text-slate-400 mt-1">{users.length} registered users</p>
+                <h1 className="text-2xl font-bold text-white">{t('headerUsers')}</h1>
+                <p className="text-sm text-slate-400 mt-1">{users.length} {t('headerUsers').toLowerCase()}</p>
               </div>
             </div>
             <button
@@ -154,7 +156,7 @@ const GlobalUserManagement: React.FC = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              New User
+              {t('newUser')}
             </button>
           </div>
         </div>
@@ -172,7 +174,7 @@ const GlobalUserManagement: React.FC = () => {
                 </svg>
               </div>
               <Input type="text" 
-                placeholder="Search by name, email or company..."
+                placeholder={t('searchUser')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`${theme.inputs.base} pl-10 w-full`}
@@ -185,7 +187,7 @@ const GlobalUserManagement: React.FC = () => {
               onChange={(e) => setFilterCompany(e.target.value)}
               className={`${theme.inputs.base} w-full`}
             >
-              <option value="">All companies</option>
+              <option value="">{t('allCompanies')}</option>
               {companies.map(company => (
                 <option key={company.id} value={company.id}>{company.name}</option>
               ))}
@@ -197,39 +199,39 @@ const GlobalUserManagement: React.FC = () => {
               onChange={(e) => setFilterRole(e.target.value)}
               className={`${theme.inputs.base} w-full`}
             >
-              <option value="">All roles</option>
-              <option value="ADMIN">Administrator</option>
-              <option value="OPERATOR">Operator</option>
+              <option value="">{t('allRoles')}</option>
+              <option value="ADMIN">{t('administrators')}</option>
+              <option value="OPERATOR">{t('operators')}</option>
             </select>
           </div>
 
           {/* Active Filters */}
           {(searchTerm || filterCompany || filterRole) && (
             <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-700/50">
-              <span className="text-sm text-slate-400">Active filters:</span>
+              <span className="text-sm text-slate-400">{t('activeFilters')}</span>
               {searchTerm && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                  Search: {searchTerm}
-                  <button onClick={() => setSearchTerm('')} className="ml-2 hover:text-slate-200">×</button>
+                  {t('search')}: {searchTerm}
+                  <button onClick={() => setSearchTerm('')} className="ml-2 hover:text-slate-200">ï¿½</button>
                 </span>
               )}
               {filterCompany && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                  Company: {companies.find(c => c.id === filterCompany)?.name}
-                  <button onClick={() => setFilterCompany('')} className="ml-2 hover:text-slate-200">×</button>
+                  {t('company')}: {companies.find(c => c.id === filterCompany)?.name}
+                  <button onClick={() => setFilterCompany('')} className="ml-2 hover:text-slate-200">ï¿½</button>
                 </span>
               )}
               {filterRole && (
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                  Role: {ROLE_LABELS[filterRole]}
-                  <button onClick={() => setFilterRole('')} className="ml-2 hover:text-slate-200">×</button>
+                  {t('role')}: {ROLE_LABELS[filterRole]}
+                  <button onClick={() => setFilterRole('')} className="ml-2 hover:text-slate-200">ï¿½</button>
                 </span>
               )}
               <button
                 onClick={() => { setSearchTerm(''); setFilterCompany(''); setFilterRole(''); }}
                 className="text-sm text-amber-400 hover:text-amber-300 font-medium"
               >
-                Clear all
+                {t('clearAll')}
               </button>
             </div>
           )}
@@ -248,7 +250,7 @@ const GlobalUserManagement: React.FC = () => {
                 <p className="text-2xl font-bold text-white">{filteredUsers.length}</p>
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-400">Total Users</p>
+            <p className="text-sm font-medium text-slate-400">{t('totalUsersLabel')}</p>
           </div>
 
           <div className={theme.cards.stat}>
@@ -264,7 +266,7 @@ const GlobalUserManagement: React.FC = () => {
                 </p>
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-400">Administrators</p>
+            <p className="text-sm font-medium text-slate-400">{t('administrators')}</p>
           </div>
 
           <div className={theme.cards.stat}>
@@ -280,7 +282,7 @@ const GlobalUserManagement: React.FC = () => {
                 </p>
               </div>
             </div>
-            <p className="text-sm font-medium text-slate-400">Operators</p>
+            <p className="text-sm font-medium text-slate-400">{t('operators')}</p>
           </div>
         </div>
 
@@ -290,11 +292,11 @@ const GlobalUserManagement: React.FC = () => {
             <table className="min-w-full divide-y divide-slate-700">
               <thead className="bg-slate-800/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">User</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Company</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Creation Date</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('headerUsers')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('company')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('role')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('creationDate')}</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">{t('actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -305,8 +307,8 @@ const GlobalUserManagement: React.FC = () => {
                         <svg className="w-16 h-16 mb-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
-                        <p className="text-lg font-medium text-slate-400">No users found</p>
-                        <p className="text-sm text-slate-500">Adjust the filters or create a new user</p>
+                        <p className="text-lg font-medium text-slate-400">{t('noUsers')}</p>
+                        <p className="text-sm text-slate-500">{t('adjustUserFilters')}</p>
                       </div>
                     </td>
                   </tr>
@@ -333,7 +335,7 @@ const GlobalUserManagement: React.FC = () => {
                             <div className="text-sm text-slate-400">NIF: {user.company.nif}</div>
                           </>
                         ) : (
-                          <div className="text-sm text-slate-500 italic">No company</div>
+                          <div className="text-sm text-slate-500 italic">{t('noCompany')}</div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -349,7 +351,7 @@ const GlobalUserManagement: React.FC = () => {
                           <button
                             onClick={() => handleEdit(user)}
                             className="text-red-400 hover:text-red-300 transition-colors p-1 hover:bg-red-900/20 rounded disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                            title="Edit"
+                            title={t('edit')}
                             disabled={user.role === 'SUPER_ADMIN' || !user.company}
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -359,7 +361,7 @@ const GlobalUserManagement: React.FC = () => {
                           <button
                             onClick={() => handleDelete(user)}
                             className="text-red-400 hover:text-red-300 transition-colors p-1 hover:bg-red-900/20 rounded disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                            title="Delete"
+                            title={t('delete')}
                             disabled={user.role === 'SUPER_ADMIN'}
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

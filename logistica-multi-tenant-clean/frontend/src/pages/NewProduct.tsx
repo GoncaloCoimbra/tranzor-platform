@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSuppliers } from "../hooks/useSuppliers";
 import { useCreateProduct } from "../hooks/useProducts";
 import { Button, Input, Card, Badge, Alert } from '../components/common';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface Supplier {
   id: string;
@@ -32,6 +33,8 @@ interface FormErrors {
 }
 
 const NewProduct: React.FC = () => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const navigate = useNavigate();
   const { data: suppliers, isLoading: loadingSuppliers } = useSuppliers() as { data?: Supplier[]; isLoading: boolean };
   const createProductMutation = useCreateProduct();
@@ -51,33 +54,34 @@ const NewProduct: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [apiError, setApiError] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
     if (!formData.internalCode.trim()) {
-      newErrors.internalCode = "Internal code is required";
+      newErrors.internalCode = t('internalCodeRequired');
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
+      newErrors.description = t('descriptionRequired');
     }
 
     const quantityNum = Number(formData.quantity);
     if (formData.quantity === "" || isNaN(quantityNum) || quantityNum <= 0) {
-      newErrors.quantity = "Quantity must be greater than zero";
+      newErrors.quantity = t('quantityRequired');
     }
 
     if (!formData.unit.trim()) {
-      newErrors.unit = "Unit is required";
+      newErrors.unit = t('unitRequired');
     }
 
     if (!formData.supplierId) {
-      newErrors.supplierId = "Supplier is required";
+      newErrors.supplierId = t('supplierRequired');
     }
 
     if (!formData.status) {
-      newErrors.status = "Status is required";
+      newErrors.status = t('statusRequired');
     }
 
     setErrors(newErrors);
@@ -107,8 +111,10 @@ const NewProduct: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError("");
+    setSuccessMessage("");
     
     if (!validateForm()) return;
+    setIsSubmitting(true);
 
     const payload = {
       internalCode: formData.internalCode.trim(),
@@ -124,11 +130,10 @@ const NewProduct: React.FC = () => {
 
     try {
       await createProductMutation.mutateAsync(payload);
-      alert("? Product created successfully!");
-      // Wait a moment for React Query to refetch before navigating
+      setSuccessMessage(t('productCreated'));
       setTimeout(() => {
         navigate("/products");
-      }, 800);
+      }, 1200);
     } catch (error: any) {
       console.error("? Error creating product:", error);
       
@@ -161,7 +166,7 @@ const NewProduct: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] py-8 px-4">
+    <div className="product-page min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <div className="bg-gradient-to-br from-[#1e293b]/90 to-[#0f172a]/90 shadow-2xl rounded-xl border border-amber-500/30">
           {/* Header */}
@@ -173,13 +178,25 @@ const NewProduct: React.FC = () => {
                 </svg>
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">New Product</h2>
-                <p className="text-amber-100/80 mt-1">Fill in the details of the new product</p>
+                <h2 className="text-3xl font-bold text-white">{t('newProductTitle')}</h2>
+                <p className="text-amber-100/80 mt-1">{t('newProductSubtitle')}</p>
               </div>
             </div>
           </div>
 
           <div style={{ padding: '2rem' }}>
+            {successMessage && (
+              <div className="mb-6 p-4 bg-gradient-to-r from-emerald-900/30 to-emerald-900/20 border-l-4 border-emerald-500/70 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="bg-emerald-900/40 border border-emerald-500/30 rounded-lg p-2">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-emerald-200">{successMessage}</p>
+                </div>
+              </div>
+            )}
             {apiError && (
               <div className="mb-6 p-4 bg-gradient-to-r from-red-900/30 to-red-900/20 border-l-4 border-red-500/70 rounded-lg">
                 <div className="flex items-start">
@@ -205,7 +222,7 @@ const NewProduct: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Basic Information</h3>
+                  <h3 className="text-lg font-semibold text-white">{t('basicInformation')}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -262,7 +279,7 @@ const NewProduct: React.FC = () => {
 
                   <div className="md:col-span-2">
                     <label htmlFor="description" className="block text-sm font-medium text-amber-300 mb-2">
-                      Description <span className="text-red-400">*</span>
+                      {t('description')} <span className="text-red-400">*</span>
                     </label>
                     <Input type="text" id="description"
                       name="description"
@@ -301,7 +318,7 @@ const NewProduct: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <label htmlFor="quantity" className="block text-sm font-medium text-amber-300 mb-2">
-                      Quantity <span className="text-red-400">*</span>
+                      {t('quantity')} <span className="text-red-400">*</span>
                     </label>
                     <Input type="number" id="quantity"
                       name="quantity"
@@ -432,7 +449,7 @@ const NewProduct: React.FC = () => {
 
                   <div>
                     <label htmlFor="currentLocation" className="block text-sm font-medium text-amber-300 mb-2">
-                      Current Location
+                      {t('currentLocation')}
                     </label>
                     <Input type="text" id="currentLocation"
                       name="currentLocation"
@@ -454,12 +471,12 @@ const NewProduct: React.FC = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Product Status</h3>
+                  <h3 className="text-lg font-semibold text-white">{t('productStatus')}</h3>
                 </div>
                 <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label htmlFor="status" className="block text-sm font-medium text-amber-300 mb-2">
-                      Current Status <span className="text-red-400">*</span>
+                      {t('currentStatus')} <span className="text-red-400">*</span>
                     </label>
                     <select
                       id="status"
@@ -539,7 +556,7 @@ const NewProduct: React.FC = () => {
                   className="px-6 py-3 bg-gradient-to-br from-[#1e293b]/80 to-[#0f172a]/80 text-amber-300 border border-amber-500/30 rounded-lg hover:bg-amber-900/20 hover:text-amber-200 transition-all font-medium"
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
@@ -556,7 +573,7 @@ const NewProduct: React.FC = () => {
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Create Product
+                      {t('createProduct')}
                     </>
                   )}
                 </button>

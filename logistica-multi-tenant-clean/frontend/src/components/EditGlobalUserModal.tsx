@@ -67,7 +67,7 @@ const EditGlobalUserModal: React.FC<EditGlobalUserModalProps> = ({
     setError('');
 
     try {
-      await api.put(`/superadmin/users/${user.id}`, {
+      await api.patch(`/superadmin/users/${user.id}`, {
         name: formData.name,
         email: formData.email,
         role: formData.role,

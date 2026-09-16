@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import api from '../api/api';
 import { theme } from '../theme.config';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface CreateCompanyModalProps {
   onClose: () => void;
@@ -8,6 +9,8 @@ interface CreateCompanyModalProps {
 }
 
 const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSuccess }) => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [createAdmin, setCreateAdmin] = useState(false);
@@ -63,10 +66,10 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`${theme.cards.form} max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>        
+      <div className={`${theme.cards.form} max-w-2xl w-full max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col`}>
         {/* Header */}
         <div className={`sticky top-0 ${theme.backgrounds.header} px-6 py-4 flex items-center justify-between border-b border-slate-700`}>          
-          <h2 className="text-xl font-bold text-white">Create New Company</h2>
+          <h2 className="text-xl font-bold text-white">{t('createNewCompany')}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-300 transition-colors"
@@ -78,7 +81,7 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto">
           {error && (
             <div className={theme.alerts.error + " mb-4"}>
               <div className="flex items-center">
@@ -92,11 +95,11 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
 
           {/* Company Info */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Company Information</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">{t('companyInformation')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
-                  Company Name *
+                  {t('companyName')} *
                 </label>
                 <input
                   type="text"
@@ -111,7 +114,7 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
 
               <div>
                 <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
-                  Tax ID *
+                  {t('taxId')} *
                 </label>
                 <input
                   type="text"
@@ -156,7 +159,7 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
-                  Address
+                  {t('address')}
                 </label>
                 <input
                   type="text"
@@ -181,13 +184,13 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
                 className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
               />
               <label htmlFor="createAdmin" className="ml-2 block text-sm font-medium text-white">
-                Create company administrator user
+                {t('createAdminUser')}
               </label>
             </div>
 
             {createAdmin && (
               <div className="space-y-4 p-4 rounded-lg bg-[#1e293b]/50">
-                <h3 className="text-sm font-semibold text-white mb-3">Administrator Details</h3>
+                <h3 className="text-sm font-semibold text-white mb-3">{t('administratorDetails')}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
@@ -246,7 +249,7 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
               onClick={onClose}
               className={`${theme.buttons.secondary} border-0`}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -256,14 +259,14 @@ const CreateCompanyModal: React.FC<CreateCompanyModalProps> = ({ onClose, onSucc
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Creating...</span>
+                  <span>{t('creating')}</span>
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Create Company</span>
+                  <span>{t('createCompany')}</span>
                 </>
               )}
             </button>

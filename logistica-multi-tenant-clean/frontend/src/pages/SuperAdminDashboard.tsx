@@ -171,7 +171,7 @@ const SuperAdminDashboard: React.FC = () => {
       title:    'Company Management',
       subtitle: 'Create, edit, and manage all companies in the system',
       color:    ds.accent,
-      path:     '/empresas',
+      path:     '/companies',
       icon: (
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -220,7 +220,7 @@ const SuperAdminDashboard: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => navigate('/empresas')}
+              onClick={() => navigate('/companies')}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200"
               style={{ background: ds.bgCard, border: `1px solid ${ds.border}`, color: ds.textSecondary }}
               onMouseEnter={e => {
@@ -319,7 +319,7 @@ const SuperAdminDashboard: React.FC = () => {
               </p>
             </div>
             <button
-              onClick={() => navigate('/empresas')}
+              onClick={() => navigate('/companies')}
               className="text-xs font-semibold transition-colors"
               style={{ color: ds.accent }}
             >
@@ -337,7 +337,7 @@ const SuperAdminDashboard: React.FC = () => {
               <p className="text-sm mb-3" style={{ color: ds.textMuted }}>
                 {error ? 'Could not load companies' : 'No companies registered'}
               </p>
-              <button onClick={() => navigate('/empresas')}
+              <button onClick={() => navigate('/companies')}
                 className="text-xs font-semibold" style={{ color: ds.accent }}>
                 Add company ?
               </button>
@@ -349,7 +349,7 @@ const SuperAdminDashboard: React.FC = () => {
                   key={company.id}
                   className="flex items-center gap-4 p-3 rounded-xl transition-all duration-200 cursor-pointer"
                   style={{ border: '1px solid transparent' }}
-                  onClick={() => navigate('/empresas')}
+                  onClick={() => navigate('/companies')}
                   onMouseEnter={e => {
                     (e.currentTarget as HTMLElement).style.background = ds.bg;
                     (e.currentTarget as HTMLElement).style.borderColor = ds.border;
@@ -459,4 +459,5 @@ const SuperAdminDashboard: React.FC = () => {
 };
 
 export default SuperAdminDashboard;
+
 

@@ -5,6 +5,7 @@ import FilterChips from '../components/FilterChips';
 import FilterSelector from '../components/FilterSelector';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme, getStatusBadgeClass, statusLabels } from '../theme.config';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface Vehicle {
   id: string;
@@ -30,7 +31,7 @@ interface Company {
   name: string;
 }
 
-// ?? FUNÇÃO MELHORADA para extrair mensagens de error do backend
+// ?? FUNï¿½ï¿½O MELHORADA para extrair mensagens de error do backend
 const extractErrorMessage = (error: any, defaultMessage: string): string => {
   console.log('?? [ERROR DEBUG] Estrutura completa do error:', error);
   console.log('?? [ERROR DEBUG] error.response:', error?.response);
@@ -44,7 +45,7 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
     console.log('?? [ERROR DEBUG] date type:', typeof date);
     console.log('?? [ERROR DEBUG] date.message:', date.message);
     
-    // Se date é string diretamente
+    // Se date ï¿½ string diretamente
     if (typeof date === 'string') {
       console.log(' [ERROR DEBUG] Retornando date como string');
       return date;
@@ -52,24 +53,24 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
     
     // Se date.message existe
     if (date.message) {
-      // Se é array (validação do NestJS)
+      // Se ï¿½ array (validaï¿½ï¿½o do NestJS)
       if (Array.isArray(date.message)) {
         console.log(' [ERROR DEBUG] Retornando primeiro item do array');
         return date.message[0] || defaultMessage;
       }
-      // Se é string
+      // Se ï¿½ string
       if (typeof date.message === 'string') {
         console.log(' [ERROR DEBUG] Retornando date.message');
         return date.message;
       }
-      // Se é objeto (pode ter nested message)
+      // Se ï¿½ objeto (pode ter nested message)
       if (typeof date.message === 'object' && date.message.message) {
         console.log(' [ERROR DEBUG] Retornando date.message.message');
         return date.message.message;
       }
     }
     
-    // Se date.error existe e é string
+    // Se date.error existe e ï¿½ string
     if (date.error && typeof date.error === 'string') {
       console.log(' [ERROR DEBUG] Retornando date.error');
       return date.error;
@@ -88,12 +89,14 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
     return error.message;
   }
   
-  // 3?? Se nada funcionar, retornar mensagem padrão
-  console.log('?? [ERROR DEBUG] Retornando mensagem padrão');
+  // 3?? Se nada funcionar, retornar mensagem padrï¿½o
+  console.log('?? [ERROR DEBUG] Retornando mensagem padrï¿½o');
   return defaultMessage;
 };
 
 const VehicleList: React.FC = () => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const {
     activeFilters,
     hasFilters,
@@ -331,21 +334,21 @@ const VehicleList: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`${theme.backgrounds.page} flex items-center justify-center min-h-screen`}>
+      <div className="loading-page flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-[#cbd5e1]">Loading...</p>
+          <p className="loading-message">{t('loadingVehicles')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`${theme.backgrounds.page} p-6 min-h-screen`}>
+    <div className={`operations-page ${theme.backgrounds.page} p-6 min-h-screen`}>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Vehicles</h1>
-          <p className="text-sm text-[#cbd5e1] mt-1">Vehicle Fleet Management</p>
+          <h1 className="text-3xl font-bold text-white">{t('headerVehicles')}</h1>
+          <p className="text-sm text-[#cbd5e1] mt-1">{t('vehicleFleet')}</p>
         </div>
         <button
           onClick={() => {
@@ -363,14 +366,14 @@ const VehicleList: React.FC = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-              Cancel
+              {t('cancel')}
             </>
           ) : (
             <>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              New Vehicle
+              {t('newVehicle')}
             </>
           )}
         </button>
@@ -384,7 +387,7 @@ const VehicleList: React.FC = () => {
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
             <div className="flex-1">
-              <p className="font-bold text-lg text-red-200">?? Error</p>
+              <p className="font-bold text-lg text-red-200">Error</p>
               <p className="text-base mt-2 leading-relaxed">{String(error)}</p>
             </div>
             <button
@@ -406,7 +409,7 @@ const VehicleList: React.FC = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <Input type="text" 
-            placeholder="Search vehicles..."
+            placeholder={t('searchVehicles')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-[#1e293b] text-white"
@@ -416,7 +419,7 @@ const VehicleList: React.FC = () => {
           type="submit"
           className="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
         >
-          Search
+          {t('search')}
         </button>
       </form>
 
@@ -717,8 +720,8 @@ const VehicleList: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
             </svg>
-            <p className="text-lg font-bold text-amber-400">No vehicles registered</p>
-            <p className="text-sm mt-1">Click "New Vehicle" to get started</p>
+            <p className="text-lg font-bold text-amber-400">{t('noVehicles')}</p>
+            <p className="text-sm mt-1">{t('newVehicleHint')}</p>
           </div>
         )}
       </div>

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/api';
 import UserManagementTable from '../components/UserManagementTable';
@@ -32,12 +31,11 @@ const Settings: React.FC = () => {
     phone: '',
   });
 
-  // ? SUPER_ADMIN has no company — redirect to their own dashboard
-  if (user?.role === 'SUPER_ADMIN') {
-    return <Navigate to="/superadmin-home" replace />;
-  }
-
   useEffect(() => {
+    if (user?.role === 'SUPER_ADMIN') {
+      setLoading(false);
+      return;
+    }
     loadCompanyInfo();
   }, []);
 
@@ -72,7 +70,7 @@ const Settings: React.FC = () => {
     setSuccess('');
 
     try {
-      // ? PATCH /companies/:id — correct endpoint
+      // ? PATCH /companies/:id ï¿½ correct endpoint
       await api.patch(`/companies/${companyInfo?.id}`, formData);
       setSuccess('Information updated successfully!');
       await loadCompanyInfo();

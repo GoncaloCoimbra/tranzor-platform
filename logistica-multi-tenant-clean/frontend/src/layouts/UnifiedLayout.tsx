@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import UnifiedHeader from '../components/layout/UnifiedHeader';
 import UnifiedSidebar from '../components/layout/UnifiedSidebar';
 import UnifiedFooter from '../components/layout/UnifiedFooter';
@@ -18,36 +19,25 @@ const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
   showFooter = true,
   variant = 'admin',
 }) => {
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') === 'dark';
-    }
-    return false;
-  });
+  const location = useLocation();
+  const { user } = useAuth();
+  const isSuperAdminArea = location.pathname.startsWith('/superadmin') ||
+    (user?.role === 'SUPER_ADMIN' && ['/users', '/companies'].includes(location.pathname));
 
   useEffect(() => {
     const html = document.documentElement;
-    if (darkMode) {
-      html.classList.add('dark-mode');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      html.classList.remove('dark-mode');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [darkMode]);
+    html.classList.add('dark-mode');
+    localStorage.setItem('theme', 'dark');
+  }, []);
 
   return (
     <div className="unified-layout">
       {showHeader && (
-        <UnifiedHeader 
-          variant={variant}
-          darkMode={darkMode}
-          onThemeToggle={() => setDarkMode(!darkMode)}
-        />
+        <UnifiedHeader variant={variant} />
       )}
       
       <div className="layout-wrapper">
-        {showSidebar && <UnifiedSidebar />}
+        {showSidebar && !isSuperAdminArea && <UnifiedSidebar />}
         
         <main className="layout-main">
           <Outlet />

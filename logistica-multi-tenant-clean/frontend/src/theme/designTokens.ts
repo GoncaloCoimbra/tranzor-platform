@@ -7,27 +7,27 @@
 const COLORS = {
   // Backgrounds
   bg: {
-    primary: '#07090f',          // Background principal (quase preto)
-    secondary: '#080c14',        // Background secundário (um pouco mais claro)
-    tertiary: '#0a0d16',         // Background terciário
-    card: '#0d1117',             // Cards e containers
-    cardHover: '#111820',        // Cards ao hover
-    input: '#0a0e17',            // Inputs
+    primary: '#111214',          // Fundo principal
+    secondary: '#1a1b1e',        // Fundo secundário
+    tertiary: '#25272c',         // Hover e overlays
+    card: '#1a1b1e',             // Cards e containers
+    cardHover: '#25272c',        // Cards ao hover
+    input: '#1a1b1e',            // Inputs
     overlay: '#000000cc',        // Overlay semi-transparente
   },
 
   // Borders
   border: {
-    default: '#1a2234',          // Border padrão
-    hover: '#253248',            // Border ao hover
+    default: '#3f4247',          // Border padrão
+    hover: '#9ca3af',            // Border ao hover
     focus: '#dc2626',            // Border ao focus
   },
 
   // Text
   text: {
-    primary: '#f0f4ff',          // Texto principal
-    secondary: '#7a8fa8',        // Texto secundário (labels)
-    muted: '#3a4d63',            // Texto mutado (hints)
+    primary: '#ffffff',          // Texto principal
+    secondary: '#d1d5db',        // Texto secundário (labels)
+    muted: '#9ca3af',            // Texto mutado (hints)
   },
 
   // Accents & Actions
@@ -40,12 +40,12 @@ const COLORS = {
 
   // Semantic
   semantic: {
-    success: '#34d399',          // Verde (success)
-    warning: '#f59e0b',          // Âmbar (warning)
+    success: '#10b981',          // Entrega confirmada / OK
+    warning: '#f59e0b',          // Atraso / atenção
     danger: '#f87171',           // Vermelho (error)
     info: '#dc2626',             // Vermelho (informação)
-    purple: '#a78bfa',           // Roxo adicional
-    orange: '#fb923c',           // Laranja adicional
+    purple: '#8b5cf6',           // Gráficos secundários
+    orange: '#f59e0b',           // Compatibilidade: atenção
   },
 };
 

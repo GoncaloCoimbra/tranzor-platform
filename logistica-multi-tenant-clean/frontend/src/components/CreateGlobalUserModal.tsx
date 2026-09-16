@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { theme } from '../theme.config';
 import api from '../api/api';
+import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 
 interface Company {
   id: string;
@@ -14,6 +15,8 @@ interface CreateGlobalUserModalProps {
 }
 
 const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies, onClose, onSuccess }) => {
+  const { language } = useLanguage();
+  const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,19 +42,19 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('passwordMismatch'));
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError(t('passwordMin'));
       setLoading(false);
       return;
     }
 
     if (!formData.companyId) {
-      setError('Please select a company');
+      setError(t('selectCompany'));
       setLoading(false);
       return;
     }
@@ -76,9 +79,9 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className={`${theme.cards.form} w-full max-w-md max-h-[90vh] overflow-y-auto`}>
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-700/50">
-          <h2 className="text-xl font-bold text-white">Create New User</h2>
+      <div className={`${theme.cards.form} w-full max-w-md max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col`}>
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-700/50 flex-shrink-0">
+          <h2 className="text-xl font-bold text-white">{t('createNewUser')}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-300 transition-colors"
@@ -101,10 +104,10 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2" htmlFor="name">
-              Full Name *
+              {t('fullName')} *
             </label>
             <input
               type="text"
@@ -136,7 +139,7 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2" htmlFor="companyId">
-              Company *
+              {t('company')} *
             </label>
             <select
               id="companyId"
@@ -146,7 +149,7 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
               className={theme.inputs.base}
               required
             >
-              <option value="">Select Company</option>
+              <option value="">{t('selectCompany')}</option>
               {companies.map(company => (
                 <option key={company.id} value={company.id}>{company.name}</option>
               ))}
@@ -155,7 +158,7 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2" htmlFor="role">
-              Role *
+              {t('role')} *
             </label>
             <select
               id="role"
@@ -173,7 +176,7 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2" htmlFor="password">
-              Password *
+              {t('password')} *
             </label>
             <input
               type="password"
@@ -186,12 +189,12 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
               minLength={6}
               placeholder="••••••"
             />
-            <p className="text-xs text-slate-500 mt-1">Minimum 6 characters</p>
+            <p className="text-xs text-slate-500 mt-1">{t('passwordMin')}</p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2" htmlFor="confirmPassword">
-              Confirm Password *
+              {t('confirmPassword')} *
             </label>
             <input
               type="password"
@@ -212,11 +215,11 @@ const CreateGlobalUserModal: React.FC<CreateGlobalUserModalProps> = ({ companies
               className="px-4 py-2 text-slate-400 hover:text-slate-300 transition-colors font-medium disabled:opacity-50"
               disabled={loading}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
-              className={`${theme.buttons.primary} bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 flex items-center gap-2 disabled:opacity-50`}
+              className={`${theme.buttons.primary} flex items-center gap-2 disabled:opacity-50`}
               disabled={loading}
             >
               {loading ? (
