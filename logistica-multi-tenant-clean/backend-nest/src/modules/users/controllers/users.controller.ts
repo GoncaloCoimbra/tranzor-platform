@@ -48,6 +48,9 @@ export class UsersController {
     if (!target || (user.role !== Role.SUPER_ADMIN && target.companyId !== user.companyId)) {
       throw new ForbiddenException('Cannot update a user from another company');
     }
+    if (user.role !== Role.SUPER_ADMIN && Object.prototype.hasOwnProperty.call(data, 'role')) {
+      throw new ForbiddenException('Only super admins can change user roles');
+    }
     return this.usersService.update(id, data);
   }
 }

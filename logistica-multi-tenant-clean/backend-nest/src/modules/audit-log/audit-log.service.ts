@@ -96,7 +96,7 @@ export class AuditLogService {
     entity: string;
     entityId?: string;
     userId: string;
-    companyId: string;
+    companyId: string | null;
     ipAddress?: string;
     metadata?: any;
   }) {

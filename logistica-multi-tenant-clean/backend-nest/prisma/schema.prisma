@@ -211,10 +211,10 @@ model AuditLog {
   entityId  String?
   ipAddress String?
   userId    String
-  companyId String
+  companyId String?
   data      Json?
   createdAt DateTime @default(now())
-  company   Company  @relation(fields: [companyId], references: [id])
+  company   Company? @relation(fields: [companyId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
 }
 
