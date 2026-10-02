@@ -1,283 +1,111 @@
-# Tranzor — Full-Stack Distributed Commerce Platform
+# Tranzor Platform
 
-> 🚧 **Projeto em desenvolvimento contínuo.** Ver [Roadmap de melhoria](#-roadmap-de-melhoria) e [IMPROVEMENT_PLAN.md](./IMPROVEMENT_PLAN.md) para o estado atual e próximos passos.
+Plataforma composta por três serviços: Commerce, para operações de comércio eletrónico; ChatOps, para comandos e comunicação em tempo real; e Logística, para gestão logística multi-tenant. Este repositório inclui os respetivos serviços, aplicações frontend, configurações Docker Compose e manifests Kubernetes.
 
-Ecossistema integrado de três serviços: **Commerce** (e-commerce com checkout resiliente), **Logistics** (WMS/TMS multi-tenant) e **ChatOps** (motor operacional em tempo real). Projeto com foco em arquitetura distribuída, Docker, Redis, autenticação segura e comportamento fail-fast em ambiente de produção.
+## Tecnologias e componentes
 
-**Stack:** TypeScript | React + NestJS + Fastify | Docker | Redis | PostgreSQL | MongoDB | Prisma
+| Componente | Implementação confirmada |
+| --- | --- |
+| Commerce | Node.js, TypeScript, Express, Prisma, PostgreSQL, MongoDB, Redis e ClickHouse |
+| Frontend Commerce | React e Vite |
+| ChatOps | Node.js, TypeScript, Fastify, WebSocket, Prisma e Redis |
+| Logística | NestJS, Prisma, PostgreSQL e Redis |
+| Frontend Logística | React Scripts (Create React App) |
+| Execução local | Docker Compose |
 
-Consulte o plano de melhorias em [IMPROVEMENT_PLAN.md](./IMPROVEMENT_PLAN.md) para os próximos passos do projeto.
+## Obter o código
 
----
-
-## 🚀 Quick Start
-
-### Pré-requisitos
-- Node.js 20+
-- Docker Desktop
-- npm
-
-### Setup e Arranque
-
-```bash
-# 1. Instalar dependências em todos os serviços
-npm run install:all
-
-# 2. Validar configuração do Docker Compose
-npm run validate:deploy
-
-# 3. Subir os containers
-npm run start:all
-
-# 4. Verificar status
-npm run status:all
-
-# 5. Consultar logs de um serviço específico
-npm run logs:all -- chatops-backend
+```sh
+git clone https://github.com/GoncaloCoimbra/tranzor-platform.git
+cd tranzor-platform
 ```
 
-### Parar o ambiente
+## Estrutura do repositório
 
-```bash
-npm run stop:all
+```text
+backend/                         API Commerce
+frontend/                        Aplicação web Commerce
+Chatops/backend/                 Serviço ChatOps
+Chatops/frontend/                Interface ChatOps
+logistica-multi-tenant-clean/
+  backend-nest/                  API Logística e schema Prisma
+  frontend/                      Interface Logística
+  docs/                          Documentação do módulo
+docker-compose.yml               Serviços de dados e API Commerce
+docker-compose.override.yml      Serviços de desenvolvimento integrados
+docker-compose.staging.yml       Sobreposição de configuração de staging
+docker-compose.prod.yml          Stack Compose de produção
+k8s/                             Manifests Kubernetes
 ```
 
-## Docker e Kubernetes
+Documentação por serviço: [Commerce](./backend/README.md), [ChatOps](./Chatops/backend/README.md), [Logística](./logistica-multi-tenant-clean/README.md) e [guia de deployment da Logística](./logistica-multi-tenant-clean/docs/DEPLOYMENT.md).
 
-O Docker Compose continua a ser o fluxo local integrado. Os Dockerfiles de
-produção e os manifests Kubernetes para Commerce, ChatOps e Logistics estão em
-[k8s/](./k8s); consulte [k8s/README.md](./k8s/README.md) para construir imagens,
-preparar secrets e validar antes de aplicar. ChatOps fica deliberadamente
-limitado a acesso local enquanto a autenticação de produção não estiver pronta.
+## Docker Compose
 
----
+### Desenvolvimento integrado
 
-## 🔗 Endpoints Locais
+O Compose carrega automaticamente `docker-compose.override.yml` quando se executa o ficheiro base:
 
-| Serviço | URL | Auth | Descrição |
-|---|---|---|---|
-| Commerce | http://localhost:3001/health | ❌ | Health check público |
-| ChatOps | http://localhost:3002/health | ❌ | Health check público |
-| Logistics | http://localhost:3000/health | ❌ | Health check público |
-| Logistics API | http://localhost:3000/api | ✅ JWT | Endpoints autenticados |
-
----
-
-## 🏗️ Arquitetura
-
-### Comunicação entre serviços
-
-```
-┌─────────────────────────────────────────────┐
-│         ChatOps WebSocket                    │
-│  (Autenticação por token, close 4001)        │
-└────────────┬──────────────────────────────────┘
-             │
-        HTTP REST
-             │
-    ┌────────▼──────────┐
-    │   Logistics API   │
-    │  (Isolamento por  │
-    │   empresa)        │
-    └────────┬──────────┘
-             │
-      Redis pub/sub
-      (portfolio:stock-sync)
-             │
-    ┌────────▼──────────┐
-    │   Commerce DB      │
-    │  (Stock, Orders)   │
-    └───────────────────┘
+```sh
+docker compose config
+docker compose up --build
 ```
 
-### Race condition prevention
-- Lock distribuído com Redis para operações críticas de stock
-- Verificação de ownership antes de libertar lock
-- Fallback em memória apenas em ambiente de desenvolvimento
-- Fail-fast em produção se Redis indisponível
-- **Subscrição Redis (ChatOps ↔ Logistics) protegida com timeout explícito de 5s por tentativa**, com retry (3 tentativas, backoff de 2s), evitando bloqueio indefinido do arranque caso o Redis aceite ligação mas não confirme a subscrição a tempo
+O ficheiro base define MongoDB, Redis, PostgreSQL para os três serviços, ClickHouse e a API Commerce. A sobreposição acrescenta os serviços ChatOps e Logística e respetivas interfaces.
 
-### Fail-fast em produção
-- Prisma: valida conexão com `SELECT 1` no arranque
-- Redis: falha se `REDIS_URL` não estiver configurado em ambiente de produção
-- WebSocket Auth: tokens inválidos são rejeitados imediatamente com código 4001
+Há uma colisão de portas publicada na configuração atual: a API Commerce e a interface de Logística tentam ambas usar a porta de host `3001`. A validação `docker compose config` confirma a sintaxe e a interpolação, mas não confirma que serviços com portas em conflito conseguem arrancar simultaneamente.
 
----
+### Staging
 
-## ✅ Validação
+`docker-compose.staging.yml` é uma sobreposição ao ficheiro base, não uma stack autónoma:
 
-### Testes unitários
-
-```bash
-cd website/backend
-npm test
-
-cd Chatops/backend
-npm test
-
-cd logistica-multi-tenant-clean/backend-nest
-npm test
+```sh
+docker compose -f docker-compose.yml -f docker-compose.staging.yml config
+docker compose -f docker-compose.yml -f docker-compose.staging.yml up --build
 ```
 
-### Estado verificado (última verificação manual)
+Antes de executar, define `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET` no ambiente ou no ficheiro `.env` local. A interpolação usa expressões obrigatórias: se faltar uma destas variáveis, o Compose termina com erro em vez de usar uma credencial de staging predefinida.
 
-> **Nota de transparência:** os números abaixo foram confirmados manualmente via `docker compose ps` e `curl` direto a cada endpoint, não copiados de uma execução anterior — ver metodologia em [IMPROVEMENT_PLAN.md](./IMPROVEMENT_PLAN.md).
+### Produção
 
-- **11/11 serviços definidos no Docker Compose a correr, todos `healthy`**
-  (backend, chatops-backend, chatops-frontend, logistica-backend, logistica-frontend, clickhouse, mongo, postgres_Tranzor, postgres_chatops, postgres_logistica, redis)
-- **3/3 health endpoints a devolver `200 OK`** (Commerce, ChatOps, Logistics)
-- Suite E2E automatizada (Playwright) configurada para CI; o resultado depende da execução do workflow atual.
-- Pipeline CI/CD (GitHub Actions): backend, frontend, qualidade de código e segurança automatizados em cada push.
+`docker-compose.prod.yml` define uma stack independente. O ficheiro `.env` é usado para interpolação e também carregado no backend:
 
-### Fluxos validados
-- Comando de stock via ChatOps para Logistics
-- Rejeição de token inválido no WebSocket
-- Fallback de comunicação em ambiente de desenvolvimento
-- Fluxo completo de registo → login → navegação → carrinho → checkout (E2E)
-- Guard de rotas administrativas com redirecionamento correto pós-login
-
----
-
-## 🧭 Roadmap de melhoria
-
-O projeto está funcional, mas precisa de maturidade adicional para produção completa com dados e pagamentos reais. Ver [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md) para o plano detalhado.
-
-### Commerce
-- [ ] Validar staging ou cluster real
-- [ ] Adicionar observabilidade e métricas
-- [ ] Documentar deployment em produção
-- [ ] Ampliar testes E2E para checkout e rollback
-
-### Logistics
-- [ ] Validar o `k8s/` em cluster real
-- [ ] Limpar código legado e separar fluxo ativo
-- [x] Adicionar testes tenant-aware e RBAC no backend ativo
-- [ ] Configurar monitoramento e alertas
-
-### ChatOps
-- [ ] Formalizar deployment em produção
-- [ ] Adicionar métricas de canal e uso
-- [ ] Implementar testes E2E para ChatOps → Logistics
-- [ ] Documentar variáveis de ambiente e dependências
-
-Consulte [IMPROVEMENT_PLAN.md](./IMPROVEMENT_PLAN.md) para tarefas detalhadas e prioridades.
-
----
-
-## 📁 Estrutura do projeto
-
-```
-tranzor/
-├── website/                          # Commerce backend e configuração
-│   ├── backend/                      # Node/Prisma/Fastify + lógica de checkout
-│   └── docker-compose.override.yml
-│
-├── Chatops/                          # ChatOps backend e integração
-│   └── backend/
-│       ├── src/                      # WebSocket, comandos e Redis
-│       └── tests/
-│
-├── logistica-multi-tenant-clean/     # Logistics WMS/TMS multi-tenant
-│   ├── backend-nest/                 # NestJS com isolamento por tenant
-│   ├── frontend/                     # React frontend
-│   └── docs/                         # Documentação e integração
-│
-├── docker-compose.yml                # Produção
-├── docker-compose.override.yml       # Dev overrides
-├── package.json                      # Scripts root
-└── README.md
+```sh
+docker compose --env-file .env -f docker-compose.prod.yml config
+docker compose --env-file .env -f docker-compose.prod.yml up --build
 ```
 
----
+Em produção são obrigatórias `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET`. Os valores de `.env.example` são apenas placeholders: substitui-os por segredos fortes antes de qualquer utilização fora de desenvolvimento.
 
-## 🔐 Segurança
+### Redis e portas dos serviços de dados
 
-### Autenticação WebSocket (ChatOps)
-- Tokens inválidos são rejeitados com código 4001
-- Sem token ou token malformado, a conexão é fechada
-- Cada mensagem é tratada com contexto de usuário
+Na stack integrada, o Redis exige autenticação. `REDIS_PASSWORD` configura o servidor e é usada para construir o URL Redis dos três serviços — Commerce, ChatOps e Logística. Em desenvolvimento existe um valor de fallback local; staging e produção exigem a variável. O mesmo valor tem de ser usado pelos três clientes para preservar o acesso a locks de stock e eventos partilhados.
 
-### Isolamento multi-tenant (Logistics)
-- `companyId` é verificado em todas as queries
-- Não há acesso cruzado entre empresas
-- Guards e middlewares reforçam o isolamento por tenant
+As portas publicadas dos serviços de dados estão limitadas a loopback:
 
-### Prisma fail-fast
-- O serviço valida `DATABASE_URL` no arranque
-- Se o banco não estiver disponível em produção, o processo encerra
+| Serviço | Porta no host |
+| --- | ---: |
+| MongoDB | 27017 |
+| Redis | 6379 |
+| PostgreSQL Commerce | 5432 |
+| PostgreSQL Logística | 5433 |
+| PostgreSQL ChatOps | 5434 |
+| ClickHouse HTTP | 8123 |
+| ClickHouse nativo | 9000 |
 
-### Envelope de resposta consistente
-- Todos os endpoints de autenticação e dados seguem o formato `{ success, data: {...} }`, validado e testado após correção de inconsistências em `/auth/register`, `/auth/login`, `/auth/me` e `/account/profile`
+Esta restrição aplica-se às configurações Compose da raiz. Os Compose autónomos de ChatOps e Logística têm instâncias próprias; consulta os respetivos ficheiros antes de os usar.
 
----
+## Estado e limitações
 
-## 🛠️ Variáveis de Ambiente
+- O endpoint ChatOps `/auth/dev-token` emite um token de desenvolvimento fora de `NODE_ENV=production`; em produção responde como não encontrado. Não existe ainda um fluxo de autenticação de produção documentado para ChatOps.
+- O ChatOps mantém ligações WebSocket, metadados de ligação e estado de canais em memória do processo; esse estado não é partilhado entre réplicas e perde-se quando o processo termina.
+- O schema Prisma do ChatOps está no repositório, mas não existe histórico de migrações Prisma versionadas em `Chatops/backend/prisma/migrations`.
+- MongoDB, PostgreSQL, Redis e ClickHouse são executados como instâncias únicas nas configurações Compose; não está configurada uma topologia de alta disponibilidade.
+- O MongoDB do Compose não tem autenticação configurada.
+- O Compose autónomo de ChatOps monta `./pgdata` para `/var/lib/postgresql/data`. Esse bind mount contém os dados locais da base de dados; preserva-o e não o apagues como parte de uma limpeza do repositório.
+- Os manifests Kubernetes estão presentes, mas não foram validados num cluster Kubernetes real. A validação de configuração ou a construção de imagens não substitui um ensaio de deployment num cluster.
+- As imagens Docker da Logística foram construídas localmente com os comandos indicados em [docs/DEPLOYMENT.md](./logistica-multi-tenant-clean/docs/DEPLOYMENT.md); os manifests Kubernetes continuam por validar em cluster.
 
-### Website (Commerce)
-```
-NODE_ENV=production
-PORT=3001
-DATABASE_URL=<database-url>
-REDIS_URL=<redis-url>
-SKIP_PRISMA=0  # Nunca ativar em produção
-```
+## Seeds e credenciais
 
-### ChatOps
-```
-NODE_ENV=production
-PORT=3002
-WS_PORT=9001
-REDIS_URL=<redis-url>
-JWT_SECRET=<jwt-secret>
-```
-
-### Logistics
-```
-NODE_ENV=production
-PORT=3000
-DATABASE_URL=<database-url>
-REDIS_URL=<redis-url>
-```
-
-Ver [docs/ENVIRONMENT_VARIABLES.md](./docs/ENVIRONMENT_VARIABLES.md) para a lista completa e exemplos.
-
----
-
-## 📊 Observações de Produção
-
-- **Histórico do Redis:** guarda eventos de stock sync em `portfolio:stock-sync`
-- **Notificações (Logistics):** best-effort, não bloqueantes — falha de notificação não impede operação
-- **Retry em fallback:** 3 tentativas com backoff de 2s antes de falhar (aplicado também à subscrição Redis do ChatOps)
-- **Logs:** ChatOps imprime `Redis subscriber connected`, Logistics imprime `Nest application successfully started`
-
----
-
-## 🚧 Próximos Passos
-
-- [x] CI/CD pipeline (GitHub Actions) com testes automáticos, lint, segurança e E2E
-- [x] E2E tests (Playwright) para fluxos críticos (auth, carrinho, checkout, admin)
-- [ ] Monitoring (Prometheus/Grafana) para métricas em produção
-- [ ] Rate limiting no ChatOps
-- [ ] Deploy automático de staging/produção (atualmente manual via `workflow_dispatch`, pendente de credenciais reais — ver [PRODUCTION_READINESS.md](./PRODUCTION_READINESS.md))
-
----
-
-## 👤 Autor
-
-**Gonçalo Pinho Coimbra**
-Full-Stack Developer & Software Engineer
-[goncalo.pinho.coimbra@gmail.com](mailto:goncalo.pinho.coimbra@gmail.com) | [LinkedIn](https://linkedin.com/in/goncalo-coimbra-b514b0345) | [Portfolio](https://goncalopcoimbraportfolio.netlify.app)
-
----
-
-## 📄 Documentação Detalhada
-
-- [Commerce Backend](./website/backend/README.md)
-- [ChatOps Backend](./Chatops/backend/README.md)
-- [Logistics Module](./logistica-multi-tenant-clean/README.md)
-- [Integration Guide](./docs/ARCHITECTURE.md)
-- [Production Readiness Plan](./PRODUCTION_READINESS.md)
-
----
-
-*Nota: Este projeto foi desenvolvido como demonstração prática de arquitetura distribuída, fail-safe em produção, e integração de múltiplos serviços via Docker. Os números de estado ("11/11 serviços", "3/3 endpoints") são verificados manualmente e atualizados periodicamente — não são uma alegação estática.*
+O seed da Logística em `logistica-multi-tenant-clean/backend-nest/prisma/seed.ts` exige credenciais através de `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`, `DEMO_ADMIN_PASSWORD`, `DEMO_OPERATOR_PASSWORD` e `DEMO_USER_PASSWORD`. Define valores fortes apenas no ambiente de execução; não uses nem publiques passwords de demonstração.
