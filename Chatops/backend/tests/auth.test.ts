@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { parseUserIdFromToken } from '../src/auth';
+import { createSignedToken as issueSignedToken, parseUserIdFromToken } from '../src/auth';
 
 describe('parseUserIdFromToken', () => {
   const secret = 'test-secret';
@@ -16,6 +16,12 @@ describe('parseUserIdFromToken', () => {
     const token = createSignedToken({ sub: 'user-123' });
 
     expect(parseUserIdFromToken(`Bearer ${token}`)).toBe('user-123');
+  });
+
+  it('creates a signed token accepted by the parser', () => {
+    process.env.JWT_SECRET = secret;
+
+    expect(parseUserIdFromToken(`Bearer ${issueSignedToken('user-123')}`)).toBe('user-123');
   });
 
   it('rejects a token with an invalid signature', () => {

@@ -502,8 +502,19 @@ export default function App() {
     ws.send(JSON.stringify({ type: 'subscribe', channelId, userId: currentUserId }));
   };
 
-  const initializeWebSocket = () => {
-    const ws = new WebSocket(WS_URL);
+  const initializeWebSocket = async () => {
+    let token: string;
+    try {
+      const tokenResponse = await fetch(`${API_URL}/auth/dev-token`);
+      if (!tokenResponse.ok) throw new Error(`Token request failed: ${tokenResponse.status}`);
+      ({ token } = await tokenResponse.json() as { token: string });
+    } catch (error) {
+      console.error('WS authentication failed', error);
+      setConnectionState('offline');
+      scheduleReconnect();
+      return;
+    }
+    const ws = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
     wsRef.current = ws;
 
     ws.addEventListener('open', () => {

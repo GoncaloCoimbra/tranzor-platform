@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+node_modules
+dist
+coverage
+logs
+*.log
+playwright-report
+test-results

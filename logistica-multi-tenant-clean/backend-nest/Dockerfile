@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app/backend-nest
 COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/backend-nest/dist ./dist
+COPY --from=builder /app/backend-nest/prisma ./prisma
 COPY --from=builder /app/backend-nest/tsconfig.json ./tsconfig.json
 EXPOSE 3000
 CMD ["node", "-r", "tsconfig-paths/register", "dist/src/main.js"]

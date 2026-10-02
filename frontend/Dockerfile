@@ -1,14 +1,16 @@
-﻿FROM node:20-alpine AS builder
+FROM node:22-alpine AS build
+
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+
 COPY . ./
+ARG VITE_API_URL=/api/v1
+ENV VITE_API_URL=${VITE_API_URL}
 RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:alpine AS runtime
 RUN rm -f /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
-ENTRYPOINT []
-CMD ["nginx", "-g", "daemon off;"]

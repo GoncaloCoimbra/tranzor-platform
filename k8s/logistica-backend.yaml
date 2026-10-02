@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logistica-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logistica-backend
+  template:
+    metadata:
+      labels:
+        app: logistica-backend
+    spec:
+      containers:
+        - name: backend
+          image: logistica-backend:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: NODE_ENV
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LOGISTICA_PORT
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: deployment-secrets
+                  key: LOGISTICA_DATABASE_URL
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: deployment-secrets
+                  key: LOGISTICA_JWT_SECRET
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/backend-nest/uploads
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: logistica-uploads
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logistica-backend
+spec:
+  selector:
+    app: logistica-backend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+  type: ClusterIP

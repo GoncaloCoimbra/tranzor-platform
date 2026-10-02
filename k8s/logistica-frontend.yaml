@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logistica-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: logistica-frontend
+  template:
+    metadata:
+      labels:
+        app: logistica-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: logistica-frontend:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logistica-frontend
+spec:
+  selector:
+    app: logistica-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP

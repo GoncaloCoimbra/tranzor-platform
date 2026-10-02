@@ -5,7 +5,7 @@ import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 
-interface AuditLog {
+interface AuditLogRecord {
   id: string;
   action: string;
   entity: string;
@@ -30,7 +30,7 @@ interface AuditStats {
 const AuditLog: React.FC = () => {
   const { language } = useLanguage();
   const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
-  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [logs, setLogs] = useState<AuditLogRecord[]>([]);
   const [stats, setStats] = useState<AuditStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -206,7 +206,7 @@ const AuditLog: React.FC = () => {
   };
 
   const getActionIcon = (action: string) => {
-    const iconConfig: Record<string, { gradient: string; borderColor: string; textColor: string; path: JSX.Element }> = {
+    const iconConfig: Record<string, { gradient: string; borderColor: string; textColor: string; path: React.ReactNode }> = {
       CREATE: {
         gradient: 'from-emerald-900/30 to-emerald-900/20',
         borderColor: 'border-emerald-500/30',
@@ -640,5 +640,4 @@ const AuditLog: React.FC = () => {
 };
 
 export default AuditLog;
-
 

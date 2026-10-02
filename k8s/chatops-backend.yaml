@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatops-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatops-backend
+  template:
+    metadata:
+      labels:
+        app: chatops-backend
+    spec:
+      containers:
+        - name: backend
+          image: chatops-backend:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3002
+            - name: websocket
+              containerPort: 9001
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: CHATOPS_NODE_ENV
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: CHATOPS_HTTP_PORT
+            - name: WS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: CHATOPS_WS_PORT
+            - name: CORS_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: CHATOPS_CORS_ORIGIN
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: deployment-secrets
+                  key: CHATOPS_DATABASE_URL
+            - name: REDIS_URL
+              value: redis://redis:6379
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: deployment-secrets
+                  key: CHATOPS_JWT_SECRET
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/uploads
+          startupProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: chatops-uploads
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatops-backend
+spec:
+  selector:
+    app: chatops-backend
+  ports:
+    - name: http
+      port: 3002
+      targetPort: http
+    - name: websocket
+      port: 9001
+      targetPort: websocket
+  type: ClusterIP

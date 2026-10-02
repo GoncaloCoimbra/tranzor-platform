@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: tranzor
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - storage.yaml
+  - mongodb.yaml
+  - redis.yaml
+  - postgres-tranzor.yaml
+  - postgres-chatops.yaml
+  - postgres-logistica.yaml
+  - clickhouse.yaml
+  - tranzor-backend.yaml
+  - tranzor-frontend.yaml
+  - chatops-backend.yaml
+  - chatops-frontend.yaml
+  - logistica-backend.yaml
+  - logistica-frontend.yaml
+  - ingress.yaml

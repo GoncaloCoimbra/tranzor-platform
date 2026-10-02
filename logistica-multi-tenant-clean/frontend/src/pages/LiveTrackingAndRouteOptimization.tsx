@@ -66,10 +66,10 @@ interface Geofence {
     start: string;
     end: string;
   };
-  alerts: Alert[];
+  alerts: GeofenceAlert[];
 }
 
-interface Alert {
+interface GeofenceAlert {
   id: string;
   type: 'entry' | 'exit' | 'speeding' | 'long_stop' | 'maintenance' | 'fuel' | 'temperature';
   vehicle: string;
@@ -99,7 +99,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [geofences, setGeofences] = useState<Geofence[]>([]);
-  const [activeAlerts, setActiveAlerts] = useState<Alert[]>([]);
+  const [activeAlerts, setActiveAlerts] = useState<GeofenceAlert[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [, setLiveDataError] = useState<string>('');
   const [, setLivePollError] = useState<string>('');
@@ -355,7 +355,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     }
   };
 
-  const getPriorityColor = (priority: Alert['priority']) => {
+  const getPriorityColor = (priority: GeofenceAlert['priority']) => {
     switch (priority) {
       case 'low': return 'bg-red-500';
       case 'medium': return 'bg-amber-500';
@@ -365,7 +365,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     }
   };
 
-  const getAlertLabel = (type: Alert['type']) => {
+  const getAlertLabel = (type: GeofenceAlert['type']) => {
     switch (type) {
       case 'speeding': return 'SPD';
       case 'entry': return 'ENT';
@@ -1599,5 +1599,4 @@ const LiveTrackingRouteOptimization: React.FC = () => {
 };
 
 export default LiveTrackingRouteOptimization;
-
 

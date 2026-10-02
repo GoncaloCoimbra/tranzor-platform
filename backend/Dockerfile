@@ -41,4 +41,4 @@ COPY --from=build /app/data ./data
 
 EXPOSE 3001
 
-ENTRYPOINT ["sh", "-c", "npx prisma generate && (npx prisma migrate deploy || true) && exec node dist/server.js"]
+ENTRYPOINT ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && exec node dist/server.js"]

@@ -4,6 +4,17 @@ build/
 tmp-*
 login_superadmin.json
 .env
+.env.*
+!.env.example
+k8s/secrets.env
+Chatops/pgdata/
+Chatops/backend/tmp/
+test-results/
+**/test-results/
+**/playwright-report/
+**/uploads/
+*.backup
+*.bak
 .vscode/
 .DS_Store
 .venv/

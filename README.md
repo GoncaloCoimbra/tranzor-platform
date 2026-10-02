@@ -42,6 +42,14 @@ npm run logs:all -- chatops-backend
 npm run stop:all
 ```
 
+## Docker e Kubernetes
+
+O Docker Compose continua a ser o fluxo local integrado. Os Dockerfiles de
+produção e os manifests Kubernetes para Commerce, ChatOps e Logistics estão em
+[k8s/](./k8s); consulte [k8s/README.md](./k8s/README.md) para construir imagens,
+preparar secrets e validar antes de aplicar. ChatOps fica deliberadamente
+limitado a acesso local enquanto a autenticação de produção não estiver pronta.
+
 ---
 
 ## 🔗 Endpoints Locais

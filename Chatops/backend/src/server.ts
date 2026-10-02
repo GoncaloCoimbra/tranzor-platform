@@ -12,7 +12,7 @@ import client from 'prom-client';
 import { publishPortfolioEvent } from './redisClient';
 import { ChatOpsEngine } from './chatOpsEngine';
 import { prisma } from './prismaClient';
-import { parseUserIdFromToken } from './auth';
+import { createSignedToken, parseUserIdFromToken } from './auth';
 
 const HTTP_PORT = Number(process.env.PORT || 3002);
 const WS_PORT = Number(process.env.WS_PORT || 9001);
@@ -206,7 +206,9 @@ const broadcastToChannel = (channelId: string, payload: any) => {
 };
 
 const publishToChannel = (channelId: string, payload: any) => {
-  void publishPortfolioEvent(`channel:${channelId}`, JSON.stringify(payload));
+  void publishPortfolioEvent(`channel:${channelId}`, JSON.stringify(payload)).catch((err) => {
+    console.warn('Redis publish failed:', err);
+  });
 };
 
 const registerConnection = (ws: WebSocket, channelId: string, userId: string) => {
@@ -249,6 +251,14 @@ fastify.addHook('onResponse', async (request, reply) => {
   const route = (request as any).routerPath || request.raw.url || 'unknown';
   httpRequestTotal.inc({ method: request.method, route, status_code: String(reply.statusCode) }, 1);
   httpRequestDurationMs.observe({ method: request.method, route, status_code: String(reply.statusCode) }, durationMs);
+});
+
+fastify.get('/auth/dev-token', async (_request, reply) => {
+  if (process.env.NODE_ENV === 'production') {
+    return reply.code(404).send({ error: 'Not found' });
+  }
+
+  return { token: createSignedToken('goncalo') };
 });
 
 fastify.get('/health', async () => {
@@ -484,8 +494,8 @@ if (process.env.NODE_ENV !== 'test' || process.env.FORCE_START === 'true') {
 wss.on('connection', (ws: WebSocket, req) => {
   const rawAuth = req.headers.authorization;
   const authHeader = Array.isArray(rawAuth) ? String(rawAuth[0]) : (rawAuth as string | undefined);
-
-  const userId = authHeader ? parseUserIdFromToken(authHeader) : null;
+  const tokenFromQuery = new URL(req.url || '/', 'http://localhost').searchParams.get('token');
+  const userId = parseUserIdFromToken(authHeader || (tokenFromQuery ? `Bearer ${tokenFromQuery}` : undefined));
 
   // Security decision: require a valid token. Close the socket when the
   // provided token is missing or invalid to avoid silently allowing

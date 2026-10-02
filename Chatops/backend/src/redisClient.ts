@@ -18,6 +18,7 @@ export async function publishPortfolioEvent(channel: string, payload: string): P
   redis.on('error', () => undefined);
 
   try {
+    await redis.connect();
     await redis.publish(channel, payload);
   } finally {
     redis.disconnect();
