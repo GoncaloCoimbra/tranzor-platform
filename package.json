@@ -1,6 +1,9 @@
 {
   "scripts": {
     "install:all": "npm install && npm run chatops:install && npm run logistica:install",
+    "commerce:backend:test": "npm test --prefix backend -- --runInBand",
+    "commerce:frontend:test": "npm test --prefix frontend",
+    "commerce:test": "npm run commerce:backend:test && npm run commerce:frontend:test",
     "chatops:backend:install": "npm install --prefix Chatops/backend",
     "chatops:frontend:install": "npm install --prefix Chatops/frontend",
     "chatops:install": "npm run chatops:backend:install && npm run chatops:frontend:install",
@@ -24,7 +27,7 @@
     "smoke:check": "node scripts/smoke-check.js",
     "integration:smoke": "node scripts/integration-smoke.js",
     "test:e2e": "npm run test:e2e --prefix backend",
-    "test:all": "npm run chatops:test && npm run logistica:test"
+    "test:all": "npm run commerce:test && npm run chatops:test && npm run logistica:test"
   },
   "dependencies": {
     "html5-qrcode": "^2.3.8"
