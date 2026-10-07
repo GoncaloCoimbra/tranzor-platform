@@ -6,6 +6,7 @@ describe('Prisma tenant scope middleware', () => {
     const tenantContext = new TenantContextService();
     const prisma = new PrismaService(tenantContext);
     jest.spyOn(prisma, '$connect').mockResolvedValue();
+    jest.spyOn(prisma, '$queryRaw').mockResolvedValue([] as never);
     const useSpy = jest.spyOn(prisma, '$use');
     await prisma.onModuleInit();
     const middleware = useSpy.mock.calls[0][0];

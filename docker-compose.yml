@@ -139,6 +139,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:-replace-with-a-secure-random-secret}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-replace-with-a-secure-random-refresh-secret}
       APP_SHUTDOWN_TIMEOUT_MS: ${APP_SHUTDOWN_TIMEOUT_MS:-10000}
+      ALLOW_DEGRADED: ${ALLOW_DEGRADED:-false}
+      STARTUP_MAX_ATTEMPTS: ${STARTUP_MAX_ATTEMPTS:-5}
+      STARTUP_RETRY_DELAY_MS: ${STARTUP_RETRY_DELAY_MS:-250}
     ports:
       - "3001:3001"
     depends_on:

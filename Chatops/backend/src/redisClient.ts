@@ -15,11 +15,27 @@ export async function publishPortfolioEvent(channel: string, payload: string): P
   }
 
   const redis = new Redis(REDIS_URL, redisOptions);
-  redis.on('error', () => undefined);
+  redis.on('error', (error) => console.error('[chatops] Redis publish connection error:', error));
 
   try {
     await redis.connect();
     await redis.publish(channel, payload);
+  } finally {
+    redis.disconnect();
+  }
+}
+
+export async function checkRedisConnection(): Promise<void> {
+  const redisUrl = process.env.REDIS_URL?.trim();
+  if (!redisUrl) throw new Error('REDIS_URL is not configured');
+
+  const redis = new Redis(redisUrl, redisOptions);
+  redis.on('error', (error) => console.error('[chatops] Redis startup probe error:', error));
+  try {
+    await redis.connect();
+    if (await redis.ping() !== 'PONG') {
+      throw new Error('Redis startup ping returned an unexpected response');
+    }
   } finally {
     redis.disconnect();
   }

@@ -9,7 +9,8 @@ import { createServer } from 'http';
 import WebSocket, { WebSocketServer } from 'ws';
 import Redis from 'ioredis';
 import client from 'prom-client';
-import { publishPortfolioEvent } from './redisClient';
+import { checkRedisConnection, publishPortfolioEvent } from './redisClient';
+import { verifyStartupDependencies } from './startupDependencies';
 import { ChatOpsEngine } from './chatOpsEngine';
 import { prisma } from './prismaClient';
 import { getJwtSecret, verifyCommerceToken, type CommerceIdentity } from './auth';
@@ -867,9 +868,9 @@ fastify.get('/health', async () => {
       completed: startupCompleted,
       error: startupError,
     },
-    db: process.env.SKIP_PRISMA
+    db: process.env.NODE_ENV === 'test'
       ? { enabled: false, status: 'skipped' }
-      : { enabled: true, status: 'connected' },
+      : { enabled: true, status: databaseConnected ? 'connected' : 'unavailable' },
     redis: redisHealth,
     websocket: WS_PORT ? 'enabled' : 'disabled',
     timestamp: new Date().toISOString(),
@@ -930,8 +931,8 @@ fastify.get('/metrics/prometheus', async (request, reply) => {
 });
 
 async function checkRedisHealth() {
-  const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
-  const configured = Boolean(process.env.REDIS_URL);
+  const redisUrl = process.env.REDIS_URL?.trim();
+  const configured = Boolean(redisUrl);
   const health = {
     configured,
     connected: false,
@@ -944,6 +945,10 @@ async function checkRedisHealth() {
     health.error = 'disabled';
     return health;
   }
+  if (!redisUrl) {
+    health.error = 'REDIS_URL is not configured';
+    return health;
+  }
 
   const redis = new Redis(redisUrl, {
     lazyConnect: true,
@@ -952,9 +957,7 @@ async function checkRedisHealth() {
     retryStrategy: () => null,
   });
 
-  redis.on('error', () => {
-    // silence expected connection failures so health checks stay stable
-  });
+  redis.on('error', (error) => console.error('[chatops] Redis health probe error:', error));
 
   try {
     const start = Date.now();
@@ -1213,23 +1216,40 @@ export const wss = new WebSocketServer({ server: httpServer });
 
 let hasStarted = false;
 let isShuttingDown = false;
+let databaseConnected = false;
 
 export async function startServer() {
   if (hasStarted) return;
   hasStarted = true;
   startupCompleted = false;
   startupError = null;
+  databaseConnected = false;
 
   try {
     getJwtSecret();
-    // SKIP_PRISMA is a development/test flag only. It skips the database
-    // connect step but does not change authentication logic or WebSocket
-    // token parsing. Do not set this in production.
-    if (!process.env.SKIP_PRISMA) {
-      await prisma.$connect();
-      console.log('Prisma connected');
+    if (process.env.NODE_ENV !== 'test') {
+      await verifyStartupDependencies([
+        {
+          name: 'PostgreSQL',
+          check: async () => {
+            await prisma.$connect();
+            await prisma.$queryRaw`SELECT 1`;
+            databaseConnected = true;
+          },
+        },
+        { name: 'Redis', check: checkRedisConnection },
+      ], {
+        onAttemptFailure: (name, attempt, error) => console.error(
+          `Startup dependency ${name} attempt ${attempt} failed:`,
+          error,
+        ),
+        onDegraded: (name, error) => console.warn(
+          `ALLOW_DEGRADED=true: continuing without ${name}:`,
+          error,
+        ),
+      });
     } else {
-      console.log('SKIP_PRISMA set — skipping prisma.$connect()');
+      databaseConnected = false;
     }
 
     await fastify.listen({ host: '0.0.0.0', port: HTTP_PORT });
@@ -2027,7 +2047,7 @@ if (process.env.NODE_ENV !== 'test') {
         enableOfflineQueue: false,
         reconnectOnError: () => false,
       });
-      redis.on('error', () => undefined);
+      redis.on('error', (error: unknown) => console.error('[chatops] Redis connection error:', error));
       await redis.psubscribe('channel:*');
       redis.on('pmessage', (_pattern: string, channel: string, message: string) => {
         const channelId = channel.replace('channel:', '');

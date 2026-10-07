@@ -30,7 +30,6 @@ function createCommerceToken(user: { id: string; email: string; role: string }):
 
 describe('ChatOps authentication and health', () => {
   beforeAll(async () => {
-    process.env.SKIP_PRISMA = 'true';
     process.env.NODE_ENV = 'test';
     process.env.JWT_SECRET = TEST_JWT_SECRET;
     process.env.PORT = '0';

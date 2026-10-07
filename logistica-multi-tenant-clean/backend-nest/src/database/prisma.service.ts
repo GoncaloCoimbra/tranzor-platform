@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { TenantContextService } from '../common/tenant-context.service';
+import { verifyStartupDependencies } from '../common/startup-dependencies';
 
 @Injectable()
 export class PrismaService
@@ -24,8 +25,26 @@ export class PrismaService
   }
 
   async onModuleInit() {
-    await this.$connect();
-    this.logger.log(' Prisma connected to database');
+    await verifyStartupDependencies([
+      {
+        name: 'PostgreSQL',
+        check: async () => {
+          await this.$connect();
+          await this.$queryRaw`SELECT 1`;
+        },
+      },
+    ], {
+      onAttemptFailure: (name, attempt, error) => this.logger.error(
+        `Startup dependency ${name} attempt ${attempt} failed`,
+        error instanceof Error ? error.stack : String(error),
+      ),
+      onDegraded: (name, error) => this.logger.warn(
+        `ALLOW_DEGRADED=true: continuing without ${name}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      ),
+    });
+    this.logger.log('Prisma connected to database');
 
     // Add middleware to inject companyId
     this.$use(async (params, next) => {

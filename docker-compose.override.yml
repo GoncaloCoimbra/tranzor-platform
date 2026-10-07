@@ -16,6 +16,9 @@ services:
       CORS_ORIGIN: http://localhost:5173,http://localhost:3006,http://localhost:5177,http://127.0.0.1:5177
       DATABASE_URL: postgresql://${POSTGRES_CHATOPS_USER:-chatops}:${POSTGRES_CHATOPS_PASSWORD:-chatops}@postgres_chatops:5432/${POSTGRES_CHATOPS_DB:-chatops_db}
       REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      ALLOW_DEGRADED: ${ALLOW_DEGRADED:-false}
+      STARTUP_MAX_ATTEMPTS: ${STARTUP_MAX_ATTEMPTS:-5}
+      STARTUP_RETRY_DELAY_MS: ${STARTUP_RETRY_DELAY_MS:-250}
       JWT_SECRET: ${JWT_SECRET:-replace-with-a-secure-random-secret}
       COMMERCE_API_URL: http://backend:3001/api/v1
       LOGISTICS_URL: http://logistica-backend:3000
@@ -67,6 +70,9 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_LOGISTICA_USER:-postgres}:${POSTGRES_LOGISTICA_PASSWORD:-postgres}@postgres_logistica:5432/${POSTGRES_LOGISTICA_DB:-logistica}
       REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      ALLOW_DEGRADED: ${ALLOW_DEGRADED:-false}
+      STARTUP_MAX_ATTEMPTS: ${STARTUP_MAX_ATTEMPTS:-5}
+      STARTUP_RETRY_DELAY_MS: ${STARTUP_RETRY_DELAY_MS:-250}
       JWT_SECRET: ${JWT_SECRET:-local-dev-logistica-jwt-secret}
       CORS_ORIGIN: http://localhost:3003
       PORT: 3000

@@ -12,6 +12,8 @@ npm run dev
 
 Os scripts disponíveis estão definidos em `package.json`: `npm run build`, `npm start`, `npm test` e os comandos de validação e arranque de staging. O seed em [prisma/seed.ts](./prisma/seed.ts) cria um produto e um cliente de demonstração; não define credenciais de login.
 
+O arranque confirma PostgreSQL e Redis com cinco tentativas por omissão; `ALLOW_DEGRADED=true` é a única opção para continuar sem uma dependência, e `STARTUP_MAX_ATTEMPTS`/`STARTUP_RETRY_DELAY_MS` configuram o número de tentativas e o backoff.
+
 ## Docker
 
 O [Dockerfile](./Dockerfile) constrói uma imagem multi-stage para o backend e expõe as portas `3002` e `9001`. A partir da raiz do repositório:

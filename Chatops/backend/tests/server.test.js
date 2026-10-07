@@ -36,7 +36,6 @@ let fastify;
 let stopServer;
 describe('ChatOps /health', () => {
     beforeAll(async () => {
-        process.env.SKIP_PRISMA = 'true';
         process.env.NODE_ENV = 'test';
         const serverModule = await Promise.resolve().then(() => __importStar(require('../src/server')));
         fastify = serverModule.fastify;

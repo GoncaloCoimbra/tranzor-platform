@@ -12,6 +12,8 @@ npm run dev
 
 Os scripts `build`, `start`, `test`, `test:e2e`, `prisma:migrate` e `prisma:seed` estão definidos em `package.json`. A API usa a porta `3001` por omissão. As rotas de estado incluem `GET /health`, `GET /readyz` e `GET /livez`; `GET /metrics` expõe métricas Prometheus. `tranzor_http_request_duration_ms` mede a latência total do pedido por rota correspondida; `tranzor_shop_operation_duration_ms` separa operações de catálogo, cache, Typesense, hidratação e escritas de visualizações. `tranzor_mongodb_command_duration_ms` mede a duração observada pelo driver MongoDB e `tranzor_mongodb_pool_checkout_duration_ms` mede a espera para obter uma ligação do pool. As métricas não expõem documentos nem parâmetros de consulta.
 
+No arranque, MongoDB e Redis (e PostgreSQL quando `DATABASE_URL` está configurado) são verificados com cinco tentativas por omissão; `ALLOW_DEGRADED=true` permite continuar sem uma dependência e `STARTUP_MAX_ATTEMPTS`/`STARTUP_RETRY_DELAY_MS` configuram as tentativas e o backoff.
+
 O endpoint `GET /api/v1/shop/products` mantém a resposta completa por omissão. As interfaces de cartões podem pedir `?view=summary` para receber apenas os campos usados na listagem; a paginação e os preços mantêm-se iguais, e o detalhe continua disponível no endpoint de produto.
 
 ## Docker Compose

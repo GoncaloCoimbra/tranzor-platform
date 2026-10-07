@@ -2,7 +2,6 @@ describe('ChatOps observability endpoints', () => {
   let fastify: any;
   let stopServer: (() => Promise<void>) | undefined;
   beforeAll(async () => {
-    process.env.SKIP_PRISMA = 'true';
     process.env.NODE_ENV = 'test';
 
     const serverModule = await import('../src/server');

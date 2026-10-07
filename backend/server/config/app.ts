@@ -34,7 +34,7 @@ import feedsRoutes from '../routes/feeds';
 import tenantRoutes from '../routes/tenant';
 import wmsRoutes from '../routes/wms';
 
-const allowDegradedMode = process.env.ALLOW_DEGRADED_MODE === 'true' || process.env.NODE_ENV === 'development';
+const allowDegradedMode = process.env.ALLOW_DEGRADED === 'true';
 
 const app = express();
 app.set('trust proxy', Number(process.env.TRUST_PROXY || 1));

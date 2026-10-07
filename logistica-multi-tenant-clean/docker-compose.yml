@@ -44,6 +44,9 @@
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-logistica}?schema=public
       REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      ALLOW_DEGRADED: ${ALLOW_DEGRADED:-false}
+      STARTUP_MAX_ATTEMPTS: ${STARTUP_MAX_ATTEMPTS:-5}
+      STARTUP_RETRY_DELAY_MS: ${STARTUP_RETRY_DELAY_MS:-250}
       JWT_SECRET: ${JWT_SECRET:-local-dev-logistica-jwt-secret}
       PORT: 3000
       NODE_ENV: development

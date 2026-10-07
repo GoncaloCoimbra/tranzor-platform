@@ -31,62 +31,40 @@ export class LogisticsRedisSubscriber {
   async start(): Promise<void> {
     const redisUrl = process.env.REDIS_URL;
     if (!redisUrl) {
-      console.error('[logistics] REDIS_URL not set — refusing to start with silent fallback to 127.0.0.1');
       throw new Error('REDIS_URL environment variable is required');
     }
 
-    const maxAttempts = 3;
-    const delayMs = 2000;
+    const client = new Redis(redisUrl, {
+      lazyConnect: true,
+      connectTimeout: 5000,
+      maxRetriesPerRequest: 1,
+      retryStrategy: () => null,
+    });
+    client.on('error', (err) => {
+      console.error('[logistics] Redis subscriber error', err);
+    });
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        const client = new Redis(redisUrl, {
-          lazyConnect: true,
-          connectTimeout: 5000,
-        });
-        await Promise.race([
-          client.connect(),
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () => reject(new Error('Redis connection timed out after 5000ms')),
-              5000,
-            ),
-          ),
-        ]);
-        await client.ping();
+    try {
+      await client.connect();
+      const pong = await client.ping();
+      if (pong !== 'PONG') throw new Error('Redis startup ping returned an unexpected response');
 
-        this.subscriber = client;
-        this.subscriber.on('connect', () => {
-          console.log('[logistics] Redis subscriber connected');
-        });
-        this.subscriber.on('error', (err) => {
-          console.error('[logistics] Redis subscriber error', err);
-        });
+      client.on('connect', () => {
+        console.log('[logistics] Redis subscriber connected');
+      });
 
-        await subscribeWithTimeout(this.subscriber, 'portfolio:stock-sync', 5000);
-        console.log('[logistics] Subscribed to portfolio:stock-sync');
+      await subscribeWithTimeout(client, 'portfolio:stock-sync', 5000);
+      this.subscriber = client;
+      console.log('[logistics] Subscribed to portfolio:stock-sync');
 
-        this.subscriber.on('message', (channel, message) => {
-          if (channel === 'portfolio:stock-sync') {
-            console.log('[logistics] Received stock-sync event:', message);
-          }
-        });
-
-        return; // success
-      } catch (err) {
-        console.error(`[logistics] Redis connection attempt ${attempt} failed:`, err);
-        try {
-          if (this.subscriber) this.subscriber.disconnect();
-        } catch (e) {
-          /* ignore */
+      client.on('message', (channel, message) => {
+        if (channel === 'portfolio:stock-sync') {
+          console.log('[logistics] Received stock-sync event:', message);
         }
-        if (attempt < maxAttempts) {
-          await new Promise((r) => setTimeout(r, delayMs));
-          continue;
-        }
-        console.error('[logistics] All Redis connection attempts failed — throwing');
-        throw err;
-      }
+      });
+    } catch (error) {
+      client.disconnect();
+      throw error;
     }
   }
 }
