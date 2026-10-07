@@ -217,6 +217,9 @@ ProductSchema.index({ isFeatured: 1 });
 ProductSchema.index({ price: 1 });
 ProductSchema.index({ 'rating.average': -1 });
 ProductSchema.index({ createdAt: -1 });
+ProductSchema.index({ isActive: 1, isDeleted: 1, createdAt: -1 });
+ProductSchema.index({ isActive: 1, isDeleted: 1, category: 1, createdAt: -1 });
+ProductSchema.index({ isActive: 1, isDeleted: 1, isFeatured: 1, createdAt: -1 });
 
 // Virtual for current price (sale price or regular price)
 ProductSchema.virtual('currentPrice').get(function() {

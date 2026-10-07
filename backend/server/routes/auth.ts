@@ -65,6 +65,10 @@ router.get('/me', optionalAuth, asyncHandler(async (req: AuthRequest, res: Respo
 	if (!user) {
 		throw new UnauthorizedError('Usuário não encontrado');
 	}
+	if (!user.isActive) {
+		clearAuthCookie(res);
+		throw new UnauthorizedError('Conta desativada');
+	}
 
 	res.json({
 		success: true,

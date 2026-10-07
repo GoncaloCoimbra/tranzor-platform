@@ -67,7 +67,7 @@ export default defineConfig({
       cwd: process.cwd(),
       env: {
         ...process.env,
-        DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/Tranzor_test',
+        DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5435/Tranzor_test',
       },
       timeout: 180000,
     },

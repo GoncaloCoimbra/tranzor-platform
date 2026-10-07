@@ -104,6 +104,7 @@ const ReviewSchema = new Schema<IReview, IReviewModel>({
 
 // Indexes
 ReviewSchema.index({ product: 1, createdAt: -1 });
+ReviewSchema.index({ product: 1, isApproved: 1, createdAt: -1 });
 ReviewSchema.index({ user: 1 });
 ReviewSchema.index({ rating: -1 });
 ReviewSchema.index({ isApproved: 1 });

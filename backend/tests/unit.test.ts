@@ -267,6 +267,39 @@ describe('Authentication Controller', () => {
       expect(response.body.success).toBe(false);
       expect(response.body.error.message || response.body.message).toContain('Credenciais inválidas');
     });
+
+    it('should reject an existing session when its account is deactivated', async () => {
+      const login = await request(server)
+        .post('/api/v1/auth/login')
+        .send({ email: testEmail, password: testPassword });
+      const setCookie = login.headers['set-cookie'];
+      const tokenCookie = Array.isArray(setCookie)
+        ? setCookie.find((cookie: string) => cookie.startsWith('token='))
+        : setCookie;
+      expect(login.status).toBe(200);
+      expect(tokenCookie).toBeDefined();
+      if (!tokenCookie) throw new Error('Login did not issue a session cookie');
+
+      const account = mockUsers[testEmail];
+      const accountId = account._id as string;
+      const previousActiveState = account.isActive;
+      mockUsers[testEmail].isActive = false;
+      mockUsersById[accountId].isActive = false;
+      try {
+        const response = await request(server)
+          .get('/api/v1/auth/me')
+          .set('Cookie', tokenCookie.split(';')[0]);
+
+        expect(response.status).toBe(401);
+        expect(response.body.error.message || response.body.message).toContain('Conta desativada');
+        expect(response.headers['set-cookie']).toEqual(expect.arrayContaining([
+          expect.stringContaining('token=;'),
+        ]));
+      } finally {
+        mockUsers[testEmail].isActive = previousActiveState;
+        mockUsersById[accountId].isActive = previousActiveState;
+      }
+    });
   });
 });
 
