@@ -66,6 +66,19 @@ export class PrismaService
             ...params.args.where,
             companyId,
           };
+        } else if (
+          params.action === 'count' ||
+          params.action === 'aggregate' ||
+          params.action === 'groupBy'
+        ) {
+          params.args.where = {
+            ...params.args.where,
+            companyId,
+          };
+        } else if (params.action === 'createMany') {
+          params.args.data = Array.isArray(params.args.data)
+            ? params.args.data.map((data) => ({ ...data, companyId }))
+            : { ...params.args.data, companyId };
         }
       }
 

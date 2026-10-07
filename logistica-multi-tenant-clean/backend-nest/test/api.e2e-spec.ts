@@ -1,6 +1,9 @@
 import { INestApplication } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { Role } from '@prisma/client';
 import request from 'supertest';
 import { createApp } from './../src/main';
+import { PrismaService } from '../src/database/prisma.service';
 
 describe('API Health Checks - E2E', () => {
   let app: INestApplication;
@@ -123,13 +126,76 @@ describe('API Health Checks - E2E', () => {
 
 describe('Multi-Tenant Data Isolation - E2E', () => {
   let app: INestApplication;
+  let prisma: PrismaService;
+  let jwtService: JwtService;
+  let companyA: { id: string };
+  let companyB: { id: string };
+  let userA: { id: string };
+  let productB: { id: string };
+  let supplierB: { id: string };
+  let tokenA: string;
 
   beforeAll(async () => {
     app = await createApp();
     await app.init();
+    prisma = app.get(PrismaService);
+    jwtService = app.get(JwtService);
+
+    const unique = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    companyA = await prisma.company.create({
+      data: {
+        name: `Tenant A ${unique}`,
+        nif: `TA-${unique}`,
+        email: `tenant-a-${unique}@example.test`,
+      },
+      select: { id: true },
+    });
+    companyB = await prisma.company.create({
+      data: {
+        name: `Tenant B ${unique}`,
+        nif: `TB-${unique}`,
+        email: `tenant-b-${unique}@example.test`,
+      },
+      select: { id: true },
+    });
+    userA = await prisma.user.create({
+      data: {
+        name: 'Tenant A Operator',
+        email: `operator-${unique}@example.test`,
+        password: 'not-used-in-this-test',
+        role: Role.OPERATOR,
+        companyId: companyA.id,
+      },
+      select: { id: true },
+    });
+    supplierB = await prisma.supplier.create({
+      data: {
+        name: `Tenant B Supplier ${unique}`,
+        nif: `SB-${unique}`,
+        companyId: companyB.id,
+      },
+      select: { id: true },
+    });
+    productB = await prisma.product.create({
+      data: {
+        internalCode: `TENANT-B-${unique}`,
+        description: 'Tenant B product',
+        quantity: 12,
+        unit: 'unit',
+        supplierId: supplierB.id,
+        companyId: companyB.id,
+      },
+      select: { id: true },
+    });
+    tokenA = await jwtService.signAsync({ sub: userA.id });
   });
 
   afterAll(async () => {
+    if (productB) await prisma.product.deleteMany({ where: { id: productB.id } });
+    if (supplierB) await prisma.supplier.deleteMany({ where: { id: supplierB.id } });
+    if (userA) await prisma.user.deleteMany({ where: { id: userA.id } });
+    if (companyB) await prisma.company.deleteMany({ where: { id: companyB.id } });
+    if (companyA) await prisma.company.deleteMany({ where: { id: companyA.id } });
     await app.close();
   });
 
@@ -140,15 +206,32 @@ describe('Multi-Tenant Data Isolation - E2E', () => {
     expect(response.body).toHaveProperty('message');
   });
 
-  it('should return 403 Forbidden for unauthorized roles', async () => {
-    // This test assumes a valid JWT exists for a non-admin user
-    // In a real scenario, you would create a test user first
-    const testToken = 'invalid-or-expired-token';
-
+  it('returns 403 when an authenticated operator attempts an admin-only action', async () => {
     const response = await request(app.getHttpServer())
-      .delete('/api/products/some-id')
-      .set('Authorization', `Bearer ${testToken}`);
+      .delete('/api/products/does-not-exist')
+      .set('Authorization', `Bearer ${tokenA}`);
 
-    expect([401, 403]).toContain(response.status);
+    expect(response.status).toBe(403);
+  });
+
+  it('prevents tenant A from reading or changing tenant B products', async () => {
+    const read = await request(app.getHttpServer())
+      .get(`/api/products/${productB.id}`)
+      .set('Authorization', `Bearer ${tokenA}`);
+    const update = await request(app.getHttpServer())
+      .patch(`/api/products/${productB.id}`)
+      .set('Authorization', `Bearer ${tokenA}`)
+      .send({ description: 'Cross-tenant modification' });
+    const persisted = await prisma.product.findUnique({
+      where: { id: productB.id },
+      select: { description: true, companyId: true },
+    });
+
+    expect(read.status).toBe(404);
+    expect(update.status).toBe(404);
+    expect(persisted).toEqual({
+      description: 'Tenant B product',
+      companyId: companyB.id,
+    });
   });
 });
