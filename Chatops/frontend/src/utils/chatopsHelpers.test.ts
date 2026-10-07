@@ -8,6 +8,21 @@ describe('chatopsHelpers', () => {
     expect(getDateLabel(now)).toBe('Hoje');
   });
 
+  it('formats relative dates in the selected language', () => {
+    const now = new Date();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+
+    expect(getDateLabel(now.getTime(), 'en')).toBe('Today');
+    expect(getDateLabel(yesterday.getTime(), 'en')).toBe('Yesterday');
+    expect(getDateLabel(now.getTime(), 'es')).toBe('Hoy');
+    expect(getDateLabel(yesterday.getTime(), 'es')).toBe('Ayer');
+    expect(formatTimestamp(now.getTime(), 'en')).toContain('Today');
+    expect(formatTimestamp(yesterday.getTime(), 'en')).toContain('Yesterday');
+    expect(formatTimestamp(now.getTime(), 'es')).toContain('Hoy');
+    expect(formatTimestamp(yesterday.getTime(), 'es')).toContain('Ayer');
+  });
+
   it('formats timestamps as Ontem for yesterday', () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);

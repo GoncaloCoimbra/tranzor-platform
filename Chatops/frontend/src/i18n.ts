@@ -21,7 +21,11 @@ export const useLanguage = () => {
   const [language, setLanguage] = useState<Language>(() => getStoredLanguage());
 
   useEffect(() => {
-    const update = () => setLanguage(getStoredLanguage());
+    const update = () => {
+      const storedLanguage = getStoredLanguage();
+      document.documentElement.lang = storedLanguage;
+      setLanguage(storedLanguage);
+    };
     update();
     window.addEventListener('chatops-language-change', update);
     return () => window.removeEventListener('chatops-language-change', update);

@@ -1,22 +1,38 @@
-export const formatTimestamp = (ts: number) => {
-  const date = new Date(ts);
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  const time = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-  if (date.toDateString() === now.toDateString()) return `Hoje ${time}`;
-  if (date.toDateString() === yesterday.toDateString()) return `Ontem ${time}`;
-  return `${date.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })} ${time}`;
+type ChatLanguage = 'pt' | 'en' | 'es';
+
+const LOCALES: Record<ChatLanguage, string> = {
+  pt: 'pt-PT',
+  en: 'en-GB',
+  es: 'es-ES',
 };
 
-export const getDateLabel = (ts: number) => {
+export const getLocale = (language: ChatLanguage) => LOCALES[language];
+
+const RELATIVE_DAY_LABELS: Record<ChatLanguage, { today: string; yesterday: string }> = {
+  pt: { today: 'Hoje', yesterday: 'Ontem' },
+  en: { today: 'Today', yesterday: 'Yesterday' },
+  es: { today: 'Hoy', yesterday: 'Ayer' },
+};
+
+export const formatTimestamp = (ts: number, language: ChatLanguage = 'pt') => {
   const date = new Date(ts);
   const now = new Date();
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  if (date.toDateString() === now.toDateString()) return 'Hoje';
-  if (date.toDateString() === yesterday.toDateString()) return 'Ontem';
-  return date.toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' });
+  const time = date.toLocaleTimeString(LOCALES[language], { hour: '2-digit', minute: '2-digit' });
+  if (date.toDateString() === now.toDateString()) return `${RELATIVE_DAY_LABELS[language].today} ${time}`;
+  if (date.toDateString() === yesterday.toDateString()) return `${RELATIVE_DAY_LABELS[language].yesterday} ${time}`;
+  return `${date.toLocaleDateString(LOCALES[language], { day: '2-digit', month: 'short' })} ${time}`;
+};
+
+export const getDateLabel = (ts: number, language: ChatLanguage = 'pt') => {
+  const date = new Date(ts);
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (date.toDateString() === now.toDateString()) return RELATIVE_DAY_LABELS[language].today;
+  if (date.toDateString() === yesterday.toDateString()) return RELATIVE_DAY_LABELS[language].yesterday;
+  return date.toLocaleDateString(LOCALES[language], { day: '2-digit', month: 'long', year: 'numeric' });
 };
 
 export const formatFileSize = (bytes?: number) => {

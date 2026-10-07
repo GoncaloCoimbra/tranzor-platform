@@ -9,10 +9,36 @@ datasource db {
 }
 
 model Channel {
-  id        String    @id @default(uuid())
-  name      String
-  messages  Message[]
-  auditLogs AuditLog[]
+  id            String          @id @default(uuid())
+  name          String
+  isPrivate     Boolean         @default(false)
+  ownerId       String?
+  messages      Message[]
+  auditLogs     AuditLog[]
+  groupMembers  ChannelMember[]
+  pinnedMessages PinnedMessage[]
+}
+
+model ChannelMember {
+  channelId   String
+  userId      String
+  displayName String
+  role        String   @default("member")
+  createdAt   DateTime @default(now())
+  channel     Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+  @@index([userId])
+}
+
+model ChatUser {
+  id         String   @id
+  name       String
+  email      String   @unique
+  role       String
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Message {
@@ -22,6 +48,29 @@ model Message {
   userId     String
   channel    Channel  @relation(fields: [channelId], references: [id])
   channelId  String
+  readReceipts MessageReadReceipt[]
+  pinnedMessage PinnedMessage?
+}
+
+model MessageReadReceipt {
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId])
+  @@index([userId])
+}
+
+model PinnedMessage {
+  messageId     String   @id
+  channelId     String
+  pinnedByUserId String
+  createdAt     DateTime @default(now())
+  message       Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  channel       Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
 }
 
 model Product {

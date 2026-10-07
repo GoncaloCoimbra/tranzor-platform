@@ -4,11 +4,11 @@ services:
     image: postgres:15
     restart: unless-stopped
     environment:
-      POSTGRES_USER: chatops
-      POSTGRES_PASSWORD: chatops
-      POSTGRES_DB: chatops_db
+      POSTGRES_USER: ${POSTGRES_USER:-chatops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chatops}
+      POSTGRES_DB: ${POSTGRES_DB:-chatops_db}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - ./pgdata:/var/lib/postgresql/data
 
@@ -16,5 +16,5 @@ services:
     image: redis:7
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     command: ["redis-server", "--save", "", "--appendonly", "no"]

@@ -25,6 +25,11 @@
   cursor: pointer;
 }
 
+.chatops-lang-select option {
+  color: #0e0e0e;
+  background-color: #ffffff;
+}
+
 .chatops-lang-select:hover {
   border-color: var(--ink);
   background-color: rgba(0, 0, 0, 0.02);
