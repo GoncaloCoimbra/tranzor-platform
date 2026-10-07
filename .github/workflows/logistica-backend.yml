@@ -87,6 +87,7 @@ jobs:
       DATABASE_URL: postgresql://postgres:${{ github.run_id }}-${{ github.run_attempt }}-logistica-e2e@localhost:5432/logistica_e2e?schema=public
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: ${{ github.run_id }}-${{ github.run_attempt }}-logistica-e2e-ephemeral-jwt-secret
+      RUN_REDIS_SUBSCRIBER_INTEGRATION: true
       NODE_ENV: test
     defaults:
       run:

@@ -1,5 +1,6 @@
+import { randomUUID } from 'crypto';
 import { prisma } from './prismaClient';
-import { publishPortfolioEvent } from './redisClient';
+import { publishPortfolioEvent, STOCK_SYNC_CHANNEL, type StockSyncEvent } from './redisClient';
 
 const LOGISTICS_URL = process.env.LOGISTICS_URL || 'http://logistica-backend:3000';
 const COMMERCE_API_URL = (process.env.COMMERCE_API_URL || 'http://backend:3001/api/v1').replace(/\/+$/, '');
@@ -234,20 +235,30 @@ export class ChatOpsEngine {
             throw new Error(data?.message || 'Logistics stock lookup failed');
           }
 
-          const eventPayload = {
+          if (
+            typeof data?.companyId !== 'string' ||
+            typeof data?.stock !== 'number' ||
+            !Number.isFinite(data.stock) ||
+            data.stock < 0 ||
+            typeof data?.updatedAt !== 'string' ||
+            !Number.isFinite(Date.parse(data.updatedAt))
+          ) {
+            throw new Error('Logistics stock response is missing tenant or version metadata');
+          }
+
+          const eventPayload: StockSyncEvent = {
+            eventId: randomUUID(),
             type: 'stock_sync',
+            companyId: data.companyId,
             sku,
             stock: data?.stock,
             description: data?.description,
             source: 'chatops',
+            productUpdatedAt: new Date(data.updatedAt).toISOString(),
             timestamp: new Date().toISOString(),
           };
 
-          try {
-            await publishPortfolioEvent('portfolio:stock-sync', JSON.stringify(eventPayload));
-          } catch (redisError: any) {
-            console.warn('[ChatOpsEngine] Redis publish failed, continuing anyway:', redisError?.message || redisError);
-          }
+          await publishPortfolioEvent(STOCK_SYNC_CHANNEL, JSON.stringify(eventPayload));
 
           const result = commandText(language, {
             pt: `📦 Stock atual da Logística: ${data?.description || sku} tem ${data?.stock ?? 'N/A'} unidades.`,

@@ -1,6 +1,19 @@
 import Redis from 'ioredis';
 
 const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
+export const STOCK_SYNC_CHANNEL = 'portfolio:stock-sync';
+
+export interface StockSyncEvent {
+  eventId: string;
+  type: 'stock_sync';
+  companyId: string;
+  sku: string;
+  stock: number;
+  productUpdatedAt: string;
+  description?: string;
+  source: 'chatops';
+  timestamp: string;
+}
 
 const redisOptions = {
   lazyConnect: true,

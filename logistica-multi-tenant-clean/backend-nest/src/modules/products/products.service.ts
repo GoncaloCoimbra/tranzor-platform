@@ -224,6 +224,8 @@ export class ProductsService {
         description: true,
         quantity: true,
         status: true,
+        companyId: true,
+        updatedAt: true,
       },
     });
 
@@ -236,6 +238,8 @@ export class ProductsService {
       description: product.description,
       stock: product.quantity,
       status: product.status,
+      companyId: product.companyId,
+      updatedAt: product.updatedAt.toISOString(),
     };
   }
 

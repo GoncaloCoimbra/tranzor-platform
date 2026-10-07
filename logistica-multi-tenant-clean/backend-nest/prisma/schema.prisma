@@ -204,6 +204,29 @@ model StockReservation {
   @@index([status])
 }
 
+model ProcessedStockSyncEvent {
+  eventId     String   @id
+  companyId   String
+  sku         String
+  processedAt DateTime @default(now())
+
+  @@index([companyId, processedAt])
+}
+
+model StockSyncDeadLetter {
+  id        String   @id @default(uuid())
+  eventId   String?
+  companyId String?
+  channel   String
+  payload   String   @db.Text
+  error     String   @db.Text
+  attempts  Int
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([companyId, createdAt])
+}
+
 model AuditLog {
   id        String   @id @default(uuid())
   action    String
@@ -352,4 +375,3 @@ enum TaskPriority {
   HIGH
   URGENT
 }
-

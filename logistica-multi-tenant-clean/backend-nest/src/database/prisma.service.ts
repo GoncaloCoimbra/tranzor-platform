@@ -25,12 +25,14 @@ export class PrismaService
   }
 
   async onModuleInit() {
+    let connected = false;
     await verifyStartupDependencies([
       {
         name: 'PostgreSQL',
         check: async () => {
           await this.$connect();
           await this.$queryRaw`SELECT 1`;
+          connected = true;
         },
       },
     ], {
@@ -44,7 +46,7 @@ export class PrismaService
         }`,
       ),
     });
-    this.logger.log('Prisma connected to database');
+    if (connected) this.logger.log('Prisma connected to database');
 
     // Add middleware to inject companyId
     this.$use(async (params, next) => {
@@ -122,6 +124,7 @@ export class PrismaService
       'TransportProduct',
       'ProductMovement',
       'StockReservation',
+      'ProcessedStockSyncEvent',
       'AuditLog',
       'Settings',
       'Notification',

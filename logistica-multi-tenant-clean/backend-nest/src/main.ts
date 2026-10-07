@@ -6,6 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { LogisticsRedisSubscriber } from './integration/redis-subscriber';
 import { verifyStartupDependencies } from './common/startup-dependencies';
+import { PrismaService } from './database/prisma.service';
 const helmet = require('helmet');
 
 // SERIALIZATION FIX (BigInt/Date)
@@ -124,26 +125,6 @@ export async function createApp(): Promise<NestExpressApplication> {
   });
   logger.log('📁 Pasta de uploads configurada: /uploads/');
 
-  const redisSubscriber = new LogisticsRedisSubscriber();
-  if (process.env.NODE_ENV !== 'test') {
-    await verifyStartupDependencies(
-      [{ name: 'Redis', check: () => redisSubscriber.start() }],
-      {
-        onAttemptFailure: (name, attempt, error) => logger.error(
-          `Startup dependency ${name} attempt ${attempt} failed`,
-          error instanceof Error ? error.stack : String(error),
-        ),
-        onDegraded: (name, error) => logger.warn(
-          `ALLOW_DEGRADED=true: continuing without ${name}: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        ),
-      },
-    );
-  } else {
-    logger.log('⚠️ Skipping Redis subscriber initialization in test environment');
-  }
-
   // INITIALIZATION LOGS (just information — `listen` is controlled by the caller)
   logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   logger.log('✅ NestJS application ready (no listener).');
@@ -159,6 +140,22 @@ if (process.env.NODE_ENV !== 'test' || process.env.FORCE_START === 'true') {
     const logger = new Logger('Bootstrap');
     try {
       const app = await createApp();
+      await app.init();
+      const redisSubscriber = new LogisticsRedisSubscriber(app.get(PrismaService));
+      await verifyStartupDependencies(
+        [{ name: 'Redis', check: () => redisSubscriber.start() }],
+        {
+          onAttemptFailure: (name, attempt, error) => logger.error(
+            `Startup dependency ${name} attempt ${attempt} failed`,
+            error instanceof Error ? error.stack : String(error),
+          ),
+          onDegraded: (name, error) => logger.warn(
+            `ALLOW_DEGRADED=true: continuing without ${name}: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          ),
+        },
+      );
       const port = process.env.PORT || 3000;
       await app.listen(port);
     } catch (error) {
