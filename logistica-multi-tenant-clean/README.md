@@ -31,10 +31,8 @@ O ficheiro usa o [Dockerfile do backend](./backend-nest/Dockerfile) com contexto
 | Compose autónomo | API backend | 3002 | 3000 |
 | Compose autónomo | Interface de desenvolvimento | 3001 | 3000 |
 | Compose integrado da raiz | API através do proxy Nginx | 3000 | 3000 |
-| Compose integrado da raiz | Interface de desenvolvimento | 3001 | 3000 |
+| Compose integrado da raiz | Interface de desenvolvimento | 3003 | 3000 |
 | Imagem frontend de produção | Nginx | não publicada pelo Compose autónomo | 80 |
-
-Na stack integrada, a API Commerce e a interface de Logística tentam ambas publicar a porta de host `3001`. A configuração Compose pode ser validada, mas essa colisão impede que ambos os serviços usem simultaneamente essa porta no mesmo host. Esta documentação não altera a configuração.
 
 ## Redis e bases de dados
 
@@ -66,6 +64,7 @@ O seed executa `TRUNCATE` em várias tabelas antes de inserir os dados de exempl
 
 - As configurações Compose usam instâncias únicas de PostgreSQL e Redis; não fornecem alta disponibilidade.
 - O MongoDB usado pela stack integrada da raiz não tem autenticação configurada. O Compose autónomo deste módulo não define MongoDB.
-- O endpoint ChatOps `/auth/dev-token` é apenas para desenvolvimento e não existe quando `NODE_ENV=production`; a autenticação de produção do ChatOps continua por resolver.
-- O ChatOps não tem migrações Prisma versionadas. O seu estado de ligações, presença e cache de canais reside em memória do processo e não é partilhado entre réplicas.
+- O ChatOps autentica com contas do Commerce através de sessão protegida por cookie; Commerce e ChatOps têm de partilhar o mesmo `JWT_SECRET`. A antiga rota `/auth/dev-token` não está disponível.
+- As migrações Prisma do ChatOps estão versionadas em `Chatops/backend/prisma/migrations`. Mensagens e grupos são persistidos; ligações WebSocket, presença e salas de chamada permanecem em memória do processo e não são partilhadas entre réplicas.
+- Chamadas e partilha de ecrã usam WebRTC; as chamadas em curso não são recuperadas após reinício do backend. Para redes restritivas é necessário configurar e testar um servidor TURN. Os manifests Kubernetes do ChatOps ainda não foram validados num cluster real.
 - O Compose autónomo ChatOps monta `Chatops/pgdata` como `./pgdata:/var/lib/postgresql/data`. Essa pasta contém dados locais PostgreSQL e não deve ser apagada durante a limpeza do repositório.

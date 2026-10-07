@@ -39,7 +39,7 @@ docker compose -f logistica-multi-tenant-clean/docker-compose.yml up --build
 
 O Compose autónomo inclui PostgreSQL, Redis, backend e frontend. Publica a API em `localhost:3002` (container `3000`) e a interface de desenvolvimento em `localhost:3001` (container `3000`). As portas host de PostgreSQL (`5432`) e Redis (`6379`) estão limitadas a `127.0.0.1`.
 
-Na stack integrada da raiz, a API Logística escuta internamente na porta `3000` e é encaminhada pelo proxy Nginx também publicado na porta `3000`. A interface de desenvolvimento publica `3001` no host. A API Commerce publica igualmente a porta `3001`, pelo que há uma colisão quando ambos os serviços tentam arrancar no mesmo host.
+Na stack integrada da raiz, a API Logística escuta internamente na porta `3000` e é encaminhada pelo proxy Nginx também publicado na porta `3000`. A interface de desenvolvimento publica a porta `3003` no host. A API Commerce mantém a porta `3001`.
 
 ## Variáveis de ambiente
 

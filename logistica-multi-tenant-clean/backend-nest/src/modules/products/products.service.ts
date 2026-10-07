@@ -239,6 +239,27 @@ export class ProductsService {
     };
   }
 
+  async getLowStock(companyId: string) {
+    const threshold = 5;
+    const where = { companyId, quantity: { lte: threshold } };
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        select: {
+          internalCode: true,
+          description: true,
+          quantity: true,
+          unit: true,
+        },
+        orderBy: [{ quantity: 'asc' }, { internalCode: 'asc' }],
+        take: 50,
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    return { threshold, total, products };
+  }
+
   async getStatsByStatus(companyId: string) {
     const products = await this.prisma.product.findMany({
       where: { companyId },

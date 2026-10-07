@@ -67,9 +67,21 @@ export interface SocketUser {
   companyId: string | null;
 }
 
+const developmentCorsOrigins = [
+  'http://localhost:3001',
+  'http://localhost:3000',
+  'http://localhost:3003',
+];
+const gatewayCorsOrigins = ['production', 'staging'].includes(process.env.NODE_ENV ?? '')
+  ? (process.env.CORS_ORIGIN ?? '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+  : developmentCorsOrigins;
+
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3001', 'http://localhost:3000'],
+    origin: gatewayCorsOrigins,
     credentials: true,
   },
   path: '/ws',

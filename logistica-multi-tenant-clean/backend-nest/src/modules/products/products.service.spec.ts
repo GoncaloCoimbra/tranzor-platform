@@ -198,6 +198,34 @@ describe('ProductsService - State Machine Tests', () => {
     });
   });
 
+  it('lists only tenant products at or below the low-stock threshold', async () => {
+    const products = [
+      { internalCode: 'SKU-1', description: 'Low quantity', quantity: 2, unit: 'pcs' },
+    ];
+    (prisma.product.findMany as jest.Mock).mockResolvedValue(products);
+    (prisma.product.count as jest.Mock).mockResolvedValue(1);
+
+    await expect(service.getLowStock(mockCompanyId)).resolves.toEqual({
+      threshold: 5,
+      total: 1,
+      products,
+    });
+    expect(prisma.product.findMany).toHaveBeenCalledWith({
+      where: { companyId: mockCompanyId, quantity: { lte: 5 } },
+      select: {
+        internalCode: true,
+        description: true,
+        quantity: true,
+        unit: true,
+      },
+      orderBy: [{ quantity: 'asc' }, { internalCode: 'asc' }],
+      take: 50,
+    });
+    expect(prisma.product.count).toHaveBeenCalledWith({
+      where: { companyId: mockCompanyId, quantity: { lte: 5 } },
+    });
+  });
+
   describe('Edge Cases', () => {
     it('should handle transition with location change', async () => {
       const mockProduct = {

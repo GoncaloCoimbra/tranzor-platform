@@ -1,19 +1,19 @@
-services:
+﻿services:
   db:
     image: postgres:15-alpine
     container_name: logistica-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: logistica
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-logistica}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - logistica-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,13 +22,16 @@ services:
     image: redis:7
     container_name: logistica-redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--requirepass", "${REDIS_PASSWORD:-local-dev-redis-password}"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-local-dev-redis-password}
     volumes:
       - redis_data:/data
     networks:
       - logistica-network
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$REDIS_PASSWORD redis-cli ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -39,9 +42,9 @@ services:
       dockerfile: backend-nest/Dockerfile
     container_name: logistica-backend
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/logistica
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-logistica}?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-dev-logistica-jwt-secret}
       PORT: 3000
       NODE_ENV: development
     ports:

@@ -72,6 +72,14 @@ export class ProductsController {
     return this.productsService.getStockBySku(sku, request.companyId);
   }
 
+  @Get('low-stock')
+  @Public()
+  @UseGuards(ApiKeyGuard)
+  @ApiOperation({ summary: 'Listar produtos com cinco ou menos unidades para integração ChatOps' })
+  async getLowStock(@Req() request: any) {
+    return this.productsService.getLowStock(request.companyId);
+  }
+
   @Get(':id')
   @Roles(Role.ADMIN, Role.OPERATOR)
   @ApiOperation({ summary: 'Get product por ID' })
