@@ -14,6 +14,8 @@ Os scripts `build`, `start`, `test`, `test:e2e`, `prisma:migrate` e `prisma:seed
 
 No arranque, MongoDB e Redis (e PostgreSQL quando `DATABASE_URL` está configurado) são verificados com cinco tentativas por omissão; `ALLOW_DEGRADED=true` permite continuar sem uma dependência e `STARTUP_MAX_ATTEMPTS`/`STARTUP_RETRY_DELAY_MS` configuram as tentativas e o backoff.
 
+O checkout falha se não conseguir adquirir o lock distribuído Redis de cada produto. O lease atual é de 30 segundos, sem renovação: limita a 30 segundos a retenção de locks abandonados após a queda de um worker; uma operação que ultrapasse esse prazo pode perder exclusividade.
+
 O endpoint `GET /api/v1/shop/products` mantém a resposta completa por omissão. As interfaces de cartões podem pedir `?view=summary` para receber apenas os campos usados na listagem; a paginação e os preços mantêm-se iguais, e o detalhe continua disponível no endpoint de produto.
 
 ## Docker Compose
