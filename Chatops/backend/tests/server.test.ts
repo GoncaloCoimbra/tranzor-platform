@@ -1127,6 +1127,63 @@ describe('ChatOps authentication and health', () => {
     }
   });
 
+  it('rejects upload filenames containing path traversal', async () => {
+    const token = createCommerceToken({
+      id: 'upload-user',
+      email: 'upload-user@example.com',
+      role: 'user',
+    });
+    const boundary = '----chatops-upload-test';
+    const payload = [
+      `--${boundary}\r\nContent-Disposition: form-data; name="channelId"\r\n\r\nlogistica\r\n`,
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="../outside.txt"\r\nContent-Type: text/plain\r\n\r\npayload\r\n`,
+      `--${boundary}--\r\n`,
+    ].join('');
+
+    const response = await fastify.inject({
+      method: 'POST',
+      url: '/upload',
+      headers: {
+        cookie: `chatops_session=${token}`,
+        'content-type': `multipart/form-data; boundary=${boundary}`,
+      },
+      payload,
+    });
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('requires authentication to download channel files', async () => {
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/channels/private-channel/files/missing-file',
+    });
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('denies file downloads to users outside the channel', async () => {
+    const token = createCommerceToken({
+      id: 'outside-channel-user',
+      email: 'outside-channel@example.com',
+      role: 'user',
+    });
+    jest.spyOn(prisma.channel, 'findUnique').mockResolvedValue({
+      id: 'private-channel',
+      name: 'Private',
+      isPrivate: true,
+      groupMembers: [{ userId: 'channel-member', displayName: 'Member' }],
+    } as never);
+
+    const response = await fastify.inject({
+      method: 'GET',
+      url: '/channels/private-channel/files/missing-file',
+      headers: { cookie: `chatops_session=${token}` },
+    });
+
+    expect(response.statusCode).toBe(403);
+  });
+
   it('ends active calls before a graceful backend shutdown', async () => {
     jest.spyOn(prisma.channel, 'findUnique').mockResolvedValue({
       id: 'shutdown-group',
@@ -1172,4 +1229,5 @@ describe('ChatOps authentication and health', () => {
       socket.emit('close');
     }
   });
+
 });

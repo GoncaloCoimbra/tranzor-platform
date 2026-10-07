@@ -36,7 +36,7 @@ export class AuthService {
 
   //  REGISTER
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const { email, password, name, role, companyId } = registerDto;
+    const { email, password, name } = registerDto;
 
     this.logger.log(`🔵 Starting registration for: ${email}`);
 
@@ -54,26 +54,20 @@ export class AuthService {
 
     //  CORREÇÃO: Usar transação para garantir que tudo seja salvo
     const result = await this.prisma.$transaction(async (tx) => {
-      let finalCompanyId = companyId;
+      this.logger.log(` Creating default company for: ${name}`);
 
-      // If no companyId and not SUPER_ADMIN, create default company
-      if (!companyId && role !== Role.SUPER_ADMIN) {
-        this.logger.log(` Creating default company for: ${name}`);
+      const company = await tx.company.create({
+        data: {
+          name: `${name}'s Company`,
+          nif: `TEMP-${Date.now()}`,
+          email,
+          phone: null,
+          address: null,
+          isActive: true,
+        },
+      });
 
-        const company = await tx.company.create({
-          data: {
-            name: `${name}'s Company`,
-            nif: `TEMP-${Date.now()}`, // Gerar NIF temporário único
-            email: email,
-            phone: null,
-            address: null,
-            isActive: true,
-          },
-        });
-
-        finalCompanyId = company.id;
-        this.logger.log(` Company created with ID: ${company.id}`);
-      }
+      this.logger.log(` Company created with ID: ${company.id}`);
 
       // Create o usuário
       const user = await tx.user.create({
@@ -81,8 +75,8 @@ export class AuthService {
           name,
           email,
           password: hashedPassword,
-          role: role || Role.OPERATOR,
-          companyId: finalCompanyId ?? undefined,
+          role: Role.OPERATOR,
+          companyId: company.id,
         },
       });
 
