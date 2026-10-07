@@ -18,7 +18,7 @@ async function findProductByCode(code: string): Promise<ProductLookup | null> {
   const normalized = code.trim().toUpperCase();
   if (!normalized) return null;
 
-  const response = await apiClient.get<{ products: any[] }>('/shop/products?limit=200');
+  const response = await apiClient.get<{ products: any[] }>('/shop/products?limit=200&view=summary');
   if (!response.success || !response.data) {
     return null;
   }

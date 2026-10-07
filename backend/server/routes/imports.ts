@@ -3,6 +3,7 @@ import { UserRole } from '@prisma/client';
 import { authenticate, authorize } from '../middleware/auth';
 import { catalogImportSchema } from '../core/validators';
 import { importCatalogRows } from '../core/catalogSeeder';
+import { clearCacheByPrefix } from '../utils/cache';
 
 const router = Router();
 
@@ -10,6 +11,7 @@ router.post('/catalog/import', authenticate, authorize(UserRole.ADMIN, UserRole.
   try {
     const rows = catalogImportSchema.parse(req.body);
     const summary = await importCatalogRows(rows);
+    await clearCacheByPrefix('catalog:');
 
     return res.status(201).json({
       success: true,

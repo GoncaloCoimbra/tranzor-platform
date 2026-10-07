@@ -16,6 +16,7 @@
 		"db:seed": "ts-node scripts/seed.ts",
 		"db:seed:excel": "ts-node scripts/seedExcel.ts",
 		"db:rollback": "ts-node scripts/dbRollback.ts",
+		"search:reindex": "node scripts/reindex-product-search.js",
 		"lint": "eslint \"server/**/*.ts\" --ext .ts",
 		"staging:validate": "bash scripts/validate-staging.sh",
 		"staging:start": "bash scripts/start-staging.sh"

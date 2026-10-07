@@ -25,7 +25,7 @@ import { getAllowedOrigins } from './cors';
 // logger intentionally not imported here to avoid unused variable in this module
 import { requestIdMiddleware } from '../utils/handlers';
 import client from 'prom-client';
-import { getMetricsSnapshot, metricsMiddleware } from '../utils/metrics';
+import { getMatchedRoute, getMetricsSnapshot, metricsMiddleware } from '../utils/metrics';
 import { getCacheStatus } from '../utils/cache';
 import { getDatabaseStatus } from './db';
 import swaggerUi from 'swagger-ui-express';
@@ -105,14 +105,14 @@ const httpRequestDurationMs = new client.Histogram({
   name: 'tranzor_http_request_duration_ms',
   help: 'HTTP request duration in milliseconds',
   labelNames: ['method', 'route', 'status_code'],
-  buckets: [50, 100, 200, 300, 500, 1000, 2000, 5000],
+  buckets: [50, 100, 200, 300, 500, 1000, 2000, 5000, 10000],
 });
 
 app.use((req, res, next) => {
   const start = process.hrtime.bigint();
   res.on('finish', () => {
     const durationMs = Number(process.hrtime.bigint() - start) / 1_000_000;
-    const route = req.route?.path || req.path;
+    const route = getMatchedRoute(req);
     const statusCode = String(res.statusCode);
 
     httpRequestTotal.inc({ method: req.method, route, status_code: statusCode }, 1);

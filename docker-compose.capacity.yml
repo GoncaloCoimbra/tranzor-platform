@@ -1,0 +1,81 @@
+services:
+  mongo:
+    image: mongo:7
+    command: ["mongod", "--wiredTigerCacheSizeGB", "0.25"]
+    mem_limit: 768m
+    cpus: ${CAPACITY_MONGO_CPUS:-1.5}
+    ports:
+      - "127.0.0.1:27018:27017"
+    volumes:
+      - capacity_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--requirepass", "${CAPACITY_REDIS_PASSWORD:?CAPACITY_REDIS_PASSWORD must be set}"]
+    environment:
+      CAPACITY_REDIS_PASSWORD: ${CAPACITY_REDIS_PASSWORD:?CAPACITY_REDIS_PASSWORD must be set}
+    mem_limit: 96m
+    cpus: 0.25
+    ports:
+      - "127.0.0.1:6380:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$CAPACITY_REDIS_PASSWORD redis-cli ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  typesense:
+    image: typesense/typesense:27.1
+    command: ["--data-dir", "/data", "--api-key", "${TYPESENSE_API_KEY:?TYPESENSE_API_KEY must be set}"]
+    mem_limit: 384m
+    cpus: 0.5
+    ports:
+      - "127.0.0.1:8109:8108"
+    volumes:
+      - capacity_typesense_data:/data
+
+  capacity-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    entrypoint: ["node", "dist/server.js"]
+    environment:
+      NODE_ENV: staging
+      PORT: 3002
+      MONGODB_URI: mongodb://mongo:27017/${CAPACITY_TEST_DATABASE:-TranzorCapacity}
+      REDIS_URL: redis://:${CAPACITY_REDIS_PASSWORD:?CAPACITY_REDIS_PASSWORD must be set}@redis:6379
+      TYPESENSE_HOST: typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_PROTOCOL: http
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY must be set}
+      JWT_SECRET: capacity-test-jwt-secret-not-for-production
+      JWT_REFRESH_SECRET: capacity-test-refresh-secret-not-for-production
+      APP_SHUTDOWN_TIMEOUT_MS: 5000
+      RATE_LIMIT_MAX_REQUESTS: 500000
+      RATE_LIMIT_WINDOW_MS: 900000
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      typesense:
+        condition: service_started
+    mem_limit: 512m
+    cpus: ${CAPACITY_API_CPUS:-1.0}
+    ports:
+      - "127.0.0.1:3102:3002"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3002/health', res => process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 60s
+
+volumes:
+  capacity_mongo_data:
+  capacity_typesense_data:

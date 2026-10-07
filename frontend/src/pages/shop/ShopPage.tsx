@@ -491,7 +491,7 @@ export default function ShopPage() {
         }
 
         if (products.length === 0) {
-          const fallbackResponse = await apiClient.get<{ products: any[] }>('/shop/products?limit=10');
+          const fallbackResponse = await apiClient.get<{ products: any[] }>('/shop/products?limit=10&view=summary');
           if (!active) return;
           products = Array.isArray((fallbackResponse as any).products)
             ? (fallbackResponse as any).products

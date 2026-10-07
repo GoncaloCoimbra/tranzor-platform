@@ -3,6 +3,7 @@ import { env } from './env';
 import { logger } from './logger';
 import Product from '../models/Product';
 import Review from '../models/Review';
+import { removeProductFromSearch, syncProductsToSearch } from '../services/productSearch';
 
 if (!env.DATABASE_URL) {
   const message = 'DATABASE_URL is not configured. Prisma client will not be initialized and the application will fall back to MongoDB. This is unsafe in production.';
@@ -117,6 +118,7 @@ const createProductAdapter = () => ({
     });
 
     await product.save();
+    await syncProductsToSearch([product]);
 
     if (include.category) {
       await product.populate('category');
@@ -140,11 +142,18 @@ const createProductAdapter = () => ({
       .populate(include.category ? 'category' : '')
       .lean({ virtuals: true });
 
+    if (product) {
+      await syncProductsToSearch([product]);
+    }
     return product;
   },
 
   async delete({ where = {} }: any) {
-    return Product.findByIdAndDelete(where.id).lean();
+    const product = await Product.findByIdAndDelete(where.id).lean();
+    if (product) {
+      await removeProductFromSearch(String(product._id));
+    }
+    return product;
   }
 });
 

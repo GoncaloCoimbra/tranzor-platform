@@ -5,6 +5,7 @@ import { logger } from './server/config/logger';
 import { disconnectPrismaClients, initializePrismaClients } from './server/config/prisma';
 import { disconnectRedis } from './server/utils/cache';
 import connectDB from './server/config/db';
+import { initializeProductSearch } from './server/services/productSearch';
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ const startServer = async () => {
     dotenv.config();
     await initializePrismaClients();
     await connectDB();
+    await initializeProductSearch();
 
     server = app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);

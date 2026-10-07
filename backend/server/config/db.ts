@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { env } from './env';
 import { logger } from './logger';
 import { getMongoUri } from './mongo';
+import { monitorMongoClient } from '../utils/metrics';
 
 const DEFAULT_RETRY_COUNT = 5;
 const DEFAULT_RETRY_DELAY_MS = 3000;
@@ -20,11 +21,13 @@ const connectDB = async (): Promise<void> => {
 		minPoolSize: 5,
 		connectTimeoutMS: 30000,
 		serverSelectionTimeoutMS: 30000,
+		monitorCommands: true,
 	};
 
 	for (let attempt = 1; attempt <= DEFAULT_RETRY_COUNT; attempt += 1) {
 		try {
 			await mongoose.connect(mongoURI, options);
+			monitorMongoClient(mongoose.connection.getClient());
 			logger.info('MongoDB connected successfully');
 			dbConnected = true;
 			return;
@@ -47,10 +50,10 @@ const connectDB = async (): Promise<void> => {
 };
 
 export function getDatabaseStatus() {
-	const configured = Boolean(env.DATABASE_URL);
+	const configured = Boolean(env.MONGODB_URI);
 	return {
 		configured,
-		connected: configured ? dbConnected || mongoose.connection.readyState === 1 : false,
+		connected: configured && (dbConnected || mongoose.connection.readyState === 1),
 		source: 'mongodb',
 	};
 }

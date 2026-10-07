@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { prisma } from '../config/prisma';
 import Category from '../models/Category';
 import Product from '../models/Product';
+import { syncProductsToSearch } from '../services/productSearch';
 import type { CatalogImportRow } from './validators';
 
 async function upsertPrismaProduct(row: CatalogImportRow, categorySlug: string, productSlug: string, categoryId: string, productName: string) {
@@ -142,6 +143,13 @@ export async function importCatalogRows(rows: CatalogImportRow[]) {
       });
     }
   }
+
+  const importedProducts = await Product.find({
+    _id: { $in: summary.map(item => item.mongoId) },
+  })
+    .select('_id name description category isActive isDeleted createdAt')
+    .lean();
+  await syncProductsToSearch(importedProducts);
 
   return summary;
 }

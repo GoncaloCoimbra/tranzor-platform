@@ -47,7 +47,7 @@ export default function BrandPage() {
       setProducts([]);
 
       try {
-        const response = await apiClient.get<{ products: BrandProduct[] }>(`/shop/products?brand=${encodeURIComponent(brand)}`);
+        const response = await apiClient.get<{ products: BrandProduct[] }>(`/shop/products?brand=${encodeURIComponent(brand)}&view=summary`);
         if (!response.success) {
           throw new Error(response.error?.message || 'Erro ao carregar produtos da marca');
         }

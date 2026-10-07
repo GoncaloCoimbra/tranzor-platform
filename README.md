@@ -95,6 +95,19 @@ As portas publicadas dos serviços de dados estão limitadas a loopback:
 
 Esta restrição aplica-se às configurações Compose da raiz. Os Compose autónomos de ChatOps e Logística têm instâncias próprias; consulta os respetivos ficheiros antes de os usar.
 
+## Desempenho e teste de capacidade
+
+Foi executado um ensaio local de 30 minutos com 100 utilizadores virtuais e um catálogo de 100.000 produtos (350 produtos copiados da base local e o restante sintético), usando uma stack Docker isolada com limites explícitos de CPU e memória. O ensaio completou 191.600 pedidos, cerca de 106 pedidos/s, sem erros HTTP.
+
+| Rota | P95 observado |
+| --- | ---: |
+| Listagem de produtos | 1.086 ms |
+| Categorias | 680 ms |
+| Detalhe do produto | 803 ms |
+| Pesquisa | 957 ms |
+
+O objetivo usado no ensaio era P95 ≤1 s por rota e taxa de erro ≤0,1%: as categorias, o detalhe, a pesquisa e a taxa de erros cumpriram-no; a listagem ficou 86 ms acima do limite. Estes resultados descrevem um teste local controlado, não uma certificação de produção nem uma previsão de tráfego real. O procedimento, as métricas e os limites da stack estão documentados em [backend/README.md](./backend/README.md).
+
 ## Estado e limitações
 
 - O endpoint ChatOps `/auth/dev-token` emite um token de desenvolvimento fora de `NODE_ENV=production`; em produção responde como não encontrado. Não existe ainda um fluxo de autenticação de produção documentado para ChatOps.

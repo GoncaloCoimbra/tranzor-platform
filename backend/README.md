@@ -10,7 +10,9 @@ npx prisma generate
 npm run dev
 ```
 
-Os scripts `build`, `start`, `test`, `test:e2e`, `prisma:migrate` e `prisma:seed` estão definidos em `package.json`. A API usa a porta `3001` por omissão. As rotas de estado incluem `GET /health`, `GET /readyz` e `GET /livez`; `GET /metrics` expõe métricas Prometheus.
+Os scripts `build`, `start`, `test`, `test:e2e`, `prisma:migrate` e `prisma:seed` estão definidos em `package.json`. A API usa a porta `3001` por omissão. As rotas de estado incluem `GET /health`, `GET /readyz` e `GET /livez`; `GET /metrics` expõe métricas Prometheus. `tranzor_http_request_duration_ms` mede a latência total do pedido por rota correspondida; `tranzor_shop_operation_duration_ms` separa operações de catálogo, cache, Typesense, hidratação e escritas de visualizações. `tranzor_mongodb_command_duration_ms` mede a duração observada pelo driver MongoDB e `tranzor_mongodb_pool_checkout_duration_ms` mede a espera para obter uma ligação do pool. As métricas não expõem documentos nem parâmetros de consulta.
+
+O endpoint `GET /api/v1/shop/products` mantém a resposta completa por omissão. As interfaces de cartões podem pedir `?view=summary` para receber apenas os campos usados na listagem; a paginação e os preços mantêm-se iguais, e o detalhe continua disponível no endpoint de produto.
 
 ## Docker Compose
 
@@ -36,6 +38,12 @@ O [Dockerfile](./Dockerfile) instala dependências, gera o cliente Prisma e comp
 ```sh
 docker build -t tranzor-backend:local ./backend
 ```
+
+## Pesquisa e testes de capacidade
+
+Com `TYPESENSE_HOST` e `TYPESENSE_API_KEY` configurados, Typesense ordena os resultados por relevância e fornece o total exato; MongoDB continua a ser a fonte de verdade e serve de fallback com aviso registado quando Typesense está indisponível. Define uma chave forte fora do controlo de versões. Para reindexar o catálogo existente, compila e executa `npm run search:reindex`.
+
+O ficheiro [docker-compose.capacity.yml](../docker-compose.capacity.yml) cria serviços MongoDB, Redis e Typesense isolados, com limites explícitos de memória e CPU. `CAPACITY_MONGO_CPUS` e `CAPACITY_API_CPUS` permitem comparar os limites de CPU desses serviços sem alterar a stack normal (predefinições: `1.5` e `1.0`). O harness recolhe as métricas do Docker de forma assíncrona para não bloquear a carga e mede a duração do soak com relógio monotónico; uma falha pontual de telemetria fica assinalada no relatório sem apagar os resultados de latência. Usa um projeto Compose dedicado e elimina apenas esse projeto depois do teste. A configuração é uma simulação local limitada, não equivale a staging/produção.
 
 ## Estado e limitações
 

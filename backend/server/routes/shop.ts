@@ -8,12 +8,37 @@ import { isB2BRole, optionalAuth } from '../middleware/auth';
 import { getCachedValue, setCachedValue } from '../utils/cache';
 import { roundMoney } from '../utils/money';
 import { getEffectivePrice, resolvePricingContext } from '../utils/pricingEngine';
+import { measureShopOperation } from '../utils/metrics';
+import { searchProducts } from '../services/productSearch';
 
 const router = Router();
 const CATALOG_CACHE_TTL_MS = 60_000;
+const catalogInflight = new Map<string, Promise<unknown>>();
 
 function buildCatalogCacheKey(route: string, payload: Record<string, any>) {
 	return `catalog:${route}:${JSON.stringify(payload)}`;
+}
+
+async function getOrLoadCatalogValue<T>(key: string, load: () => Promise<T>): Promise<T> {
+	const cached = await measureShopOperation('cache.read', () => getCachedValue<T>(key));
+	if (cached !== null) {
+		return cached;
+	}
+
+	const pending = catalogInflight.get(key);
+	if (pending) {
+		return pending.then(value => value as T);
+	}
+
+	const request = load()
+		.then(async value => {
+			await measureShopOperation('cache.write', () => setCachedValue(key, value, CATALOG_CACHE_TTL_MS));
+			return value;
+		})
+		.finally(() => catalogInflight.delete(key));
+
+	catalogInflight.set(key, request);
+	return request;
 }
 
 async function getB2BPricing(req: Request) {
@@ -73,6 +98,7 @@ router.get('/products', optionalAuth, async (req: Request, res: Response) => {
 			isFeatured,
 			isNew,
 			search,
+			view,
 			sort = 'createdAt',
 			order = 'desc',
 			limit = 20,
@@ -134,51 +160,59 @@ router.get('/products', optionalAuth, async (req: Request, res: Response) => {
 			isFeatured,
 			isNew,
 			search,
+			view,
 			sort,
 			order,
 			limit,
 			page,
 			userId: (req as any).user?.userId ?? 'anonymous'
 		});
-		const cachedResponse = await getCachedValue<any>(cacheKey);
-
-		if (cachedResponse) {
-			const products = accountPricing
-				? cachedResponse.products.map((product: any) => applyAccountPricing(product, accountPricing))
-				: cachedResponse.products;
-
-			return res.json({
-				success: true,
+		const countCacheKey = buildCatalogCacheKey('product-count', { query });
+		const productSelection = view === 'summary'
+			? 'name slug price salePrice category subcategory brand sku barcode code images inStock stockQuantity rating isFeatured isNew createdAt'
+			: undefined;
+		const payload = await getOrLoadCatalogValue(cacheKey, async () => {
+			const [products, total] = await Promise.all([
+				measureShopOperation('catalog.products_query', () => {
+					let productQuery = Product.find(query);
+					if (productSelection) {
+						productQuery = productQuery.select(productSelection);
+					}
+					return productQuery
+						.populate('category', 'name slug')
+						.sort(sortOptions)
+						.limit(Number(limit))
+						.skip(skip)
+						.lean({ virtuals: true }).exec();
+				}),
+				getOrLoadCatalogValue(
+					countCacheKey,
+					() => measureShopOperation('catalog.count_query', () => Product.countDocuments(query).exec()),
+				)
+			]);
+			const totalPages = Math.ceil(total / Number(limit));
+			return {
 				products,
-				pagination: cachedResponse.pagination
-			});
-		}
+				pagination: {
+					currentPage: Number(page),
+					totalPages,
+					totalProducts: total,
+					hasNextPage: Number(page) < totalPages,
+					hasPrevPage: Number(page) > 1
+				}
+			};
+		});
 
-		const products = await Product.find(query)
-			.populate('category', 'name slug')
-			.sort(sortOptions)
-			.limit(Number(limit))
-			.skip(skip)
-			.lean({ virtuals: true });
-
-		const total = await Product.countDocuments(query);
-		const totalPages = Math.ceil(total / Number(limit));
-		const payload = {
-			products,
-			pagination: {
-				currentPage: Number(page),
-				totalPages,
-				totalProducts: total,
-				hasNextPage: Number(page) < totalPages,
-				hasPrevPage: Number(page) > 1
-			}
-		};
-
-		await setCachedValue(cacheKey, payload, CATALOG_CACHE_TTL_MS);
-
-		const productsWithPricing = accountPricing
-			? products.map((product: any) => applyAccountPricing(product, accountPricing))
-			: products;
+		const productsWithPricing = view === 'summary' || accountPricing
+			? payload.products.map((product: any) => {
+				const selectedProduct = view === 'summary'
+					? { ...product, currentPrice: product.salePrice || product.price }
+					: product;
+				return accountPricing
+					? applyAccountPricing(selectedProduct, accountPricing)
+					: selectedProduct;
+			})
+			: payload.products;
 
 		res.json({
 			success: true,
@@ -198,9 +232,13 @@ router.get('/products', optionalAuth, async (req: Request, res: Response) => {
 router.get('/products/:id', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const accountPricing = await getB2BPricing(req);
-const product = await findProductByIdOrSlug(req.params.id)
-			.populate('category', 'name slug description')
-			.populate('createdBy', 'name');
+		const product = await getOrLoadCatalogValue(
+			buildCatalogCacheKey('product-detail', { idOrSlug: req.params.id }),
+			() => measureShopOperation('detail.product_query', () => findProductByIdOrSlug(req.params.id)
+				.populate('category', 'name slug description')
+				.populate('createdBy', 'name')
+				.lean({ virtuals: true }).exec()),
+		);
 
 		if (!product) {
 			return res.status(404).json({
@@ -209,15 +247,29 @@ const product = await findProductByIdOrSlug(req.params.id)
 			});
 		}
 
-		// Increment view count without triggering save hooks
-		await Product.updateOne({ _id: product._id }, { $inc: { viewCount: 1 } });
-
-		// Get reviews
-		const reviews = await Review.getProductReviews(product._id as any);
-		const ratingStats = await Review.getAverageRating(product._id as any);
+		const productId = product._id.toString();
+		const [reviewData, viewCountUpdate] = await Promise.all([
+			measureShopOperation('detail.reviews', () => getOrLoadCatalogValue(
+				buildCatalogCacheKey('product-reviews', { productId }),
+				async () => Promise.all([
+					Review.getProductReviews(product._id as any),
+					Review.getAverageRating(product._id as any),
+				]),
+			)),
+			measureShopOperation('detail.view_count_write', () => Product.findByIdAndUpdate(
+				product._id,
+				{ $inc: { viewCount: 1 } },
+				{ returnDocument: 'after' },
+			).select('viewCount').lean().exec()),
+		]);
+		if (!viewCountUpdate) {
+			throw new Error(`Product ${productId} disappeared before its view count could be updated`);
+		}
+		const [reviews, ratingStats] = reviewData;
 
 		const responseProduct: any = {
-			...product.toObject({ virtuals: true }),
+			...product,
+			viewCount: viewCountUpdate.viewCount,
 			currentPrice: product.currentPrice,
 			discountPercentage: product.discountPercentage
 		};
@@ -290,7 +342,10 @@ router.get('/products/:id/reviews', async (req: Request, res: Response) => {
 // GET /shop/categories - Get all categories
 router.get('/categories', async (req: Request, res: Response) => {
 	try {
-		const categories = await Category.getTree();
+		const categories = await getOrLoadCatalogValue(
+			buildCatalogCacheKey('categories', {}),
+			() => measureShopOperation('catalog.categories_query', () => Category.getTree()),
+		);
 
 		res.json({
 			success: true,
@@ -360,7 +415,8 @@ router.get('/categories/:slug', optionalAuth, async (req: Request, res: Response
 router.get('/search', optionalAuth, async (req: Request, res: Response) => {
 	try {
 		const accountPricing = await getB2BPricing(req);
-		const { q, category, limit = 20, page = 1 } = req.query;
+		const { category, limit = 20, page = 1 } = req.query;
+		const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
 
 		if (!q) {
 			return res.status(400).json({
@@ -369,41 +425,82 @@ router.get('/search', optionalAuth, async (req: Request, res: Response) => {
 			});
 		}
 
-		const query: any = {
-			isActive: true,
-			$text: { $search: q }
+		const skip = (Number(page) - 1) * Number(limit);
+		const searchOptions = {
+			category: typeof category === 'string' ? category : undefined,
+			page: Number(page),
+			limit: Number(limit),
 		};
 
-		if (category) {
-			query.category = category;
-		}
+		const userId = (req as any).user?.userId ?? 'anonymous';
+		const cacheKey = buildCatalogCacheKey('search', {
+			q: q.toLocaleLowerCase(),
+			category,
+			limit,
+			page,
+			userId
+		});
+		const payload = await getOrLoadCatalogValue(cacheKey, async () => {
+			let products;
+			let total;
+			const searchResult = await measureShopOperation('search.engine_query', () => searchProducts(q, searchOptions));
 
-		const skip = (Number(page) - 1) * Number(limit);
+			if (searchResult) {
+				const foundProducts = await measureShopOperation('search.product_hydration', () => Product.find({
+					_id: { $in: searchResult.ids },
+					isActive: true,
+					isDeleted: false,
+				})
+					.populate('category', 'name slug')
+					.lean({ virtuals: true }).exec());
+				const productsById = new Map(foundProducts.map(product => [product._id.toString(), product]));
+				products = searchResult.ids
+					.map(id => productsById.get(id))
+					.filter((product): product is NonNullable<typeof product> => Boolean(product));
+				total = searchResult.total;
+			} else {
+				const query: any = {
+					isActive: true,
+					isDeleted: false,
+					$text: { $search: q }
+				};
+				if (searchOptions.category) query.category = searchOptions.category;
 
-		const products = await Product.find(query, {
-			score: { $meta: 'textScore' }
-		})
-		.populate('category', 'name slug')
-		.sort({ score: { $meta: 'textScore' } })
-		.limit(Number(limit))
-		.skip(skip)
-		.lean({ virtuals: true });
+				const [fallbackProducts, fallbackTotal] = await Promise.all([
+					measureShopOperation('search.mongo_fallback_query', () => Product.find(query, { score: { $meta: 'textScore' } })
+						.populate('category', 'name slug')
+						.sort({ score: { $meta: 'textScore' } })
+						.limit(Number(limit))
+						.skip(skip)
+						.lean({ virtuals: true }).exec()),
+					measureShopOperation('search.mongo_fallback_count', () => getOrLoadCatalogValue(
+						buildCatalogCacheKey('search-count', { query }),
+						() => measureShopOperation('search.mongo_fallback_count_query', () => Product.countDocuments(query).exec()),
+					))
+				]);
+				products = fallbackProducts;
+				total = fallbackTotal;
+			}
+
+			return {
+				products,
+				pagination: {
+					currentPage: Number(page),
+					totalPages: Math.ceil(total / Number(limit)),
+					totalProducts: total
+				}
+			};
+		});
 
 		const productsWithPricing = accountPricing
-			? products.map((product: any) => applyAccountPricing(product, accountPricing))
-			: products;
-
-		const total = await Product.countDocuments(query);
+			? payload.products.map((product: any) => applyAccountPricing(product, accountPricing))
+			: payload.products;
 
 		res.json({
 			success: true,
 			query: q,
 			products: productsWithPricing,
-			pagination: {
-				currentPage: Number(page),
-				totalPages: Math.ceil(total / Number(limit)),
-				totalProducts: total
-			}
+			pagination: payload.pagination
 		});
 	} catch (error) {
 		console.error('Search error:', error);

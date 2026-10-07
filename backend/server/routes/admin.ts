@@ -10,6 +10,8 @@ import { requireRole } from '../middleware/auth';
 import { summarizeAnalyticsEvents } from '../services/analyticsSummary';
 import { generateSaftExport } from '../services/saftService';
 import { reconcileStripePayments } from '../services/stripeReconciliation';
+import { removeProductFromSearch, syncProductsToSearch } from '../services/productSearch';
+import { clearCacheByPrefix } from '../utils/cache';
 
 const router = Router();
 
@@ -370,6 +372,8 @@ router.post('/products', async (req: Request, res: Response) => {
 
 		const product = new Product(productData);
 		await product.save();
+		await syncProductsToSearch([product]);
+		await clearCacheByPrefix('catalog:');
 
 		await product.populate('category', 'name');
 		await product.populate('createdBy', 'name');
@@ -415,6 +419,9 @@ router.put('/products/:id', async (req: Request, res: Response) => {
 			});
 		}
 
+		await syncProductsToSearch([product]);
+		await clearCacheByPrefix('catalog:');
+
 		res.json({
 			success: true,
 			message: 'Produto atualizado com sucesso',
@@ -453,6 +460,9 @@ router.delete('/products/:id', async (req: Request, res: Response) => {
 				error: 'Produto não encontrado'
 			});
 		}
+
+		await removeProductFromSearch(product._id.toString());
+		await clearCacheByPrefix('catalog:');
 
 		res.json({
 			success: true,
@@ -495,6 +505,7 @@ router.post('/categories', async (req: Request, res: Response) => {
 	try {
 		const category = new Category(req.body);
 		await category.save();
+		await clearCacheByPrefix('catalog:');
 
 		await category.populate('parent', 'name');
 		await category.populate('subcategories', 'name');
@@ -663,6 +674,8 @@ router.put('/reviews/:id/approve', async (req: Request, res: Response) => {
 				error: 'Avaliação não encontrada'
 			});
 		}
+
+		await clearCacheByPrefix('catalog:product-reviews:');
 
 		res.json({
 			success: true,
