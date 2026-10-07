@@ -398,7 +398,7 @@ export default function HomePage() {
             <HeroMosaic />
             <div className="hero-badge" aria-hidden>
               <span className="hero-badge-num">50</span>
-              <span className="hero-badge-txt">anos<br/>em PT</span>
+              <span className="hero-badge-txt">{t('home.heroBadgeYears')}<br/>{t('home.heroBadgeLocation')}</span>
             </div>
           </div>
         </div>
@@ -681,7 +681,7 @@ export default function HomePage() {
         .hero-headline { margin:0 0 2rem; line-height:1; letter-spacing:-1px; }
         .hero-line { display:block; }
         .hero-line--serif { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.6rem,3.5vw,2.6rem); color:var(--muted-light); font-weight:400; margin-bottom:4px; }
-        .hero-line--bold { font-family:var(--font-display); font-weight:800; font-size:clamp(4rem,9vw,7.5rem); color:var(--text); position:relative; display:inline-block; }
+        .hero-line--bold { font-family:var(--font-display); font-weight:800; font-size:clamp(3.5rem,7.5vw,6.5rem); color:var(--text); position:relative; display:inline-block; }
         .hero-underline { position:absolute; bottom:-2px; left:0; width:100%; height:10px; overflow:visible; }
         .hero-line--italic { font-family:var(--font-serif); font-style:italic; font-size:clamp(1.8rem,4vw,3rem); color:var(--red); font-weight:700; margin-top:6px; }
 
@@ -690,9 +690,9 @@ export default function HomePage() {
 
         .hero-actions { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:2.5rem; }
 
-        .btn-hero-primary { background:var(--red); color:white; padding:15px 32px; border-radius:var(--radius); font-family:var(--font-display); font-weight:700; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; text-decoration:none; display:inline-flex; align-items:center; gap:10px; transition:background 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow:0 4px 20px rgba(217,4,41,0.3); border:none; }
+        .btn-hero-primary { background:var(--red); color:white; padding:15px 32px; border-radius:var(--radius); font-family:var(--font-display); font-weight:700; font-size:13px; letter-spacing:0.02em; text-transform:uppercase; text-decoration:none; display:inline-flex; align-items:center; gap:10px; white-space:nowrap; transition:background 0.2s, transform 0.2s, box-shadow 0.2s; box-shadow:0 4px 20px rgba(217,4,41,0.3); border:none; }
         .btn-hero-primary:hover { background:var(--red-vivid); transform:translateY(-2px); box-shadow:0 8px 32px rgba(217,4,41,0.4); }
-        .btn-hero-ghost { background:transparent; color:var(--text); padding:15px 28px; border-radius:var(--radius); font-family:var(--font-display); font-weight:600; font-size:13px; letter-spacing:1px; text-decoration:none; display:inline-flex; align-items:center; border:1px solid var(--border); transition:border-color 0.2s, color 0.2s, background 0.2s; }
+        .btn-hero-ghost { background:transparent; color:var(--text); padding:15px 28px; border-radius:var(--radius); font-family:var(--font-display); font-weight:600; font-size:13px; letter-spacing:0.01em; text-decoration:none; display:inline-flex; align-items:center; white-space:nowrap; border:1px solid var(--border); transition:border-color 0.2s, color 0.2s, background 0.2s; }
         .btn-hero-ghost:hover { border-color:rgba(217,4,41,0.4); color:var(--red); background:rgba(217,4,41,0.05); }
 
         /* ── Floating chat button (ESTILO MELHORADO) ── */
@@ -904,7 +904,7 @@ export default function HomePage() {
         .nl-field { display:flex; border:1px solid rgba(217,4,41,0.3); border-radius:10px; overflow:hidden; }
         .nl-input { flex:1; padding:14px 18px; background:var(--charcoal-3); border:none; outline:none; color:var(--white); font-family:var(--font-display); font-size:14px; }
         .nl-input::placeholder { color:var(--muted); }
-        .nl-btn { background:var(--red); color:white; border:none; padding:14px 22px; cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; transition:background 0.2s; flex-shrink:0; }
+        .nl-btn { background:var(--red); color:white; border:none; padding:14px 22px; cursor:pointer; font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:0.02em; text-transform:uppercase; white-space:nowrap; transition:background 0.2s; flex-shrink:0; }
         .nl-btn:hover { background:var(--red-vivid); }
 
         /* ── STORES ── */
@@ -914,7 +914,7 @@ export default function HomePage() {
         .store-header { display:flex; align-items:center; gap:10px; margin-bottom:1rem; }
         .store-since { font-family:var(--font-display); font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
         .store-city { font-family:var(--font-serif); font-weight:700; font-size:1.6rem; color:var(--text); margin:0 0 1.5rem; line-height:1.15; }
-        .store-directions { display:inline-flex; align-items:center; gap:6px; margin-top:1.5rem; font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--red); text-decoration:none; border-bottom:1px solid rgba(217,4,41,0.3); padding-bottom:2px; transition:gap 0.2s, border-color 0.2s; }
+        .store-directions { display:inline-flex; align-items:center; gap:6px; margin-top:1.5rem; font-family:var(--font-display); font-weight:700; font-size:12px; letter-spacing:0.02em; text-transform:uppercase; color:var(--red); text-decoration:none; border-bottom:1px solid rgba(217,4,41,0.3); padding-bottom:2px; transition:gap 0.2s, border-color 0.2s; }
         .store-directions:hover { gap:10px; border-color:var(--red); }
 
         /* ── Scroll to top ── */

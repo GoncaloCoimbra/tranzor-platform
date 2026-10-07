@@ -190,7 +190,7 @@ export default function SearchResultsPage() {
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ddd" strokeWidth="1.5" style={{ marginBottom: 16 }} aria-hidden>
                 <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
               </svg>
-              <p style={{ fontWeight: 700, fontSize: 16, color: '#111', marginBottom: 8 }}>Nenhum resultado</p>
+              <p style={{ fontWeight: 700, fontSize: 16, color: 'var(--text)', marginBottom: 8 }}>Nenhum resultado</p>
               <p style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>Tente ajustar os filtros ou pesquisar por outros termos.</p>
               <button
                 onClick={() => { setCatFilter('Todos'); setActiveFilters(null); }}
@@ -275,9 +275,7 @@ export default function SearchResultsPage() {
         </div>
       </section>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+      <style>{`        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
         .card-anim { animation: fadeUp .3s both; }
       `}</style>
     </AppLayout>
@@ -290,28 +288,28 @@ export default function SearchResultsPage() {
 const s: Record<string, React.CSSProperties> = {
   hero: {
     position: 'relative', padding: '6rem 2rem 3.5rem',
-    borderBottom: '1px solid rgba(0,0,0,0.08)', background: '#fff', overflow: 'hidden',
+    borderBottom: '1px solid var(--border)', background: 'var(--bg)', overflow: 'hidden',
   },
   heroGrid: {
     position: 'absolute', inset: 0,
-    backgroundImage: `linear-gradient(rgba(217,4,41,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(217,4,41,0.04) 1px,transparent 1px)`,
+    backgroundImage: `linear-gradient(var(--accent) 1px,transparent 1px),linear-gradient(90deg,var(--accent) 1px,transparent 1px)`,
     backgroundSize: '72px 72px',
   },
   heroInner: { maxWidth: 900, margin: '0 auto', position: 'relative' },
   heroLabel: {
     display: 'inline-block', fontSize: 11, fontWeight: 600, letterSpacing: 2,
-    textTransform: 'uppercase', color: '#D90429', marginBottom: '1rem',
-    fontFamily: "'Syne', sans-serif",
+    textTransform: 'uppercase', color: 'var(--red)', marginBottom: '1rem',
+    fontFamily: "'Manrope', sans-serif",
   },
   heroTitle: {
-    fontFamily: "'Syne', sans-serif", fontWeight: 800,
+    fontFamily: "'Manrope', sans-serif", fontWeight: 800,
     fontSize: 'clamp(1.8rem,4vw,3rem)', lineHeight: 1.1,
-    color: '#111', letterSpacing: -0.5, marginBottom: '.75rem',
+    color: 'var(--text)', letterSpacing: -0.5, marginBottom: '.75rem',
   },
-  heroSub: { fontSize: 14, color: '#666', lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" },
-  filterSummary: { color: '#D90429', fontWeight: 600 },
+  heroSub: { fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.7, fontFamily: "'Manrope', sans-serif" },
+  filterSummary: { color: 'var(--red)', fontWeight: 600 },
 
-  body: { background: '#f5f5f3', padding: '2.5rem 2rem 5rem' },
+  body: { background: 'var(--bg)', padding: '2.5rem 2rem 5rem' },
   bodyInner: { maxWidth: 1200, margin: '0 auto' },
 
   /* Barra de controlo */
@@ -322,26 +320,26 @@ const s: Record<string, React.CSSProperties> = {
   catPills: { display: 'flex', gap: 6, flexWrap: 'wrap' },
   pill: {
     padding: '7px 15px', borderRadius: 99, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-    border: '1px solid rgba(0,0,0,0.12)', background: '#fff', color: '#555',
-    fontFamily: "'Syne', sans-serif", transition: 'all .15s',
+    border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)',
+    fontFamily: "'Manrope', sans-serif", transition: 'all .15s',
   },
-  pillActive: { background: '#D90429', color: '#fff', border: '1px solid #D90429' },
+  pillActive: { background: 'var(--red)', color: '#fff', border: '1px solid var(--red)' },
   controlRight: { display: 'flex', alignItems: 'center', gap: 8 },
   sortSelect: {
-    padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)',
-    background: '#fff', color: '#555', fontSize: 12, fontFamily: "'Syne', sans-serif",
+    padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)',
+    background: 'var(--surface)', color: 'var(--text)', fontSize: 12, fontFamily: "'Manrope', sans-serif",
     fontWeight: 600, cursor: 'pointer', outline: 'none',
   },
   filterToggleBtn: {
     display: 'inline-flex', alignItems: 'center', gap: 6,
     padding: '8px 14px', borderRadius: 8,
-    border: '1.5px solid rgba(217,4,41,0.25)', background: 'rgba(217,4,41,0.05)',
-    color: '#D90429', fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12,
+    border: '1.5px solid var(--red-border)', background: 'var(--red-muted)',
+    color: 'var(--red)', fontFamily: "'Manrope', sans-serif", fontWeight: 700, fontSize: 12,
     cursor: 'pointer', transition: 'background .15s',
   },
   filterToggleBadge: {
-    background: '#D90429', color: '#fff',
-    fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 10,
+    background: 'var(--red)', color: '#fff',
+    fontFamily: "'Manrope', sans-serif", fontWeight: 700, fontSize: 10,
     padding: '1px 5px', borderRadius: 99,
   },
 
@@ -359,35 +357,35 @@ const s: Record<string, React.CSSProperties> = {
   },
   cardLink: { textDecoration: 'none' },
   card: {
-    background: '#fff', border: '1px solid rgba(0,0,0,.08)',
+    background: 'var(--surface)', border: '1px solid var(--border)',
     borderRadius: 12, overflow: 'hidden',
     transition: 'box-shadow .2s, transform .2s, border-color .2s',
   },
   cardImg: {
-    height: 140, background: 'linear-gradient(135deg,#f7f7f7,#ebebeb)',
+    height: 140, background: 'linear-gradient(135deg,var(--surface-2),var(--charcoal-3))',
     display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
   },
   badge: {
     position: 'absolute', top: 10, left: 10, color: '#fff',
     fontSize: 9, fontWeight: 700, padding: '3px 7px', borderRadius: 99,
-    fontFamily: "'Syne', sans-serif", letterSpacing: 1, textTransform: 'uppercase',
+    fontFamily: "'Manrope', sans-serif", letterSpacing: 1, textTransform: 'uppercase',
   },
   cardBody: { padding: '0.875rem' },
   cardMeta: { display: 'flex', justifyContent: 'space-between', marginBottom: 4 },
   cardCat: {
-    fontSize: 10, color: '#999', fontWeight: 600, textTransform: 'uppercase',
-    letterSpacing: 0.5, fontFamily: "'DM Sans', sans-serif",
+    fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase',
+    letterSpacing: 0.5, fontFamily: "'Manrope', sans-serif",
   },
   cardBrand: {
-    fontSize: 10, color: '#D90429', fontWeight: 700, fontFamily: "'Syne', sans-serif",
+    fontSize: 10, color: 'var(--red)', fontWeight: 700, fontFamily: "'Manrope', sans-serif",
   },
-  cardName: { fontWeight: 700, fontSize: 13, color: '#111', margin: '0 0 8px', lineHeight: 1.4, fontFamily: "'Syne', sans-serif" },
+  cardName: { fontWeight: 700, fontSize: 13, color: 'var(--text)', margin: '0 0 8px', lineHeight: 1.4, fontFamily: "'Manrope', sans-serif" },
   cardFooter: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  cardPrice: { fontSize: 16, fontWeight: 800, color: '#D90429', fontFamily: "'Syne', sans-serif" },
+  cardPrice: { fontSize: 16, fontWeight: 800, color: 'var(--red)', fontFamily: "'Manrope', sans-serif" },
   addBtn: {
     width: 30, height: 30, borderRadius: 8,
-    background: 'rgba(217,4,41,0.08)', border: '1px solid rgba(217,4,41,0.15)',
-    color: '#D90429', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: 'var(--red-muted)', border: '1px solid var(--red-border)',
+    color: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', transition: 'background .15s',
     flexShrink: 0,
   },
@@ -395,28 +393,28 @@ const s: Record<string, React.CSSProperties> = {
   /* Empty */
   empty: {
     textAlign: 'center', padding: '4rem 2rem',
-    background: '#fff', borderRadius: 12, border: '1px solid rgba(0,0,0,.08)',
+    background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)',
   },
   clearAllBtn: {
-    padding: '10px 22px', background: '#D90429', color: '#fff', border: 'none',
-    borderRadius: 8, fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: 12,
+    padding: '10px 22px', background: 'var(--red)', color: '#fff', border: 'none',
+    borderRadius: 8, fontFamily: "'Manrope', sans-serif", fontWeight: 700, fontSize: 12,
     letterSpacing: 1, textTransform: 'uppercase', cursor: 'pointer', transition: 'background .15s',
   },
 
   /* Sugestões */
   suggestions: {
     marginTop: '2rem', paddingTop: '1.5rem',
-    borderTop: '1px solid rgba(0,0,0,.06)',
+    borderTop: '1px solid var(--border)',
     display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8,
   },
   suggestionsLabel: {
-    fontSize: 12, color: '#888', fontFamily: "'DM Sans', sans-serif",
+    fontSize: 12, color: 'var(--text-muted)', fontFamily: "'Manrope', sans-serif",
     marginRight: 4,
   },
   suggestionLink: {
-    padding: '5px 12px', borderRadius: 99, fontSize: 12, fontFamily: "'Syne', sans-serif",
-    fontWeight: 600, color: '#555', textDecoration: 'none',
-    background: '#fff', border: '1px solid rgba(0,0,0,.1)',
+    padding: '5px 12px', borderRadius: 99, fontSize: 12, fontFamily: "'Manrope', sans-serif",
+    fontWeight: 600, color: 'var(--text)', textDecoration: 'none',
+    background: 'var(--surface)', border: '1px solid var(--border)',
     transition: 'border-color .15s, color .15s',
   },
 };

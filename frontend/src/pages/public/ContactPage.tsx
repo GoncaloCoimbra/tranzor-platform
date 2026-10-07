@@ -32,11 +32,11 @@ export default function ContactPage() {
 
 				<form className="page-card" style={{ display: 'grid', gap: '1rem' }}>
 					<label htmlFor="nome" style={{ fontWeight: 700, color: 'var(--red)' }}>{t('contact.nameLabel')}</label>
-					<input id="nome" name="nome" type="text" required style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '0.75rem', border: '1px solid var(--border)', background: 'var(--white)' }} />
+					<input id="nome" name="nome" type="text" required style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '0.75rem', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
 					<label htmlFor="email" style={{ fontWeight: 700, color: 'var(--red)' }}>{t('contact.emailLabel')}</label>
-					<input id="email" name="email" type="email" required style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '0.75rem', border: '1px solid var(--border)', background: 'var(--white)' }} />
+					<input id="email" name="email" type="email" required style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '0.75rem', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
 					<label htmlFor="mensagem" style={{ fontWeight: 700, color: 'var(--red)' }}>{t('contact.messageLabel')}</label>
-					<textarea id="mensagem" name="mensagem" rows={5} required style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '0.75rem', border: '1px solid var(--border)', background: 'var(--white)' }} />
+					<textarea id="mensagem" name="mensagem" rows={5} required style={{ width: '100%', padding: '0.9rem 1rem', borderRadius: '0.75rem', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }} />
 					<button type="submit" className="btn btn-primary">{t('contact.submitButton')}</button>
 				</form>
 			</section>

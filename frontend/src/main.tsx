@@ -6,6 +6,10 @@ import "./styles/theme.css";
 import "./i18n";
 import App from "./App";
 
+if (localStorage.getItem("darkMode") === "true") {
+  document.documentElement.classList.add("theme-dark");
+}
+
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <HelmetProvider>

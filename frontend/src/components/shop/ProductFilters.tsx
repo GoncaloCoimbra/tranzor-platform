@@ -952,14 +952,14 @@ function FilterGroupPanel({
                 onKeyDown={e => (e.key === ' ' || e.key === 'Enter') && onToggleOption(opt.value)}
                 style={S.checkRow}
               >
-                <span style={{ ...S.checkbox, background: checked ? '#D90429' : 'transparent', borderColor: checked ? '#D90429' : '#d0d0d0' }}>
+                <span style={{ ...S.checkbox, background: checked ? 'var(--red)' : 'transparent', borderColor: checked ? 'var(--red)' : 'var(--border)' }}>
                   {checked && (
                     <svg width="7" height="7" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
                       <path d="M2 6l3 3 5-5"/>
                     </svg>
                   )}
                 </span>
-                <span style={{ ...S.checkText, color: checked ? '#111' : '#555', fontWeight: checked ? 500 : 400 }}>
+                <span style={{ ...S.checkText, color: checked ? 'var(--text)' : 'var(--text-muted)', fontWeight: checked ? 500 : 400 }}>
                   {opt.label}
                 </span>
               </div>
@@ -977,8 +977,8 @@ function FilterGroupPanel({
                     style={{
                       width: 26, height: 26, borderRadius: '50%',
                       background: opt.color,
-                      border: checked ? '2.5px solid #D90429' : '2px solid rgba(0,0,0,0.1)',
-                      outline: checked ? '2.5px solid rgba(217,4,41,0.3)' : 'none',
+                      border: checked ? '2.5px solid var(--red)' : '2px solid var(--border)',
+                      outline: checked ? '2.5px solid var(--red-border)' : 'none',
                       outlineOffset: 2,
                       cursor: 'pointer',
                       transition: 'transform .15s, outline .15s',
@@ -1002,10 +1002,10 @@ function FilterGroupPanel({
                     style={{
                       padding: '4px 9px',
                       borderRadius: 6,
-                      border: checked ? '1.5px solid #D90429' : '1.5px solid #ddd',
-                      background: checked ? 'rgba(217,4,41,0.07)' : 'transparent',
-                      color: checked ? '#D90429' : '#555',
-                      fontFamily: "'DM Mono', 'DM Sans', monospace",
+                      border: checked ? '1.5px solid var(--red)' : '1.5px solid var(--border)',
+                      background: checked ? 'var(--red-muted)' : 'transparent',
+                      color: checked ? 'var(--red)' : 'var(--text)',
+                      fontFamily: "'DM Mono', 'Manrope', monospace",
                       fontSize: 11, fontWeight: checked ? 700 : 400,
                       cursor: 'pointer',
                       transition: 'all .15s',
@@ -1054,18 +1054,18 @@ export default function ProductFilters({ category, subcategory, onChange, compac
     k === 'price' ? acc : acc + (Array.isArray(v) ? v.length : 0), 0);
 
   const toggleOption = useCallback((groupId: string, value: string) => {
-    setFilters(prev => {
-      const current = (prev[groupId] as string[]) ?? [];
-      const next = current.includes(value) ? current.filter(x => x !== value) : [...current, value];
-      const updated = { ...prev, [groupId]: next };
-      onChange?.(updated);
-      return updated;
-    });
-  }, [onChange]);
+    const current = (filters[groupId] as string[]) ?? [];
+    const next = current.includes(value) ? current.filter(x => x !== value) : [...current, value];
+    const updated = { ...filters, [groupId]: next };
+    setFilters(updated);
+    onChange?.(updated);
+  }, [filters, onChange]);
 
   const setRange = useCallback((v: [number, number]) => {
-    setFilters(prev => { const u = { ...prev, price: v }; onChange?.(u); return u; });
-  }, [onChange]);
+    const updated = { ...filters, price: v };
+    setFilters(updated);
+    onChange?.(updated);
+  }, [filters, onChange]);
 
   const clearAll = () => { const f = initState(); setFilters(f); onChange?.(f); };
 
@@ -1075,7 +1075,7 @@ export default function ProductFilters({ category, subcategory, onChange, compac
     <div style={{ ...S.root, ...(compact ? S.rootCompact : {}) }}>
       <div style={S.header}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D90429"
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red)"
             strokeWidth="2" strokeLinecap="round" aria-hidden>
             <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
           </svg>
@@ -1146,16 +1146,16 @@ export default function ProductFilters({ category, subcategory, onChange, compac
         input[type='range']::-webkit-slider-thumb {
           -webkit-appearance:none;appearance:none;
           width:18px;height:18px;border-radius:50%;
-          background:#fff;border:2.5px solid #D90429;
+          background:var(--surface);border:2.5px solid var(--red);
           cursor:pointer;pointer-events:all;
-          box-shadow:0 2px 8px rgba(217,4,41,.3);
+          box-shadow:0 2px 8px var(--red-border);
           transition:transform .15s;
         }
         input[type='range']::-webkit-slider-thumb:hover{transform:scale(1.25);}
         input[type='range']::-moz-range-thumb{
           width:18px;height:18px;border-radius:50%;
-          background:#fff;border:2.5px solid #D90429;
-          cursor:pointer;box-shadow:0 2px 8px rgba(217,4,41,.3);
+          background:var(--surface);border:2.5px solid var(--red);
+          cursor:pointer;box-shadow:0 2px 8px var(--red-border);
         }
       `}</style>
     </div>
@@ -1166,23 +1166,23 @@ export default function ProductFilters({ category, subcategory, onChange, compac
    ESTILOS
    ───────────────────────────────────────── */
 const S: Record<string, React.CSSProperties> = {
-  root:         { fontFamily:"'DM Sans',sans-serif", color:'#111' },
-  rootCompact:  { background:'#fff', border:'1.5px solid #e4e4e4', borderRadius:12, padding:'1rem 1.25rem', marginBottom:'1.5rem' },
-  header:       { display:'flex', alignItems:'center', justifyContent:'space-between', paddingBottom:12, marginBottom:4, borderBottom:'1.5px solid #111' },
-  headerTitle:  { fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:14, letterSpacing:-.2, color:'#111' },
-  badge:        { background:'#D90429', color:'#fff', fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:10, padding:'2px 7px', borderRadius:99 },
-  clearBtn:     { background:'transparent', border:'none', cursor:'pointer', fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:11, letterSpacing:.5, textTransform:'uppercase' as const, color:'#D90429', padding:'3px 0', textDecoration:'underline', textUnderlineOffset:3 },
-  groupWrap:    { borderBottom:'1px solid #f0f0f0' },
-  groupHeader:  { width:'100%', background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'11px 0', gap:8, color:'#111' },
-  groupLabel:   { fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:11.5, letterSpacing:.6, textTransform:'uppercase' as const, color:'inherit' },
-  groupCount:   { background:'rgba(217,4,41,0.1)', color:'#D90429', fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:9, padding:'1px 5px', borderRadius:99 },
+  root:         { fontFamily:"'Manrope',sans-serif", color:'var(--text)' },
+  rootCompact:  { background:'var(--surface)', border:'1.5px solid var(--border)', borderRadius:12, padding:'1rem 1.25rem', marginBottom:'1.5rem' },
+  header:       { display:'flex', alignItems:'center', justifyContent:'space-between', paddingBottom:12, marginBottom:4, borderBottom:'1.5px solid var(--border)' },
+  headerTitle:  { fontFamily:"'Manrope',sans-serif", fontWeight:800, fontSize:14, letterSpacing:-.2, color:'var(--text)' },
+  badge:        { background:'var(--red)', color:'#fff', fontFamily:"'Manrope',sans-serif", fontWeight:700, fontSize:10, padding:'2px 7px', borderRadius:99 },
+  clearBtn:     { background:'transparent', border:'none', cursor:'pointer', fontFamily:"'Manrope',sans-serif", fontWeight:700, fontSize:11, letterSpacing:.5, textTransform:'uppercase' as const, color:'var(--red)', padding:'3px 0', textDecoration:'underline', textUnderlineOffset:3 },
+  groupWrap:    { borderBottom:'1px solid var(--border)' },
+  groupHeader:  { width:'100%', background:'transparent', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'11px 0', gap:8, color:'var(--text)' },
+  groupLabel:   { fontFamily:"'Manrope',sans-serif", fontWeight:700, fontSize:11.5, letterSpacing:.6, textTransform:'uppercase' as const, color:'inherit' },
+  groupCount:   { background:'var(--red-muted)', color:'var(--red)', fontFamily:"'Manrope',sans-serif", fontWeight:700, fontSize:9, padding:'1px 5px', borderRadius:99 },
   checkRow:     { display:'flex', alignItems:'center', gap:9, padding:'5px 0', cursor:'pointer', userSelect:'none' as const, transition:'opacity .15s' },
-  checkbox:     { width:15, height:15, borderRadius:4, border:'1.5px solid #d0d0d0', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'background .15s,border-color .15s' },
+  checkbox:     { width:15, height:15, borderRadius:4, border:'1.5px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, transition:'background .15s,border-color .15s' },
   checkText:    { fontSize:13, lineHeight:1.3, transition:'color .15s,font-weight .15s' },
-  priceLabel:   { fontFamily:"'Syne',sans-serif", fontWeight:700, fontSize:13, color:'#D90429' },
-  track:        { position:'absolute', top:'50%', transform:'translateY(-50%)', left:0, right:0, height:4, background:'#e8e8e8', borderRadius:99 },
-  trackFill:    { position:'absolute', top:'50%', transform:'translateY(-50%)', height:4, background:'#D90429', borderRadius:99 },
+  priceLabel:   { fontFamily:"'Manrope',sans-serif", fontWeight:700, fontSize:13, color:'var(--red)' },
+  track:        { position:'absolute', top:'50%', transform:'translateY(-50%)', left:0, right:0, height:4, background:'var(--border)', borderRadius:99 },
+  trackFill:    { position:'absolute', top:'50%', transform:'translateY(-50%)', height:4, background:'var(--red)', borderRadius:99 },
   rangeInput:   { position:'absolute' },
-  tagsWrap:     { display:'flex', flexWrap:'wrap', gap:6, paddingTop:12, borderTop:'1px solid #f0f0f0', marginTop:8 },
-  tag:          { display:'inline-flex', alignItems:'center', padding:'4px 10px', background:'rgba(217,4,41,0.07)', border:'1px solid rgba(217,4,41,0.2)', borderRadius:99, color:'#D90429', fontFamily:"'Syne',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer', transition:'background .15s' },
+  tagsWrap:     { display:'flex', flexWrap:'wrap', gap:6, paddingTop:12, borderTop:'1px solid var(--border)', marginTop:8 },
+  tag:          { display:'inline-flex', alignItems:'center', padding:'4px 10px', background:'var(--red-muted)', border:'1px solid var(--red-border)', borderRadius:99, color:'var(--red)', fontFamily:"'Manrope',sans-serif", fontWeight:600, fontSize:11, cursor:'pointer', transition:'background .15s' },
 };

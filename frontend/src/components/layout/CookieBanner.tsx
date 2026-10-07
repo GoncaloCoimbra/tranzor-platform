@@ -38,6 +38,7 @@ export default function CookieBanner() {
   return (
     <div
       role="dialog"
+      className="cookie-consent"
       aria-label={t('cookies.ariaLabel')}
       aria-live="polite"
       style={{

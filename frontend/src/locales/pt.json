@@ -20,43 +20,11 @@
     "delete": "Eliminar",
     "edit": "Editar",
     "add": "Adicionar",
-    "loading": "Carregando...",
+    "loading": "A carregar…",
     "error": "Erro",
     "success": "Sucesso",
     "warning": "Aviso",
     "info": "Informação"
-  },
-  "nav": {
-    "home": "Iníc",
-    "news": "Novidades",
-    "about": "Sobre",
-    "contact": "Contacto",
-    "shop": "Loja",
-    "products": "Produtos",
-    "categories": "Categorias",
-    "account": "Conta",
-    "orders": "Encomendas",
-    "profile": "Perfil",
-    "reviews": "Avações",
-    "admin": "Admin",
-    "b2b": "B2B",
-    "support": "Suporte",
-    "shopCta": "Ver Produtos",
-    "searchPlaceholder": "Pesquisar produtos",
-    "searchAriaLabel": "Pesquisa de produtos",
-    "clearSearch": "Limpar pesquisa",
-    "cartAriaLabel": "Carrinho de compras com {{count}} itens",
-    "popularSearches": "Pesquisas populares",
-    "suggestions": "Sugestões",
-    "searchTypeCategory": "Categoria",
-    "searchTypeProduct": "Produto",
-    "searchTypeSearch": "Pesquisa",
-    "searchNoResults": "Nenhum resultado para \"{{query}}\"",
-    "searchAllResults": "Ver todos os resultados para \"{{query}}\"",
-    "searchInCategory": "em {{category}}",
-    "searchInternalPage": "Página interna",
-    "searchInternal": "Página",
-    "searchSeeAllResults": "Ver todos os resultados para \"{{query}}\""
   },
   "account": {
     "profile": {
@@ -93,7 +61,7 @@
       "preferences": {
         "darkMode": {
           "title": "Modo Escuro",
-          "description": "Tema escuro para uma experiência mais confortável."        },
+          "description": "Ative o tema carvão. O tema claro mantém-se como padrão."        },
         "language": {
           "title": "Linguagem preferida",
           "description": "Escolha sua linguagem padrão para navegação.",
@@ -413,28 +381,28 @@
       "recentlyViewedLink": "Ver produtos vistos recentemente"
     },
     "shopFilters": {
-      "filterTitle": "🎯 Filtros",
+      "filterTitle": "Filtros",
       "clearFilters": "✕ Limpar",
-      "sortBy": "📊 Ordenar por",
+      "sortBy": "Ordenar por",
       "sortRelevance": "Relevância",
       "sortPriceAsc": "Preço: Menor → Maior",
       "sortPriceDesc": "Preço: Maior → Menor",
-      "sortRating": "Avaliação (⭐)",
+      "sortRating": "Avaliação",
       "sortNewest": "Mais Recentes",
-      "categories": "📂 Categorias",
+      "categories": "Categorias",
       "allCategories": "Todas as Categorias",
-      "subcategories": "📁 Subcategorias",
+      "subcategories": "Subcategorias",
       "allSubcategories": "Todas",
-      "priceRange": "💰 Faixa de Preço",
+      "priceRange": "Faixa de Preço",
       "minPrice": "Mín: €",
       "maxPrice": "Máx: €",
-      "brands": "🏷️ Marcas",
+      "brands": "Marcas",
       "viewMoreBrands": "Ver mais marcas ({{count}})",
-      "characteristics": "🏷️ Características",
-      "filterSummary": "📊 {{count}} produto(s) encontrado(s)",
-      "filterSummaryCategory": "📂 {{category}}",
-      "filterSummarySubcategory": "📁 {{subcategory}}",
-      "filterSummaryBrands": "🏷️ {{count}} marca(s)"
+      "characteristics": "Características",
+      "filterSummary": "{{count}} produto(s) encontrado(s)",
+      "filterSummaryCategory": "{{category}}",
+      "filterSummarySubcategory": "{{subcategory}}",
+      "filterSummaryBrands": "{{count}} marca(s)"
     }
   },
   "home": {
@@ -444,6 +412,8 @@
     "heroLine2": "inspira",
     "heroLine3": "com presença própria.",
     "heroBody": "Mais de {{count}} referências das melhores marcas mundiais. Entregamos em todo Portugal — ou visite-nos pessoalmente nas nossas lojas físicas.",
+    "heroBadgeYears": "anos",
+    "heroBadgeLocation": "em PT",
     "seoTitle": "Tranzor — Material de Escritório, Escolar e Papelaria em Portugal",
     "seoDescription": "Mais de 25.000 produtos de papelaria, escritório, escola e tecnologia. Entrega em todo Portugal. Lojas em Lisboa e Porto.",
     "seoOgTitle": "Tranzor — Material de Escritório e Papelaria",
@@ -650,23 +620,15 @@
     "accountAriaLabel": "Entrar ou criar conta",
     "recentlyViewed": "Vistos Recentemente",
     "orders": "As minhas encomendas",
-    "profile": "O meu perfil"
-  },
-  "footer": {
-    "description": "Material de escritório, escolar e papelaria em Portugal com uma oferta prática e moderna.",
-    "shopTitle": "Loja",
-    "catalog": "Catálogo",
-    "promotions": "Promoções",
-    "schoolSupplies": "Material Escolar",
-    "companyTitle": "Empresa",
-    "about": "Sobre nós",
-    "contact": "Contacto",
-    "faq": "FAQ",
-    "legalTitle": "Legal",
-    "privacy": "Privacidade",
-    "terms": "Termos",
-    "cookies": "Cookies",
-    "copyright": "Todos os direitos reservados."
+    "profile": "O meu perfil",
+    "shop": "Loja",
+    "products": "Produtos",
+    "categories": "Categorias",
+    "account": "Conta",
+    "reviews": "Avações",
+    "admin": "Admin",
+    "b2b": "B2B",
+    "support": "Suporte"
   },
   "privacy": {
     "pageTitle": "Política de Privacidade",
@@ -884,111 +846,6 @@
     "completeOrder": "Finalizar Encomenda",
     "orderPlaced": "Encomenda Realizada com Sucesso"
   },
-  "shop": {
-    "recentlyViewed": {
-      "pageTitle": "Vistos Recentemente — Tranzor",
-      "pageDescription": "Retome onde ficou com os produtos que explorou recentemente.",
-      "historyEyebrow": "Histórico",
-      "titlePart1": "Vistos",
-      "titlePart2": "Recentemente",
-      "description": "Retome onde ficou — os produtos que visitou estão aqui para facilitar a sua decisão.",
-      "emptyTitle": "Ainda não visitou nenhum produto",
-      "emptyBody": "Explore a loja e os produtos que visitar aparecerão aqui.",
-      "exploreShop": "Explorar a Loja",
-      "viewProduct": "Ver produto",
-      "continueExploring": "Continuar a explorar a loja",
-      "sampleItems": {
-        "caderno": { "name": "Caderno A4 pautado", "category": "Escolar", "time": "Há 5 min" },
-        "pen": { "name": "Caneta gel azul", "category": "Escrita", "time": "Há 20 min" },
-        "folder": { "name": "Pasta arquivo", "category": "Organização", "time": "Há 1h" }
-      }
-    },
-    "newArrivals": {
-      "pageTitle": "Novidades — Tranzor",
-      "pageDescription": "Descubra os lançamentos mais recentes da Tranzor. Produtos novos adicionados regularmente.",
-      "eyebrow": "Acabou de chegar",
-      "titlePart1": "Novidades",
-      "titlePart2": "Tranzor",
-      "description": "Os produtos mais recentes, adicionados nos últimos dias. Seja o primeiro a descobrir.",
-      "stats": {
-        "newThisWeek": "Novos esta semana",
-        "categories": "Categorias",
-        "fastShipping": "Entregas rápidas"
-      },
-      "filters": {
-        "all": "Todos",
-        "school": "Escolar",
-        "writing": "Escrita",
-        "organization": "Organização",
-        "planning": "Planeamento"
-      },
-      "badges": {
-        "new": "Novo",
-        "featured": "Destaque"
-      },
-      "daysAgo": "há {{count}}d",
-      "sampleItems": {
-        "executive": { "name": "Caderno Executive", "category": "Escolar", "price": "€8,90" },
-        "planner": { "name": "Canetas Gel Pack 10", "category": "Escrita", "price": "€5,50" },
-        "file": { "name": "Pasta Suspensa A4", "category": "Organização", "price": "€12,00" },
-        "markers": { "name": "Marcadores Duplos", "category": "Escrita", "price": "€7,80" },
-        "agenda": { "name": "Agenda 2025", "category": "Planeamento", "price": "€14,90" },
-        "clips": { "name": "Clips Metálicos 100un", "category": "Organização", "price": "€2,30" }
-      }
-    },
-    "productDetail": {
-      "pageTitle": "Produto — Tranzor",
-      "pageDescription": "Descubra produtos Tranzor com detalhes, preços e opções de compra.",
-      "loading": "A carregar produto…",
-      "cartAdded": "{{quantity}} unidade(s) de \"{{name}}\" adicionada(s) ao carrinho!",
-      "compare": {
-        "open": "Abrir comparador",
-        "compare": "Comparar produtos"
-      },
-      "relatedProducts": {
-        "pilot": { "name": "Caneta Pilot G-2 0.7mm" },
-        "notebook": { "name": "Caderno Oxford A4 200 folhas" },
-        "markers": { "name": "Marcadores Stabilo Boss" },
-        "paper": { "name": "Papel Navigator A4 500 folhas" }
-      },
-      "trust": {
-        "fastDelivery": {
-          "title": "Entrega rápida",
-          "copy": "Envio em até 48 horas para Portugal continental."
-        },
-        "securePayment": {
-          "title": "Pagamento protegido",
-          "copy": "Transações seguras com validação e suporte dedicado."
-        },
-        "easyReturns": {
-          "title": "Devolução simples",
-          "copy": "Até 30 dias para trocar ou devolver com facilidade."
-        }
-      },
-      "errors": {
-        "invalidProductId": "ID do produto inválido",
-        "loadProduct": "Não foi possível carregar o produto",
-        "notFound": "Produto não encontrado",
-        "updateFavorites": "Erro ao atualizar favoritos."
-      },
-      "ratingLabel": "{{rating}} de 5 estrelas",
-      "reviewsCount": "{{count}} avaliações",
-      "b2bPrice": "Preço B2B -{{rate}}%",
-      "quantity": {
-        "decrease": "Diminuir quantidade",
-        "increase": "Aumentar quantidade"
-      },
-      "favorite": {
-        "add": "Adicionar aos favoritos",
-        "remove": "Remover dos favoritos",
-        "updating": "A atualizar…"
-      },
-      "faqs": "Ver FAQs",
-      "relatedHeading": "Produtos relacionados",
-      "viewMore": "Ver mais →",
-      "recentlyViewedLink": "Ver produtos vistos recentemente"
-    }
-  },
   "admin": {
     "dashboard": "Painel de Controlo",
     "orders": "Encomendas",
@@ -1024,7 +881,18 @@
     "privacy": "Privacidade",
     "terms": "Termos de Serviço",
     "cookies": "Cookies",
-    "company": "© 2025 Tranzor. Todos os direitos reservados."
+    "company": "© 2025 Tranzor. Todos os direitos reservados.",
+    "description": "Material de escritório, escolar e papelaria em Portugal com uma oferta prática e moderna.",
+    "shopTitle": "Loja",
+    "catalog": "Catálogo",
+    "promotions": "Promoções",
+    "schoolSupplies": "Material Escolar",
+    "companyTitle": "Empresa",
+    "about": "Sobre nós",
+    "contact": "Contacto",
+    "faq": "FAQ",
+    "legalTitle": "Legal",
+    "copyright": "Todos os direitos reservados."
   },
   "navbar": {
     "categories": "Artes",

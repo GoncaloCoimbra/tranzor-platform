@@ -4,7 +4,7 @@
    Editorial × Portuguese Retail
 ───────────────────────────────────────────── */
 
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
   /* ── Brand Core ── */
@@ -17,20 +17,20 @@
 /* ── Neutral Palette ── */
   --white:        #ffffff;
   --offwhite:     #fafafa;
-  --charcoal:     #fafafa;
+  --charcoal:     #f8f8f8;
   --charcoal-2:   #f5f5f5;
   --charcoal-3:   #f0f0f0;
   --mid:          #e8e8e8;
   --border:       #ececec;
-  --muted:        rgba(217, 4, 41, 0.5);
-  --muted-light:  rgba(217, 4, 41, 0.6);
+  --muted:        #68707c;
+  --muted-light:  #68707c;
 
   /* ── Semantic Tokens ── */
   --bg:           var(--white);
   --surface:      var(--offwhite);
   --surface-2:    var(--charcoal-2);
-  --text:         var(--red);
-  --text-muted:   rgba(217, 4, 41, 0.65);
+  --text:         #24272b;
+  --text-muted:   #68707c;
   /* ── Radius ── */
   --radius-sm:    4px;
   --radius:       8px;
@@ -38,8 +38,8 @@
   --radius-xl:    24px;
 
   /* ── Typography ── */
-  --font-display: 'Syne', sans-serif;
-  --font-body:    'Outfit', sans-serif;
+  --font-display: 'Manrope', sans-serif;
+  --font-body:    'Manrope', sans-serif;
   --primary:      var(--red);
   --accent:       rgba(217, 4, 41, 0.06);
   --border-radius: var(--radius);
@@ -69,20 +69,148 @@
 
 /* ══ Dark Theme ═════════════════════════════ */
 .theme-dark {
-  --bg:           #1a1a1a;
-  --surface:      #2a2a2a;
-  --surface-2:    #3a3a3a;
-  --text:         #ffffff;
-  --text-muted:   rgba(255, 255, 255, 0.65);
-  --charcoal:     #2a2a2a;
-  --charcoal-2:   #3a3a3a;
-  --charcoal-3:   #4a4a4a;
-  --mid:          #555555;
-  --border:       #555555;
-  --muted:        rgba(255, 255, 255, 0.5);
-  --muted-light:  rgba(255, 255, 255, 0.6);
-  --red-muted:    rgba(217, 4, 41, 0.15);
-  --red-border:   rgba(217, 4, 41, 0.3);
+  color-scheme: dark;
+  --bg:           #202124;
+  --surface:      #282a2e;
+  --surface-2:    #303238;
+  --text:         #f3f4f6;
+  --text-muted:   #c1c5cc;
+  --red:          #ff2948;
+  --red-vivid:    #ff4d65;
+  --red-dark:     #ff4d65;
+  --charcoal:     #282a2e;
+  --charcoal-2:   #303238;
+  --charcoal-3:   #393c42;
+  --mid:          #4b4f57;
+  --border:       #454951;
+  --muted:        #c1c5cc;
+  --muted-light:  #b5bac3;
+  --red-muted:    rgba(255, 41, 72, 0.12);
+  --red-border:   rgba(255, 41, 72, 0.48);
+  --accent:       rgba(255, 83, 107, 0.12);
+  --shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow:       0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-md:    0 4px 8px rgba(0, 0, 0, 0.24);
+  --shadow-lg:    0 10px 20px rgba(0, 0, 0, 0.28);
+  --shadow-xl:    0 20px 32px rgba(0, 0, 0, 0.32);
+  --shadow-card:  0 4px 32px rgba(0, 0, 0, 0.24);
+  --shadow-nav:   0 1px 0 var(--border), 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+html { color-scheme: light; }
+html.theme-dark { color-scheme: dark; }
+
+html.theme-dark body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html.theme-dark input:not([type="checkbox"]):not([type="radio"]),
+html.theme-dark textarea,
+html.theme-dark select {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+html.theme-dark input::placeholder,
+html.theme-dark textarea::placeholder {
+  color: var(--muted-light);
+}
+
+html.theme-dark .site-navbar {
+  background: rgba(40, 42, 46, 0.96) !important;
+  border-color: var(--border) !important;
+}
+
+html.theme-dark .sd-wrap {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+html.theme-dark .sd-label { color: var(--text) !important; }
+html.theme-dark .sd-icon--produto,
+html.theme-dark .sd-icon--pesquisa { background: var(--surface-2) !important; color: var(--text-muted) !important; }
+html.theme-dark .sd-type-pill { background: var(--surface-2) !important; color: var(--text-muted) !important; }
+html.theme-dark .sd-footer { background: var(--surface-2) !important; }
+
+.navbar-search-control {
+  display: flex;
+  align-items: center;
+  width: clamp(170px, 16vw, 220px);
+  min-width: 150px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.navbar-search-control:hover,
+.navbar-search-control.is-focused {
+  border-color: var(--red);
+}
+
+.navbar-search-control.is-focused {
+  box-shadow: 0 0 0 3px var(--red-muted);
+}
+
+.navbar-search-icon {
+  flex: 0 0 auto;
+  margin-left: 13px;
+  color: var(--text-muted);
+}
+
+.navbar-search-input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px 10px 9px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  appearance: none;
+}
+
+.navbar-search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.navbar-search-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+@media (max-width: 1200px) {
+  .navbar-search-control {
+    width: clamp(150px, 19vw, 200px);
+  }
+}
+
+@media (max-width: 620px) {
+  .navbar-search-control {
+    width: min(42vw, 190px);
+    min-width: 0;
+  }
+}
+
+html.theme-dark .cookie-consent {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+html.theme-dark .cookie-consent p,
+html.theme-dark .cookie-consent button:not(:last-child) {
+  color: var(--text-muted) !important;
+}
+
+html.theme-dark .cookie-consent button:last-child {
+  background-color: var(--red) !important;
+  border-color: var(--red) !important;
+  color: #fff !important;
 }
 
 /* ══ Reset ══════════════════════════════════ */
@@ -264,7 +392,7 @@ body {
 
 .btn-secondary {
   background: transparent;
-  color: var(--white);
+  color: var(--text);
   border-color: var(--border);
 }
 
@@ -294,19 +422,24 @@ body {
 
 .page-hero h1 {
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 5vw, 4.5rem);
-  font-weight: 800;
-  letter-spacing: -0.06em;
-  line-height: 0.95;
+  max-width: 1000px;
+  font-size: clamp(2.25rem, 3.5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
   color: var(--red);
   margin-bottom: 1rem;
 }
 
+.page-hero .section-label {
+  letter-spacing: 1.5px;
+}
+
 .page-hero p {
-  max-width: 700px;
+  max-width: 62ch;
   color: var(--muted-light);
   font-size: 1rem;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 
 .page-grid {
@@ -345,16 +478,18 @@ body {
 
 .page-heading {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
-  letter-spacing: -0.04em;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  letter-spacing: -0.035em;
+  line-height: 1.25;
   margin-bottom: 0.75rem;
   color: var(--red);
 }
 
 .page-copy {
   color: var(--muted-light);
-  line-height: 1.85;
+  max-width: 62ch;
+  line-height: 1.7;
   font-size: 1rem;
 }
 
@@ -392,6 +527,23 @@ body {
 /* ══ Responsive helpers ══════════════════════ */
 @media (max-width: 768px) {
   :root { --section-v: 4rem; }
+
+  .page-hero {
+    padding: 3.5rem 1.25rem 2.5rem;
+  }
+
+  .page-hero h1 {
+    font-size: clamp(2rem, 7vw, 2.75rem);
+  }
+
+  .container {
+    padding: 0 1.25rem;
+  }
+
+  .page-grid-3,
+  .page-grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ══ KPI Components ═════════════════════════ */

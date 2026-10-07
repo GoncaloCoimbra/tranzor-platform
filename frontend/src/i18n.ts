@@ -33,6 +33,9 @@ i18n
     react: {
       useSuspense: false,
     },
+  })
+  .then(() => {
+    document.documentElement.lang = i18n.resolvedLanguage ?? i18n.language ?? 'pt';
   });
 
 // Keep document language and localStorage in sync with i18next

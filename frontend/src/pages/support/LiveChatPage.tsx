@@ -552,10 +552,7 @@ export default function LiveChatPage() {
       description={t('help.liveChatDescription')}
       canonical="/support/live-chat"
     >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-        .Tranzor-chat * { font-family: 'DM Sans', sans-serif; }
+      <style>{`        .Tranzor-chat * { font-family: 'Manrope', sans-serif; }
 
         @keyframes msgIn {
           from { opacity: 0; transform: translateY(8px); }

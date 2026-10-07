@@ -33,6 +33,39 @@ export interface ShopFiltersProps {
   totalProducts: number;
 }
 
+type FilterIconKind = 'sort' | 'category' | 'subcategory' | 'price' | 'brand' | 'features' | 'results';
+
+function FilterIcon({ kind }: { kind: FilterIconKind }) {
+  const common = {
+    width: 16,
+    height: 16,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'var(--red)',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true as const,
+  };
+
+  switch (kind) {
+    case 'category':
+      return <svg {...common}><path d="M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>;
+    case 'subcategory':
+      return <svg {...common}><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><path d="M8 12h8" /></svg>;
+    case 'price':
+      return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M15 8.5c-.6-.6-1.4-1-2.5-1-1.4 0-2.5.8-2.5 2s1.1 1.8 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1.1 0-2-.4-2.6-1" /><path d="M12.5 6v12" /></svg>;
+    case 'brand':
+      return <svg {...common}><path d="M20 13 13 20 4 11V4h7z" /><circle cx="8" cy="8" r="1" /></svg>;
+    case 'features':
+      return <svg {...common}><path d="M4 7h9M17 7h3M4 17h3M11 17h9" /><circle cx="15" cy="7" r="2" /><circle cx="9" cy="17" r="2" /></svg>;
+    case 'results':
+      return <svg {...common}><path d="M4 19V5M4 19h17" /><path d="m7 15 4-4 3 2 5-6" /></svg>;
+    default:
+      return <svg {...common}><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="8" cy="6" r="2" fill="var(--surface)" /><circle cx="15" cy="12" r="2" fill="var(--surface)" /><circle cx="10" cy="18" r="2" fill="var(--surface)" /></svg>;
+  }
+}
+
 export const ShopFilters: React.FC<ShopFiltersProps> = ({
   categories,
   selectedCategory,
@@ -91,7 +124,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
 
       {/* ORDENAÇÃO */}
       <div className="filter-section">
-        <h3>{t('shop.shopFilters.sortBy')}</h3>
+        <h3 className="filter-heading"><FilterIcon kind="sort" />{t('shop.shopFilters.sortBy')}</h3>
         <select
           className="sort-select"
           value={sortBy}
@@ -107,7 +140,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
 
       {/* CATEGORIAS */}
       <div className="filter-section">
-        <h3>{t('shop.shopFilters.categories')}</h3>
+        <h3 className="filter-heading"><FilterIcon kind="category" />{t('shop.shopFilters.categories')}</h3>
         <div className="filter-options">
           <label className={`filter-option ${!selectedCategory ? 'active' : ''}`}>
             <input
@@ -136,7 +169,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
       {/* SUBCATEGORIAS (Aparecem se categoria selecionada) */}
       {selectedCategory && subcategories.length > 0 && (
         <div className="filter-section">
-          <h3>{t('shop.shopFilters.subcategories')}</h3>
+          <h3 className="filter-heading"><FilterIcon kind="subcategory" />{t('shop.shopFilters.subcategories')}</h3>
           <div className="filter-options">
             <label className={`filter-option ${!selectedSubcategory ? 'active' : ''}`}>
               <input
@@ -164,7 +197,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
 
       {/* FAIXA DE PREÇO */}
       <div className="filter-section">
-        <h3>{t('shop.shopFilters.priceRange')}</h3>
+        <h3 className="filter-heading"><FilterIcon kind="price" />{t('shop.shopFilters.priceRange')}</h3>
         <div className="price-range">
           <label>
             {t('shop.shopFilters.minPrice')}
@@ -200,7 +233,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
       {/* MARCAS */}
       {brands.length > 0 && (
         <div className="filter-section">
-          <h3>{t('shop.shopFilters.brands')}</h3>
+          <h3 className="filter-heading"><FilterIcon kind="brand" />{t('shop.shopFilters.brands')}</h3>
           <div className="filter-options">
             {brands.slice(0, 8).map((brand) => (
               <label key={brand} className="filter-option">
@@ -236,7 +269,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
       {/* TAGS */}
       {tags.length > 0 && (
         <div className="filter-section">
-          <h3>{t('shop.shopFilters.characteristics')}</h3>
+          <h3 className="filter-heading"><FilterIcon kind="features" />{t('shop.shopFilters.characteristics')}</h3>
           <div className="filter-tags">
             {tags.slice(0, 10).map((tag) => (
               <button
@@ -253,10 +286,10 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
 
       {/* RESUMO DE RESULTADOS */}
       <div className="filter-summary">
-        <p>{t('shop.shopFilters.filterSummary', { count: totalProducts })}</p>
-        {selectedCategory && <p>{t('shop.shopFilters.filterSummaryCategory', { category: selectedCategory })}</p>}
-        {selectedSubcategory && <p>{t('shop.shopFilters.filterSummarySubcategory', { subcategory: selectedSubcategory })}</p>}
-        {selectedBrands.length > 0 && <p>{t('shop.shopFilters.filterSummaryBrands', { count: selectedBrands.length })}</p>}
+        <p className="filter-summary-row"><FilterIcon kind="results" />{t('shop.shopFilters.filterSummary', { count: totalProducts })}</p>
+        {selectedCategory && <p className="filter-summary-row"><FilterIcon kind="category" />{t('shop.shopFilters.filterSummaryCategory', { category: selectedCategory })}</p>}
+        {selectedSubcategory && <p className="filter-summary-row"><FilterIcon kind="subcategory" />{t('shop.shopFilters.filterSummarySubcategory', { subcategory: selectedSubcategory })}</p>}
+        {selectedBrands.length > 0 && <p className="filter-summary-row"><FilterIcon kind="brand" />{t('shop.shopFilters.filterSummaryBrands', { count: selectedBrands.length })}</p>}
       </div>
     </aside>
   );

@@ -3,7 +3,6 @@ import "../styles/theme.css";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import CookieBanner from "../components/layout/CookieBanner";
-import { useAuthStore } from "../store/authStore";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -73,20 +72,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, title, description, can
     window.scrollTo(0, 0);
   }, [title, description, canonical, structuredData]);
 
-  const user = useAuthStore(state => state.user);
-
   useEffect(() => {
     const html = document.documentElement;
     const darkMode = localStorage.getItem('darkMode') === 'true';
-    // Only apply dark theme for authenticated users who opted in.
-    if (bare) {
-      html.classList.remove('theme-dark');
-    } else if (user && darkMode) {
-      html.classList.add('theme-dark');
-    } else {
-      html.classList.remove('theme-dark');
-    }
-  }, [bare, user]);
+    html.classList.toggle('theme-dark', darkMode);
+  }, []);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>

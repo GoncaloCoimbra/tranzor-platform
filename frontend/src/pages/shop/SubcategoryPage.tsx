@@ -391,46 +391,46 @@ export default function SubcategoryPage() {
       {/* Hero section (igual ao seu código original) */}
       <section style={{
         position: 'relative', padding: '4rem 2rem 3rem',
-        borderBottom: '1px solid rgba(0,0,0,0.08)', background: '#fff', overflow: 'hidden',
+        borderBottom: '1px solid var(--border)', background: 'var(--bg)', overflow: 'hidden',
       }}>
         <div aria-hidden style={{
           position: 'absolute', inset: 0,
-          backgroundImage: `linear-gradient(rgba(217,4,41,0.04) 1px, transparent 1px),linear-gradient(90deg,rgba(217,4,41,0.04) 1px,transparent 1px)`,
+          backgroundImage: `linear-gradient(var(--accent) 1px, transparent 1px),linear-gradient(90deg,var(--accent) 1px,transparent 1px)`,
           backgroundSize: '72px 72px',
         }} />
         <div aria-hidden style={{
           position: 'absolute', top: '-20%', right: '-8%',
           width: 420, height: 420,
-          background: 'radial-gradient(circle,rgba(217,4,41,0.07) 0%,transparent 65%)',
+          background: 'radial-gradient(circle,var(--red-muted) 0%,transparent 65%)',
           pointerEvents: 'none',
         }} />
         <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
-          <nav style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '1.5rem', fontSize: 12, color: '#999' }}>
-            <Link to="/shop" style={{ color: '#D90429', textDecoration: 'none', fontWeight: 600 }}>{t('nav.shop')}</Link>
+          <nav style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '1.5rem', fontSize: 12, color: 'var(--text-muted)' }}>
+            <Link to="/shop" style={{ color: 'var(--red)', textDecoration: 'none', fontWeight: 600 }}>{t('nav.shop')}</Link>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M9 18l6-6-6-6"/></svg>
-            <Link to={`/shop/category/${subcategory}`} style={{ color: '#D90429', textDecoration: 'none', fontWeight: 600 }}>{label}</Link>
+            <Link to={`/shop/category/${subcategory}`} style={{ color: 'var(--red)', textDecoration: 'none', fontWeight: 600 }}>{label}</Link>
             {sub && (
               <>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M9 18l6-6-6-6"/></svg>
-                <span style={{ color: '#111', fontWeight: 600 }}>{sub}</span>
+                <span style={{ color: 'var(--text)', fontWeight: 600 }}>{sub}</span>
               </>
             )}
             {type && (
               <>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M9 18l6-6-6-6"/></svg>
-                <span style={{ color: '#111', fontWeight: 600 }}>{type}</span>
+                <span style={{ color: 'var(--text)', fontWeight: 600 }}>{type}</span>
               </>
             )}
           </nav>
           <h1 style={{
-            fontFamily: 'var(--font-display, "Syne", sans-serif)', fontWeight: 700,
+            fontFamily: 'var(--font-display, "Manrope", sans-serif)', fontWeight: 700,
             fontSize: 'clamp(2rem,4vw,3rem)', lineHeight: 1.1,
-            color: '#111', letterSpacing: -0.5, marginBottom: '1rem',
+            color: 'var(--text)', letterSpacing: -0.5, marginBottom: '1rem',
           }}>
             {sub || type || label.split(' ')[0]}{' '}
-            <span style={{ color: '#D90429' }}>{sub ? '' : (type || label.split(' ').slice(1).join(' ') || '')}</span>
+            <span style={{ color: 'var(--red)' }}>{sub ? '' : (type || label.split(' ').slice(1).join(' ') || '')}</span>
           </h1>
-          <p style={{ fontSize: 15, color: '#666', lineHeight: 1.7, maxWidth: 500, margin: 0 }}>
+          <p style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: 500, margin: 0 }}>
             {sub ? t('shop.categoryPage.subcategoryDescription', { sub }) : type ? t('shop.categoryPage.typeDescription', { type }) : t('shop.categoryPage.collectionDescription', { label: label.toLowerCase() })}
           </p>
         </div>
@@ -438,7 +438,7 @@ export default function SubcategoryPage() {
 
       {/* Corpo com filtros e produtos */}
       <div style={{
-        maxWidth: 1400, margin: '0 auto', padding: '2rem 2rem 5rem',
+        maxWidth: 1400, margin: '0 auto', padding: '2rem 2rem 5rem', background: 'var(--bg)',
         display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2rem',
       }}>
         <aside style={{ position: 'sticky', top: '20px', alignSelf: 'start' }}>
@@ -452,13 +452,13 @@ export default function SubcategoryPage() {
 
         <main>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 12 }}>
-            <span style={{ fontSize: 13, color: '#666' }}>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
               {loading ? t('common.loading') : t('shop.categoryPage.resultsCount', { count: filteredProducts.length })}
             </span>
             <select style={{
-              fontSize: 12, fontWeight: 600, color: '#111',
-              border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8,
-              padding: '7px 12px', background: '#fff', cursor: 'pointer',
+              fontSize: 12, fontWeight: 600, color: 'var(--text)',
+              border: '1px solid var(--border)', borderRadius: 8,
+              padding: '7px 12px', background: 'var(--surface)', cursor: 'pointer',
             }}>
               <option>{t('shop.shopFilters.sortBy')}: {t('shop.shopFilters.sortRelevance')}</option>
               <option>{t('shop.shopFilters.sortPriceAsc')}</option>
@@ -469,15 +469,15 @@ export default function SubcategoryPage() {
 
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}>
-              <div style={{ width: 40, height: 40, border: '3px solid #f0f0f0', borderTopColor: '#D90429', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTopColor: 'var(--red)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: '#fafafa', borderRadius: 20 }}>
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5">
+            <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--surface)', borderRadius: 20 }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
-              <p style={{ marginTop: 16, color: '#888' }}>{t('shop.categoryPage.noProducts')}</p>
-              <button onClick={() => updateFilters({ price: [0, 500] })} style={{ marginTop: 12, padding: '8px 20px', background: '#D90429', color: '#fff', border: 'none', borderRadius: 99, cursor: 'pointer' }}>
+              <p style={{ marginTop: 16, color: 'var(--text-muted)' }}>{t('shop.categoryPage.noProducts')}</p>
+              <button onClick={() => updateFilters({ price: [0, 500] })} style={{ marginTop: 12, padding: '8px 20px', background: 'var(--red)', color: '#fff', border: 'none', borderRadius: 99, cursor: 'pointer' }}>
                 {t('shop.shopFilters.clearFilters')}
               </button>
             </div>
@@ -490,7 +490,7 @@ export default function SubcategoryPage() {
               {filteredProducts.map(product => (
                 <Link key={product.id} to={`/shop/product/${product.id}`} style={{ textDecoration: 'none' }}>
                   <article style={{
-                    background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+                    background: 'var(--surface)', border: '1px solid var(--border)',
                     borderRadius: 12, overflow: 'hidden',
                     transition: 'box-shadow 0.2s, transform 0.2s',
                     height: '100%', display: 'flex', flexDirection: 'column',
@@ -505,7 +505,7 @@ export default function SubcategoryPage() {
                     }}
                   >
                     <div style={{
-                      height: 160, background: 'linear-gradient(135deg,#f5f5f5,#eaeaea)',
+                      height: 160, background: 'linear-gradient(135deg,var(--surface-2),var(--charcoal-3))',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       position: 'relative',
                     }}>
@@ -516,15 +516,15 @@ export default function SubcategoryPage() {
                       {product.badge && (
                         <span style={{
                           position: 'absolute', top: 10, left: 10,
-                          background: product.badge === 'Sale' ? '#D90429' : '#059669',
+                          background: product.badge === 'Sale' ? 'var(--red)' : '#059669',
                           color: '#fff', fontSize: 10, fontWeight: 700,
                           padding: '3px 8px', borderRadius: 99,
                         }}>{product.badge}</span>
                       )}
                     </div>
                     <div style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                      <p style={{ fontWeight: 700, fontSize: 13, color: '#111', marginBottom: 6 }}>{product.name}</p>
-                      <p style={{ fontSize: 15, fontWeight: 800, color: '#D90429', marginTop: 'auto' }}>{product.price}</p>
+                      <p style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>{product.name}</p>
+                      <p style={{ fontSize: 15, fontWeight: 800, color: 'var(--red)', marginTop: 'auto' }}>{product.price}</p>
                     </div>
                   </article>
                 </Link>

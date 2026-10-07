@@ -350,22 +350,23 @@ export default function Navbar() {
         style={{
           position: 'sticky', top: 0, left: 0, right: 0, zIndex: 1000,
           transition: 'all 0.35s cubic-bezier(.22,1,.36,1)',
-          background: scrolled ? 'rgba(255,255,255,0.98)' : '#ffffff',
+          background: scrolled ? 'var(--bg)' : 'var(--bg)',
           backdropFilter: 'blur(16px)',
-          borderBottom: '1px solid rgba(0,0,0,0.06)',
-          boxShadow: scrolled ? '0 8px 24px rgba(0,0,0,0.06)' : 'none',
+          borderBottom: '1px solid var(--border)',
+          boxShadow: scrolled ? 'var(--shadow-nav)' : 'none',
         }}
         aria-label={t('nav.mainNavigation')}
+        className="site-navbar"
       >
         <div style={{
-          maxWidth: 1280, margin: '0 auto', padding: '0 1.6rem',
+          maxWidth: 'none', width: '100%', margin: '0 auto', padding: '0 clamp(1rem, 3vw, 2.5rem)',
           height: 72, display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', gap: 24,
+          justifyContent: 'space-between', gap: 16,
         }}>
 
           {/* LOGO */}
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-            <img src="https://apcergroup.com/images/site/images/Newsroom/TRANZOR.png" alt="Tranzor" style={{ height: 40, width: 'auto', objectFit: 'contain' }} />
+          <Link to="/" aria-label="Tranzor — início" style={{ display: 'flex', alignItems: 'center', flexShrink: 0, textDecoration: 'none', color: 'var(--red)', fontFamily: 'var(--font-display)', fontSize: 21, fontWeight: 800, letterSpacing: '-0.06em' }}>
+            Tranzor
           </Link>
 
           {/* LINKS DESKTOP */}
@@ -413,8 +414,8 @@ export default function Navbar() {
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 background: 'var(--red)', color: 'var(--white)', textDecoration: 'none',
                 fontFamily: 'var(--font-display)', fontWeight: 700,
-                fontSize: 12, letterSpacing: 0.8, textTransform: 'uppercase',
-                padding: '12px 22px', borderRadius: '999px',
+                fontSize: 12, letterSpacing: '0.02em', textTransform: 'uppercase',
+                padding: '12px 18px', borderRadius: '999px', whiteSpace: 'nowrap', flexShrink: 0,
                 border: '1px solid var(--red)',
                 boxShadow: '0 10px 30px rgba(217,4,41,0.18)',
                 transition: 'background 0.2s, transform 0.2s',
@@ -430,19 +431,14 @@ export default function Navbar() {
 
             {/* PESQUISA */}
             <div style={{ position: 'relative' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center',
-                border: `1.5px solid ${searchFocus ? '#D90429' : 'rgba(217,4,41,0.18)'}`,
-                borderRadius: 999, background: 'rgba(255,255,255,0.97)',
-                transition: 'border-color 0.2s, box-shadow 0.2s',
-                boxShadow: searchFocus ? '0 0 0 3px rgba(217,4,41,0.08)' : 'none',
-              }}>
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" style={{ marginLeft: 12, flexShrink: 0 }} aria-hidden>
+              <div className={`navbar-search-control${searchFocus ? ' is-focused' : ''}`}>
+                <svg className="navbar-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
                   <circle cx="7" cy="7" r="5"/><line x1="11" y1="11" x2="14" y2="14"/>
                 </svg>
                 <input
                   ref={searchRef}
                   type="search"
+                  className="navbar-search-input"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocus(true)}
@@ -452,15 +448,10 @@ export default function Navbar() {
                   aria-label={t('nav.searchAriaLabel')}
                   aria-autocomplete="list"
                   aria-expanded={showDropdown}
-                  style={{
-                    width: 190, padding: '10px 14px 10px 8px',
-                    background: 'transparent', border: 'none', outline: 'none',
-                    color: 'var(--text)', fontFamily: 'inherit', fontSize: 13,
-                  }}
                 />
                 {searchQuery && (
                   <button onClick={() => { setSearchQuery(''); searchRef.current?.focus(); }} aria-label={t('nav.clearSearch')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px 0 0', color: '#aaa', display: 'flex', alignItems: 'center' }}>
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px 0 0', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
                       <line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/>
                     </svg>
@@ -512,7 +503,7 @@ export default function Navbar() {
                       <p style={{ margin: 0, fontSize: 12, color: '#666', lineHeight: 1.4 }}>{t('nav.cartReminderBody')}</p>
                     </div>
                   </div>
-                  <Link to="/cart" onClick={handleCartClick} style={{ display: 'block', marginTop: 10, background: '#d90429', color: 'white', textAlign: 'center', padding: '8px', borderRadius: 8, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', textDecoration: 'none' }}>{t('nav.viewCart')} →</Link>
+                  <Link to="/cart" onClick={handleCartClick} style={{ display: 'block', marginTop: 10, background: '#d90429', color: 'white', textAlign: 'center', padding: '8px', borderRadius: 8, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 11, letterSpacing: '0.02em', textTransform: 'uppercase', textDecoration: 'none' }}>{t('nav.viewCart')} →</Link>
                 </div>
               )}
 
@@ -528,7 +519,7 @@ export default function Navbar() {
                       <p style={{ margin: 0, fontSize: 12, color: '#666', lineHeight: 1.4 }}>{t('nav.cartReminderBodyAlt', { count: itemCount })}</p>
                     </div>
                   </div>
-                  <Link to="/cart" onClick={handleCartClick} style={{ display: 'block', marginTop: 10, background: '#d90429', color: 'white', textAlign: 'center', padding: '8px', borderRadius: 8, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', textDecoration: 'none' }}>{t('nav.viewCart')} →</Link>
+                  <Link to="/cart" onClick={handleCartClick} style={{ display: 'block', marginTop: 10, background: '#d90429', color: 'white', textAlign: 'center', padding: '8px', borderRadius: 8, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 11, letterSpacing: '0.02em', textTransform: 'uppercase', textDecoration: 'none' }}>{t('nav.viewCart')} →</Link>
                 </div>
               )}
             </div>
@@ -573,13 +564,13 @@ export default function Navbar() {
         <div style={{ height: 1, background: 'rgba(217,4,41,0.12)' }} />
         <Link to="/account/orders" style={{ color: '#555', textDecoration: 'none', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15 }}>{t('nav.orders')}</Link>
         <Link to="/account/profile" style={{ color: '#555', textDecoration: 'none', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15 }}>{t('nav.profile')}</Link>
-        <Link to="/shop" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '16px 20px', borderRadius: '999px', border: '1px solid var(--red)', background: 'var(--red)', color: 'var(--white)', textDecoration: 'none', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, letterSpacing: 0.8, textTransform: 'uppercase' }}>{t('nav.shopCta')} →</Link>
+        <Link to="/shop" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '16px 20px', borderRadius: '999px', border: '1px solid var(--red)', background: 'var(--red)', color: 'var(--white)', textDecoration: 'none', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, letterSpacing: '0.02em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{t('nav.shopCta')} →</Link>
       </div>
 
       {/* ESTILOS */}
       <style>{`
         .sd-wrap { position:absolute; top:calc(100% + 10px); left:50%; transform:translateX(-50%); width:380px; background:#ffffff; border:1.5px solid #e8e8e8; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.12),0 4px 16px rgba(217,4,41,0.06); overflow:hidden; animation:sdIn 0.2s cubic-bezier(.22,1,.36,1); z-index:3000; }
-        .sd-section-label { padding:10px 14px 6px; font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa; border-bottom:1px solid #f0f0f0; }
+        .sd-section-label { padding:10px 14px 6px; font-family:'Manrope',sans-serif; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#aaa; border-bottom:1px solid #f0f0f0; }
         .sd-item { width:100%; display:flex; align-items:center; gap:10px; padding:10px 14px; background:none; border:none; cursor:pointer; text-align:left; transition:background 0.15s; border-bottom:1px solid #f7f7f7; }
         .sd-item:last-of-type { border-bottom:none; }
         .sd-item:hover, .sd-item--active { background:rgba(217,4,41,0.04); }
@@ -587,19 +578,19 @@ export default function Navbar() {
         .sd-icon--categoria { background:rgba(217,4,41,0.08); color:#D90429; }
         .sd-icon--produto { background:rgba(0,0,0,0.05); color:#444; }
         .sd-icon--pesquisa { background:rgba(0,0,0,0.04); color:#888; }
-        .sd-label { flex:1; min-width:0; font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:500; color:#111; display:flex; flex-direction:column; gap:1px; }
+        .sd-label { flex:1; min-width:0; font-family:'Manrope',sans-serif; font-size:13.5px; font-weight:500; color:#111; display:flex; flex-direction:column; gap:1px; }
         .sd-cat { font-size:11px; font-weight:400; color:#aaa; }
-        .sd-type-pill { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 7px; border-radius:99px; background:#f3f3f3; color:#999; white-space:nowrap; }
+        .sd-type-pill { font-family:'Manrope',sans-serif; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 7px; border-radius:99px; background:#f3f3f3; color:#999; white-space:nowrap; }
         .sd-item--active .sd-type-pill { background:rgba(217,4,41,0.08); color:#D90429; }
-        .sd-footer { display:flex; align-items:center; gap:7px; padding:10px 14px; font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:#D90429; text-decoration:none; background:rgba(217,4,41,0.03); border-top:1px solid #f0f0f0; transition:background 0.15s; width:100%; border:none; border-top:1px solid #f0f0f0; cursor:pointer; }
+        .sd-footer { display:flex; align-items:center; gap:7px; padding:10px 14px; font-family:'Manrope',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:#D90429; text-decoration:none; background:rgba(217,4,41,0.03); border-top:1px solid #f0f0f0; transition:background 0.15s; width:100%; border:none; border-top:1px solid #f0f0f0; cursor:pointer; }
         .sd-footer:hover { background:rgba(217,4,41,0.07); }
-        .sd-empty { padding:28px 20px; display:flex; flex-direction:column; align-items:center; gap:10px; font-family:'DM Sans',sans-serif; font-size:13px; color:#aaa; text-align:center; }
-        .sd-search-all { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.5px; color:#D90429; text-decoration:none; background:none; border:none; cursor:pointer; margin-top:4px; }
+        .sd-empty { padding:28px 20px; display:flex; flex-direction:column; align-items:center; gap:10px; font-family:'Manrope',sans-serif; font-size:13px; color:#aaa; text-align:center; }
+        .sd-search-all { font-family:'Manrope',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.5px; color:#D90429; text-decoration:none; background:none; border:none; cursor:pointer; margin-top:4px; }
         .sd-search-all:hover { text-decoration:underline; }
         @keyframes sdIn { from { opacity:0; transform:translateX(-50%) translateY(-6px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
         @keyframes badgePop { from { transform:scale(0.4); opacity:0; } to { transform:scale(1); opacity:1; } }
         @keyframes reminderIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-        @media (max-width: 960px) { .desktop-nav { display:none !important; } .burger-btn { display:flex !important; } .nav-actions { gap:12px !important; } .sd-wrap { width:320px; } }
+        @media (max-width: 1200px) { .desktop-nav { display:none !important; } .burger-btn { display:flex !important; } .nav-actions { gap:12px !important; } .sd-wrap { width:320px; } }
         @media (max-width: 620px) { .nav-actions { gap:10px !important; } .sd-wrap { width:290px; left:auto; right:0; transform:none; } }
         @media (prefers-reduced-motion: reduce) { nav, .burger-btn span, .mobile-drawer, .sd-wrap { transition:none !important; animation:none !important; } }
       `}</style>

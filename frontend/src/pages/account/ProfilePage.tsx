@@ -165,7 +165,7 @@ export default function ProfilePage() {
 	const [loading, setLoading] = useState(false);
 	const [pageLoading, setPageLoading] = useState(true);
 	const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-	const [darkMode, setDarkMode] = useState(false);
+	const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
 	const [language, setLanguage] = useState<'pt' | 'en' | 'es'>('pt');
 	const [notifications, setNotifications] = useState<Notifications>({
 		email: true,
@@ -177,10 +177,6 @@ export default function ProfilePage() {
 	// ── Load initial data ────────────────────────────────────────────────────
 
 	useEffect(() => {
-		const savedDark = localStorage.getItem('darkMode') === 'true';
-		setDarkMode(savedDark);
-		applyDarkMode(savedDark);
-
 		const savedLang = localStorage.getItem('site-language') as 'pt' | 'en' | 'es' | null;
 		if (savedLang) {
 			setLanguage(savedLang);
@@ -390,7 +386,7 @@ export default function ProfilePage() {
 				</div>
 				<div className="profile-field" style={{ marginTop: '1.5rem' }}>
 					<label className="profile-label">{t('account.profile.preferences.language.title')}</label>
-					<p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.75rem' }}>
+					<p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
 						{t('account.profile.preferences.language.description')}
 					</p>
 					<select
@@ -400,11 +396,11 @@ export default function ProfilePage() {
 							width: '100%',
 							padding: '0.75rem',
 							borderRadius: '0.5rem',
-							border: '1px solid rgba(0,0,0,0.15)',
+							border: '1px solid var(--border)',
 							fontSize: '0.9375rem',
 							fontFamily: 'inherit',
 							cursor: 'pointer',
-							backgroundColor: '#fff',
+							backgroundColor: 'var(--surface)',
 						}}
 					>
 						<option value="pt">{t('account.profile.preferences.language.languages.pt')}</option>

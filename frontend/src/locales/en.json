@@ -56,7 +56,18 @@
     "searchInCategory": "in {{category}}",
     "searchInternalPage": "Internal page",
     "searchInternal": "Page",
-    "searchSeeAllResults": "See all results for \"{{query}}\""
+    "searchSeeAllResults": "See all results for \"{{query}}\"",
+    "recent": "Recently viewed",
+    "openMenu": "Open menu",
+    "mainNavigation": "Main navigation",
+    "cartReminderTitle": "You have {{count}} item{{count, plural, one{} other{s}}} in your cart!",
+    "cartReminderBody": "Don't forget to complete your purchase.",
+    "viewCart": "View cart",
+    "cartReminderTitleAlt": "Cart reminder",
+    "cartReminderBodyAlt": "You still have {{count}} item{{count, plural, one{} other{s}}} in your cart.",
+    "profileAriaLabel": "My profile",
+    "accountAriaLabel": "Sign in or create an account",
+    "recentlyViewed": "Recently viewed"
   },
   "account": {
     "profile": {
@@ -93,7 +104,7 @@
       "preferences": {
         "darkMode": {
           "title": "Dark mode",
-          "description": "A darker theme for a more comfortable experience."
+          "description": "Switch to the charcoal theme. Light mode remains the default."
         },
         "language": {
           "title": "Preferred language",
@@ -415,28 +426,28 @@
       "recentlyViewedLink": "View recently viewed products"
     },
     "shopFilters": {
-      "filterTitle": "🎯 Filters",
+      "filterTitle": "Filters",
       "clearFilters": "✕ Clear",
-      "sortBy": "📊 Sort by",
+      "sortBy": "Sort by",
       "sortRelevance": "Relevance",
       "sortPriceAsc": "Price: Low → High",
       "sortPriceDesc": "Price: High → Low",
-      "sortRating": "Rating (⭐)",
+      "sortRating": "Rating",
       "sortNewest": "Newest",
-      "categories": "📂 Categories",
+      "categories": "Categories",
       "allCategories": "All Categories",
-      "subcategories": "📁 Subcategories",
+      "subcategories": "Subcategories",
       "allSubcategories": "All",
-      "priceRange": "💰 Price Range",
+      "priceRange": "Price Range",
       "minPrice": "Min: €",
       "maxPrice": "Max: €",
-      "brands": "🏷️ Brands",
+      "brands": "Brands",
       "viewMoreBrands": "See more brands ({{count}})",
-      "characteristics": "🏷️ Characteristics",
-      "filterSummary": "📊 {{count}} product(s) found",
-      "filterSummaryCategory": "📂 {{category}}",
-      "filterSummarySubcategory": "📁 {{subcategory}}",
-      "filterSummaryBrands": "🏷️ {{count}} brand(s)"
+      "characteristics": "Characteristics",
+      "filterSummary": "{{count}} product(s) found",
+      "filterSummaryCategory": "{{category}}",
+      "filterSummarySubcategory": "{{subcategory}}",
+      "filterSummaryBrands": "{{count}} brand(s)"
     }
   },
   "home": {
@@ -446,6 +457,8 @@
     "heroLine2": "inspires",
     "heroLine3": "with its own identity.",
     "heroBody": "More than {{count}} references from the best global brands. We deliver across Portugal — or visit us in person at our physical stores.",
+    "heroBadgeYears": "years",
+    "heroBadgeLocation": "in Portugal",
     "seoTitle": "Tranzor — Office, School and Stationery Supplies in Portugal",
     "seoDescription": "More than 25,000 stationery, office, school and technology products. Delivery across Portugal. Stores in Lisbon and Porto.",
     "seoOgTitle": "Tranzor — Office Supplies and Stationery",
@@ -618,22 +631,6 @@
     "submitButton": "Send message",
     "supportTitle": "Personalized support",
     "supportBody": "Our team prepares objective proposals with clear timelines, fair costs and dedicated support from the first contact."
-  },
-  "footer": {
-    "description": "Office, school and stationery supplies in Portugal with a practical and modern offer.",
-    "shopTitle": "Shop",
-    "catalog": "Catalog",
-    "promotions": "Promotions",
-    "schoolSupplies": "School supplies",
-    "companyTitle": "Company",
-    "about": "About us",
-    "contact": "Contact",
-    "faq": "FAQ",
-    "legalTitle": "Legal",
-    "privacy": "Privacy",
-    "terms": "Terms",
-    "cookies": "Cookies",
-    "copyright": "All rights reserved."
   },
   "privacy": {
     "pageTitle": "Privacy Policy",
@@ -851,111 +848,6 @@
     "completeOrder": "Complete Order",
     "orderPlaced": "Order Placed Successfully"
   },
-  "shop": {
-    "recentlyViewed": {
-      "pageTitle": "Recently viewed — Tranzor",
-      "pageDescription": "Pick up where you left off with the products you recently explored.",
-      "historyEyebrow": "History",
-      "titlePart1": "Recently",
-      "titlePart2": "Viewed",
-      "description": "Resume your browsing flow — the items you visited are here to support your decision.",
-      "emptyTitle": "You have not visited any products yet",
-      "emptyBody": "Explore the store and the products you visit will appear here.",
-      "exploreShop": "Explore the store",
-      "viewProduct": "View product",
-      "continueExploring": "Continue exploring the store",
-      "sampleItems": {
-        "caderno": { "name": "A4 ruled notebook", "category": "School", "time": "5 min ago" },
-        "pen": { "name": "Blue gel pen", "category": "Writing", "time": "20 min ago" },
-        "folder": { "name": "File folder", "category": "Organization", "time": "1 hour ago" }
-      }
-    },
-    "newArrivals": {
-      "pageTitle": "New arrivals — Tranzor",
-      "pageDescription": "Discover the latest launches from Tranzor. Fresh products added regularly.",
-      "eyebrow": "Just arrived",
-      "titlePart1": "New",
-      "titlePart2": "Arrivals",
-      "description": "The newest products added in recent days. Be the first to discover them.",
-      "stats": {
-        "newThisWeek": "New this week",
-        "categories": "Categories",
-        "fastShipping": "Fast delivery"
-      },
-      "filters": {
-        "all": "All",
-        "school": "School",
-        "writing": "Writing",
-        "organization": "Organization",
-        "planning": "Planning"
-      },
-      "badges": {
-        "new": "New",
-        "featured": "Featured"
-      },
-      "daysAgo": "{{count}}d",
-      "sampleItems": {
-        "executive": { "name": "Executive notebook", "category": "School", "price": "€8,90" },
-        "planner": { "name": "Planner diary", "category": "Writing", "price": "€5,50" },
-        "file": { "name": "A4 suspension file", "category": "Organization", "price": "€12,00" },
-        "markers": { "name": "Dual markers", "category": "Writing", "price": "€7,80" },
-        "agenda": { "name": "2025 agenda", "category": "Planning", "price": "€14,90" },
-        "clips": { "name": "Metal clips 100 pcs", "category": "Organization", "price": "€2,30" }
-      }
-    },
-    "productDetail": {
-      "pageTitle": "Product — Tranzor",
-      "pageDescription": "Discover Tranzor products with details, pricing and purchase options.",
-      "loading": "Loading product…",
-      "cartAdded": "{{quantity}} unit(s) of \"{{name}}\" added to the cart!",
-      "compare": {
-        "open": "Open comparator",
-        "compare": "Compare products"
-      },
-      "relatedProducts": {
-        "pilot": { "name": "Pilot G-2 0.7mm pen" },
-        "notebook": { "name": "Oxford A4 notebook 200 sheets" },
-        "markers": { "name": "Stabilo Boss markers" },
-        "paper": { "name": "Navigator A4 paper 500 sheets" }
-      },
-      "trust": {
-        "fastDelivery": {
-          "title": "Fast delivery",
-          "copy": "Delivery in up to 48 hours to mainland Portugal."
-        },
-        "securePayment": {
-          "title": "Secure payment",
-          "copy": "Secure transactions with validation and dedicated support."
-        },
-        "easyReturns": {
-          "title": "Easy returns",
-          "copy": "Up to 30 days to exchange or return with ease."
-        }
-      },
-      "errors": {
-        "invalidProductId": "Invalid product ID",
-        "loadProduct": "Could not load the product",
-        "notFound": "Product not found",
-        "updateFavorites": "Could not update favorites."
-      },
-      "ratingLabel": "{{rating}} out of 5 stars",
-      "reviewsCount": "{{count}} reviews",
-      "b2bPrice": "B2B price -{{rate}}%",
-      "quantity": {
-        "decrease": "Decrease quantity",
-        "increase": "Increase quantity"
-      },
-      "favorite": {
-        "add": "Add to favorites",
-        "remove": "Remove from favorites",
-        "updating": "Updating…"
-      },
-      "faqs": "View FAQs",
-      "relatedHeading": "Related products",
-      "viewMore": "View more →",
-      "recentlyViewedLink": "View recently viewed products"
-    }
-  },
   "admin": {
     "dashboard": "Dashboard",
     "orders": "Orders",
@@ -992,7 +884,18 @@
     "privacy": "Privacy",
     "terms": "Terms of Service",
     "cookies": "Cookies",
-    "company": "© 2025 Tranzor. All rights reserved."
+    "company": "© 2025 Tranzor. All rights reserved.",
+    "description": "Office, school and stationery supplies in Portugal with a practical and modern offer.",
+    "shopTitle": "Shop",
+    "catalog": "Catalog",
+    "promotions": "Promotions",
+    "schoolSupplies": "School supplies",
+    "companyTitle": "Company",
+    "about": "About us",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "legalTitle": "Legal",
+    "copyright": "All rights reserved."
   },
   "navbar": {
     "categories": "Arts",

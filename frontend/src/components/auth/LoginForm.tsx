@@ -266,7 +266,7 @@ export function AuthStyles() {
         background: var(--red); color: white;
         border: none; border-radius: 10px; cursor: pointer;
         font-family: var(--font-display); font-weight: 700;
-        font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;
+        font-size: 13px; letter-spacing: 0.02em; text-transform: uppercase;
         display: flex; align-items: center; justify-content: center; gap: 10px;
         transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
         box-shadow: 0 4px 20px rgba(217,4,41,0.25);
@@ -308,7 +308,7 @@ export function AuthStyles() {
       .auth-divider {
         display: flex; align-items: center; gap: 12px; color: var(--muted);
         font-family: var(--font-display); font-size: 11px;
-        text-transform: uppercase; letter-spacing: 1px;
+        text-transform: uppercase; letter-spacing: 0.02em;
       }
       .auth-divider::before, .auth-divider::after {
         content: ''; flex: 1; height: 1px; background: var(--border);

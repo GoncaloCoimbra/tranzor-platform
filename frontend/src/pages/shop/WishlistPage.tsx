@@ -101,7 +101,7 @@ export default function WishlistPage() {
 	if (!user) {
 		return (
 			<AppLayout title="Lista de Desejos" description="Aceda à sua lista de produtos favoritos." canonical="/shop/wishlist">
-				<section className="page-hero" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
+				<section className="page-hero" style={{ background: 'linear-gradient(135deg, var(--red-dark), var(--red))' }}>
 					<h1 style={{ color: 'white' }}>Minha Lista de Desejos</h1>
 					<p className="page-copy" style={{ color: 'rgba(255,255,255,0.9)' }}>
 						Faça login para guardar produtos favoritos e aceder à sua lista pessoal.
@@ -128,7 +128,7 @@ export default function WishlistPage() {
 	if (loading) {
 		return (
 			<AppLayout title="Lista de Desejos" description="Aceda à sua lista de produtos favoritos." canonical="/shop/wishlist">
-				<section className="page-hero" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
+				<section className="page-hero" style={{ background: 'linear-gradient(135deg, var(--red-dark), var(--red))' }}>
 					<h1 style={{ color: 'white' }}>Minha Lista de Desejos</h1>
 					<p className="page-copy" style={{ color: 'rgba(255,255,255,0.9)' }}>
 						A carregar os seus favoritos...
@@ -168,11 +168,11 @@ export default function WishlistPage() {
 					Adicionado em {item.dateAdded || '—'}
 				</div>
 				<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', marginTop: 'auto' }}>
-					<div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#ec4899' }}>{fmt(Number(item.price ?? item.currentPrice ?? 0) || 0)}</div>
+					<div style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--red)' }}>{fmt(Number(item.price ?? item.currentPrice ?? 0) || 0)}</div>
 					{!item.inStock && (
 						<span style={{
-							background: '#fee2e2',
-							color: '#991b1b',
+							background: 'var(--red-muted)',
+							color: 'var(--red)',
 							padding: '0.3rem 0.6rem',
 							borderRadius: '4px',
 							fontSize: '0.75rem',
@@ -190,8 +190,8 @@ export default function WishlistPage() {
 							width: '100%',
 							padding: '10px',
 							background: 'transparent',
-							color: '#ec4899',
-							border: '1px solid #ec4899',
+							color: 'var(--red)',
+							border: '1px solid var(--red)',
 							borderRadius: '6px',
 							fontSize: '0.85rem',
 							fontWeight: 700,
@@ -205,7 +205,7 @@ export default function WishlistPage() {
 						style={{
 							width: '100%',
 							padding: '10px',
-							background: item.inStock ? '#ec4899' : '#d1d5db',
+							background: item.inStock ? 'var(--red)' : 'var(--surface-2)',
 							color: 'white',
 							border: 'none',
 							borderRadius: '6px',
@@ -226,7 +226,7 @@ export default function WishlistPage() {
 			description="Guarde seus produtos favoritos Tranzor para comprar mais tarde."
 			canonical="/shop/wishlist"
 		>
-			<section className="page-hero" style={{ background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)' }}>
+			<section className="page-hero" style={{ background: 'linear-gradient(135deg, var(--red-dark), var(--red))' }}>
 				<h1 style={{ color: 'white' }}>Minha Lista de Desejos</h1>
 				<p className="page-copy" style={{ color: 'rgba(255,255,255,0.9)' }}>
 					Guarde seus produtos favoritos para comprar depois e aceda a eles sempre que quiser.
@@ -241,7 +241,7 @@ export default function WishlistPage() {
 							<div className="page-grid page-grid-3" style={{ marginBottom: '3rem' }}>
 								<div className="page-card">
 									<div style={{ fontSize: '0.9rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>Itens na Lista</div>
-									<div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#ec4899' }}>{favorites.length}</div>
+									<div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--red)' }}>{favorites.length}</div>
 								</div>
 
 								<div className="page-card">
@@ -272,7 +272,7 @@ export default function WishlistPage() {
                                     }}
 									style={{
 										padding: '12px 24px',
-										background: '#ec4899',
+										background: 'var(--red)',
 										color: 'white',
 										border: 'none',
 										borderRadius: '6px',
@@ -287,7 +287,7 @@ export default function WishlistPage() {
 									onClick={() => favorites.forEach(item => handleAddToCart(item))}
 									style={{
 										padding: '12px 24px',
-										background: '#111827',
+										background: 'var(--red-dark)',
 										color: 'white',
 										border: 'none',
 										borderRadius: '6px',

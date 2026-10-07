@@ -62,6 +62,23 @@
   font-weight: 700;
 }
 
+.filter-section h3.filter-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-heading svg,
+.filter-summary-row svg {
+  flex: 0 0 auto;
+}
+
+.filter-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* Sort Select */
 .sort-select {
   width: 100%;

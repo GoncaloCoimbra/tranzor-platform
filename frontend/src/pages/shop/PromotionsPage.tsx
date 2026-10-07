@@ -391,10 +391,7 @@ export default function PromotionsPage() {
       </main>
 
       {/* ── Estilos ── */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-        /* ── Variáveis locais (tema branco) ── */
+      <style>{`        /* ── Variáveis locais (tema branco) ── */
         .promo-hero, .promo-tabs-wrap, .promo-main {
           --c-bg: #ffffff;
           --c-bg-2: #f7f7f7;
@@ -405,8 +402,8 @@ export default function PromotionsPage() {
           --c-muted: #888888;
           --c-muted-light: #555555;
           --c-border: #e4e4e4;
-          --font-head: 'Syne', sans-serif;
-          --font-body: 'DM Sans', sans-serif;
+          --font-head: 'Manrope', sans-serif;
+          --font-body: 'Manrope', sans-serif;
         }
 
         .sr-only {

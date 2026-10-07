@@ -26,37 +26,146 @@
     "warning": "Advertencia",
     "info": "Información"
   },
-  "nav": {
-    "home": "Inicio",
-    "news": "Novedades",
-    "about": "Acerca de",
-    "contact": "Contacto",
-    "shop": "Tienda",
-    "products": "Productos",
-    "categories": "Categorías",
-    "account": "Cuenta",
-    "orders": "Pedidos",
-    "profile": "Perfil",
-    "reviews": "Reseñas",
-    "admin": "Admin",
-    "b2b": "B2B",
-    "support": "Soporte",
-    "shopCta": "Ver Productos",
-    "searchPlaceholder": "Buscar productos",
-    "searchAriaLabel": "Búsqueda de productos",
-    "clearSearch": "Borrar búsqueda",
-    "cartAriaLabel": "Carrito de compras con {{count}} artículos",
-    "popularSearches": "Búsquedas populares",
-    "suggestions": "Sugerencias",
-    "searchTypeCategory": "Categoría",
-    "searchTypeProduct": "Producto",
-    "searchTypeSearch": "Búsqueda",
-    "searchNoResults": "Sin resultados para \"{{query}}\"",
-    "searchAllResults": "Ver todos los resultados para \"{{query}}\"",
-    "searchInCategory": "en {{category}}",
-    "searchInternalPage": "Página interna",
-    "searchInternal": "Página",
-    "searchSeeAllResults": "Ver todos los resultados para \"{{query}}\""
+  "home": {
+    "heroAriaLabel": "Bienvenido a Tranzor",
+    "heroEyebrow": "Desde 1973 · Lisboa · Oporto",
+    "heroLine1": "Material que",
+    "heroLine2": "inspira",
+    "heroLine3": "con identidad propia.",
+    "heroBody": "Más de {{count}} referencias de las mejores marcas del mundo. Entregamos en todo Portugal; también puede visitarnos en nuestras tiendas físicas.",
+    "heroBadgeYears": "años",
+    "heroBadgeLocation": "en Portugal",
+    "seoTitle": "Tranzor — Material de oficina, escolar y papelería en Portugal",
+    "seoDescription": "Más de 25.000 productos de papelería, oficina, escuela y tecnología. Entrega en todo Portugal. Tiendas en Lisboa y Oporto.",
+    "seoOgTitle": "Tranzor — Material de oficina y papelería",
+    "seoOgDescription": "Más de 25.000 productos. Entrega en todo Portugal.",
+    "viewCatalog": "Ver catálogo",
+    "viewCatalogAria": "Ver el catálogo completo",
+    "businessSolutions": "Soluciones para empresas",
+    "businessSolutionsAria": "Soluciones para empresas",
+    "trustReturns": "Devoluciones en 30 días",
+    "trustSatisfaction": "98 % de satisfacción",
+    "trustShipping": "Envío gratis a partir de 35 €",
+    "heroMosaic": {
+      "notebooks": "Cuadernos",
+      "pens": "Bolígrafos",
+      "pencils": "Lápices"
+    },
+    "statsHeading": "Tranzor en cifras",
+    "statsProductsLabel": "productos en el catálogo",
+    "statsProductsNote": "De las mejores marcas del mundo",
+    "statsYearsLabel": "años de experiencia",
+    "statsYearsNote": "Una historia basada en la confianza",
+    "statsDeliveriesLabel": "entregas al día",
+    "statsDeliveriesNote": "En todo el territorio nacional",
+    "statsCustomersLabel": "clientes satisfechos",
+    "statsCustomersNote": "Valoración media de 4,8/5",
+    "featuredProducts": {
+      "eyebrow": "Nuestros favoritos",
+      "title": "Los más vendidos del mes",
+      "link": "Catálogo completo →"
+    },
+    "categories": {
+      "eyebrow": "Categorías",
+      "title": "¿Qué busca\nhoy?",
+      "link": "Ver todas →",
+      "explore": "Explorar →",
+      "office": "Oficina",
+      "officeCount": "+8.000 productos",
+      "school": "Material escolar",
+      "schoolCount": "+5.000 productos",
+      "arts": "Arte y manualidades",
+      "artsCount": "+3.000 productos",
+      "tech": "Tecnología",
+      "techCount": "+2.000 productos",
+      "furniture": "Mobiliario",
+      "furnitureCount": "+500 productos"
+    },
+    "printingServices": {
+      "title": "Servicios de impresión",
+      "body": "Copias, encuadernación, plastificado, sellos y mucho más, disponible en nuestras tiendas físicas.",
+      "cta": "Más información →"
+    },
+    "editorialBanner": {
+      "eyebrow": "Promoción de la semana",
+      "title": "Hasta un 40 %\nen material escolar",
+      "body": "Cuadernos, estuches, mochilas y material de dibujo a los mejores precios del mercado. Oferta por tiempo limitado.",
+      "link": "Ver promociones",
+      "aria": "Ver promociones de material escolar",
+      "badge": "-40 %"
+    },
+    "whyTranzor": {
+      "eyebrow": "Por qué Tranzor",
+      "title": "La razón por la que\nmás de 50.000 clientes\nconfían en nosotros.",
+      "learnMore": "Más información →"
+    },
+    "campaigns": {
+      "eyebrow": "Ofertas por tiempo limitado",
+      "title": "Campañas\ndestacadas",
+      "link": "Ver todas →",
+      "cta": "Ver oferta →",
+      "card1Title": "Vuelta al cole",
+      "card1Discount": "-25 %",
+      "card1Desc": "Material escolar seleccionado con un descuento especial para la vuelta al cole.",
+      "card2Title": "Oficina eficiente",
+      "card2Discount": "-15 %",
+      "card2Desc": "Organizadores, archivadores y material de escritorio. Productividad con estilo.",
+      "card3Title": "Tecnología",
+      "card3Discount": "-10 %",
+      "card3Desc": "Accesorios y periféricos para un día a día digital más eficiente."
+    },
+    "testimonials": {
+      "eyebrow": "Testimonios",
+      "title": "Palabras que\nnos enorgullecen.",
+      "quotes": [
+        "Llevo más de una década confiando en Tranzor para equipar la oficina. La calidad, los precios y la rapidez de entrega son difíciles de superar.",
+        "Como profesora, Tranzor es mi proveedor de confianza. La web es intuitiva, las entregas siempre llegan a tiempo y el equipo resuelve cualquier duda en minutos.",
+        "Las soluciones B2B de Tranzor han transformado la gestión de nuestros consumibles. Ahorramos tiempo y dinero, y la facturación es mucho más sencilla."
+      ],
+      "authors": [
+        "António Ferreira",
+        "Maria João Sousa",
+        "Paulo Rodrigues"
+      ],
+      "roles": [
+        "Gerente · AFConsult Lda",
+        "Profesora · Escola Básica de Aveiro",
+        "Director de operaciones · TechNorth SA"
+      ]
+    },
+    "products": {
+      "addedToast": "\"{{name}}\" se ha añadido al carrito",
+      "addAria": "Añadir {{name}} al carrito",
+      "addToCart": "Añadir al carrito"
+    },
+    "floatingActions": {
+      "scrollToTopAria": "Volver arriba",
+      "liveChatAria": "Abrir el chat en directo",
+      "liveChatTitle": "Hablar con un agente"
+    },
+    "brandCarousel": {
+      "eyebrow": "Socios de confianza",
+      "title": "Marcas que conoce,\nprecios que le gustarán."
+    },
+    "newsletter": {
+      "eyebrow": "Boletín",
+      "title": "Ofertas exclusivas\nen su bandeja de entrada.",
+      "body": "Promociones antes que nadie, novedades y consejos para su oficina o aula. Sin correo basura, se lo prometemos.",
+      "emailLabel": "Su correo electrónico",
+      "placeholder": "nombre@empresa.es",
+      "button": "Suscribirse",
+      "privacy": "Al suscribirse, acepta la",
+      "privacyLink": "política de privacidad",
+      "privacySuffix": "Puede darse de baja cuando quiera.",
+      "ariaLabel": "Suscripción al boletín",
+      "success": "¡Se ha suscrito correctamente! Le damos la bienvenida al boletín de Tranzor."
+    },
+    "stores": {
+      "eyebrow": "Tiendas físicas",
+      "title": "Venga a conocernos\nen persona.",
+      "cta": "Ver en el mapa",
+      "ariaPrefix": "Cómo llegar a la tienda de"
+    }
   },
   "account": {
     "profile": {
@@ -93,7 +202,7 @@
       "preferences": {
         "darkMode": {
           "title": "Modo oscuro",
-          "description": "Un tema más oscuro para una experiencia más cómoda."
+          "description": "Activa el tema carbón. El tema claro sigue siendo el predeterminado."
         },
         "language": {
           "title": "Idioma preferido",
@@ -415,28 +524,28 @@
       "recentlyViewedLink": "Ver productos vistos recientemente"
     },
     "shopFilters": {
-      "filterTitle": "🎯 Filtros",
+      "filterTitle": "Filtros",
       "clearFilters": "✕ Limpiar",
-      "sortBy": "📊 Ordenar por",
+      "sortBy": "Ordenar por",
       "sortRelevance": "Relevancia",
       "sortPriceAsc": "Precio: Menor → Mayor",
       "sortPriceDesc": "Precio: Mayor → Menor",
-      "sortRating": "Calificación (⭐)",
+      "sortRating": "Calificación",
       "sortNewest": "Más Recientes",
-      "categories": "📂 Categorías",
+      "categories": "Categorías",
       "allCategories": "Todas las Categorías",
-      "subcategories": "📁 Subcategorías",
+      "subcategories": "Subcategorías",
       "allSubcategories": "Todas",
-      "priceRange": "💰 Rango de Precio",
+      "priceRange": "Rango de Precio",
       "minPrice": "Mín: €",
       "maxPrice": "Máx: €",
-      "brands": "🏷️ Marcas",
+      "brands": "Marcas",
       "viewMoreBrands": "Ver más marcas ({{count}})",
-      "characteristics": "🏷️ Características",
-      "filterSummary": "📊 {{count}} producto(s) encontrado(s)",
-      "filterSummaryCategory": "📂 {{category}}",
-      "filterSummarySubcategory": "📁 {{subcategory}}",
-      "filterSummaryBrands": "🏷️ {{count}} marca(s)"
+      "characteristics": "Características",
+      "filterSummary": "{{count}} producto(s) encontrado(s)",
+      "filterSummaryCategory": "{{category}}",
+      "filterSummarySubcategory": "{{subcategory}}",
+      "filterSummaryBrands": "{{count}} marca(s)"
     }
   },
   "about": {
@@ -513,23 +622,15 @@
     "accountAriaLabel": "Iniciar sesión o crear una cuenta",
     "recentlyViewed": "Vistos recientemente",
     "orders": "Mis pedidos",
-    "profile": "Mi perfil"
-  },
-  "footer": {
-    "description": "Suministros de oficina, escuela y papelería en Portugal desde 1973.",
-    "shopTitle": "Tienda",
-    "catalog": "Catálogo",
-    "promotions": "Promociones",
-    "schoolSupplies": "Material escolar",
-    "companyTitle": "Empresa",
-    "about": "Sobre nosotros",
-    "contact": "Contacto",
-    "faq": "FAQ",
-    "legalTitle": "Legal",
-    "privacy": "Privacidad",
-    "terms": "Términos",
-    "cookies": "Cookies",
-    "copyright": "Todos los derechos reservados."
+    "profile": "Mi perfil",
+    "shop": "Tienda",
+    "products": "Productos",
+    "categories": "Categorías",
+    "account": "Cuenta",
+    "reviews": "Reseñas",
+    "admin": "Admin",
+    "b2b": "B2B",
+    "support": "Soporte"
   },
   "privacy": {
     "pageTitle": "Política de Privacidad",
@@ -782,7 +883,18 @@
     "privacy": "Privacidad",
     "terms": "Términos de Servicio",
     "cookies": "Cookies",
-    "company": "© 2025 Tranzor. Todos los derechos reservados."
+    "company": "© 2025 Tranzor. Todos los derechos reservados.",
+    "description": "Suministros de oficina, escuela y papelería en Portugal desde 1973.",
+    "shopTitle": "Tienda",
+    "catalog": "Catálogo",
+    "promotions": "Promociones",
+    "schoolSupplies": "Material escolar",
+    "companyTitle": "Empresa",
+    "about": "Sobre nosotros",
+    "contact": "Contacto",
+    "faq": "FAQ",
+    "legalTitle": "Legal",
+    "copyright": "Todos los derechos reservados."
   },
   "navbar": {
     "categories": "Artes",

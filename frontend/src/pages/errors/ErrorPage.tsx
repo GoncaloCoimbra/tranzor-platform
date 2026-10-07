@@ -85,10 +85,7 @@ export default function ErrorPage() {
         </div>
       </div>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-
-        .err-root {
+      <style>{`        .err-root {
           --red:       #D90429;
           --red-soft:  rgba(217,4,41,0.06);
           --red-mid:   rgba(217,4,41,0.14);
@@ -98,8 +95,8 @@ export default function ErrorPage() {
           --border:    #e4e4e4;
           --bg:        #ffffff;
           --bg2:       #f7f7f7;
-          --font-h:    'Syne', sans-serif;
-          --font-b:    'DM Sans', sans-serif;
+          --font-h:    'Manrope', sans-serif;
+          --font-b:    'Manrope', sans-serif;
 
           position: relative;
           min-height: 78vh;

@@ -4,8 +4,6 @@ import AppLayout from '../../layouts/AppLayout';
 import { useCartStore } from '../../store/cartStore';
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-
   /* ── DESIGN TOKENS (mirrors ShopPage + HomePage) ── */
   .esc-root {
     --c-bg:       #ffffff;
@@ -17,8 +15,8 @@ const styles = `
     --c-muted:    #888888;
     --c-muted-l:  #555555;
     --c-border:   #e4e4e4;
-    --font-head:  'Syne', sans-serif;
-    --font-body:  'DM Sans', sans-serif;
+    --font-head:  'Manrope', sans-serif;
+    --font-body:  'Manrope', sans-serif;
     --radius:     10px;
 
     font-family: var(--font-body);
