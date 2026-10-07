@@ -1,15 +1,38 @@
 services:
+  redis:
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD must be set}"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$REDIS_PASSWORD redis-cli ping"]
+
+  postgres_Tranzor:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+
+  clickhouse:
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-Tranzor}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?CLICKHOUSE_PASSWORD must be set}
+
   backend:
     environment:
       NODE_ENV: staging
       PORT: 3101
       APP_SHUTDOWN_TIMEOUT_MS: 10000
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-tranzor_app}:${POSTGRES_PASSWORD:-TranzorAppPass2026}@postgres_Tranzor:5432/${POSTGRES_DB:-tranzor}}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379
+      TYPESENSE_HOST: typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_PROTOCOL: http
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY must be set}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-tranzor_app}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@postgres_Tranzor:5432/${POSTGRES_DB:-tranzor}
       CLICKHOUSE_HTTP_URL: ${CLICKHOUSE_HTTP_URL:-http://clickhouse:8123}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?CLICKHOUSE_PASSWORD must be set}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET must be set}
     ports:
       - "3101:3101"
     depends_on:

@@ -11,6 +11,17 @@ services:
       NODE_ENV: production
       PORT: 3001
       APP_SHUTDOWN_TIMEOUT_MS: 10000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-tranzor_app}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD é obrigatória}@postgres:5432/${POSTGRES_DB:-tranzor}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD é obrigatória}@redis:6379
+      TYPESENSE_HOST: typesense
+      TYPESENSE_PORT: 8108
+      TYPESENSE_PROTOCOL: http
+      TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY é obrigatória}
+      CLICKHOUSE_HTTP_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?CLICKHOUSE_PASSWORD é obrigatória}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET é obrigatória}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET é obrigatória}
     ports:
       - "3001:3001"
     depends_on:
@@ -20,6 +31,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      typesense:
+        condition: service_started
       clickhouse:
         condition: service_healthy
     volumes:
@@ -32,7 +45,7 @@ services:
     environment:
       MONGO_INITDB_DATABASE: Tranzor
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
@@ -47,13 +60,13 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-tranzor}
       POSTGRES_USER: ${POSTGRES_USER:-tranzor_app}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-TranzorAppPass2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD é obrigatória}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tranzor_app} -d ${POSTGRES_DB:-tranzor}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -61,23 +74,38 @@ services:
   redis:
     image: redis:7-alpine
     restart: always
-    command: redis-server --appendonly yes --save 60 1
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD é obrigatória}"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD é obrigatória}
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$REDIS_PASSWORD redis-cli ping"]
       interval: 10s
       timeout: 5s
       retries: 10
 
+  typesense:
+    image: typesense/typesense:27.1
+    restart: always
+    command: ["--data-dir", "/data", "--api-key", "${TYPESENSE_API_KEY:?TYPESENSE_API_KEY é obrigatória}"]
+    ports:
+      - "127.0.0.1:8108:8108"
+    volumes:
+      - typesense_data:/data
+
   clickhouse:
     image: clickhouse/clickhouse-server:24.8
     restart: always
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-Tranzor}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?CLICKHOUSE_PASSWORD é obrigatória}
     ports:
-      - "8123:8123"
-      - "9000:9000"
+      - "127.0.0.1:8123:8123"
+      - "127.0.0.1:9000:9000"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     ulimits:
@@ -94,4 +122,5 @@ volumes:
   mongo_data:
   postgres_data:
   redis_data:
+  typesense_data:
   clickhouse_data:

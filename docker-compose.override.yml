@@ -1,18 +1,27 @@
 services:
   chatops-backend:
-    image: node:20-bullseye
+    build:
+      context: ./Chatops/backend
+      dockerfile: Dockerfile
+    image: chatops-backend:dev
     container_name: chatops-backend
-    working_dir: /workspace/Chatops/backend
+    working_dir: /app
     volumes:
-      - ./Chatops/backend:/workspace/Chatops/backend
-      - /workspace/Chatops/backend/node_modules
+      - ./Chatops/backend:/app
+      - /app/node_modules
     environment:
+      NODE_ENV: development
       PORT: 3002
       WS_PORT: 9001
-      CORS_ORIGIN: http://localhost:5173,http://localhost:3006
-      DATABASE_URL: postgresql://chatops:chatops@postgres_chatops:5432/chatops_db
-      REDIS_URL: redis://redis:6379
+      CORS_ORIGIN: http://localhost:5173,http://localhost:3006,http://localhost:5177,http://127.0.0.1:5177
+      DATABASE_URL: postgresql://${POSTGRES_CHATOPS_USER:-chatops}:${POSTGRES_CHATOPS_PASSWORD:-chatops}@postgres_chatops:5432/${POSTGRES_CHATOPS_DB:-chatops_db}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-replace-with-a-secure-random-secret}
+      COMMERCE_API_URL: http://backend:3001/api/v1
       LOGISTICS_URL: http://logistica-backend:3000
+      LOGISTICS_API_KEY: ${LOGISTICS_API_KEY:-}
+      TURN_URLS: ${CHATOPS_TURN_URLS:-}
+      TURN_SHARED_SECRET: ${CHATOPS_TURN_SHARED_SECRET:-}
     ports:
       - "3002:3002"
       - "9001:9001"
@@ -21,8 +30,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: sh -c "apt-get update && apt-get install -y libssl1.1 --no-install-recommends && npm install && npx prisma generate && npm run build && npm start"
+    command: sh -c "npm ci && npx prisma generate && npm run build && npm start"
     restart: unless-stopped
+    stop_grace_period: 20s
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3002/health', res => process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
       interval: 30s
@@ -38,8 +48,8 @@ services:
       - ./Chatops/frontend:/workspace/Chatops/frontend
       - /workspace/Chatops/frontend/node_modules
     environment:
-      VITE_WS_URL: ws://localhost:9001
-      VITE_API_URL: http://localhost:3002
+      DOCKER_BACKEND_URL: http://chatops-backend:3002
+      DOCKER_WS_URL: ws://chatops-backend:9001
       HOST: 0.0.0.0
       PORT: 5173
       BROWSER: none
@@ -55,9 +65,10 @@ services:
       context: ./logistica-multi-tenant-clean
       dockerfile: backend-nest/Dockerfile
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres_logistica:5432/logistica
-      REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+      DATABASE_URL: postgresql://${POSTGRES_LOGISTICA_USER:-postgres}:${POSTGRES_LOGISTICA_PASSWORD:-postgres}@postgres_logistica:5432/${POSTGRES_LOGISTICA_DB:-logistica}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-dev-logistica-jwt-secret}
+      CORS_ORIGIN: http://localhost:3003
       PORT: 3000
       NODE_ENV: development
     depends_on:
@@ -96,9 +107,10 @@ services:
       DOCKER_BACKEND_URL: http://logistica-backend:3000
       HOST: 0.0.0.0
       PORT: 3000
+      WDS_SOCKET_PORT: 3003
       BROWSER: none
     ports:
-      - "3001:3000"
+      - "3003:3000"
     depends_on:
       - logistica-backend
     command: sh -c "npm install && npm run start -- --host 0.0.0.0 --port 3000"

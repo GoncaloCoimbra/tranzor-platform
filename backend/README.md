@@ -25,11 +25,11 @@ docker compose up --build
 
 O [Compose de staging](../docker-compose.staging.yml) é uma sobreposição ao ficheiro base. O [Compose de produção](../docker-compose.prod.yml) é uma configuração independente e carrega `.env` no backend.
 
-Staging e produção exigem `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET`. O Compose termina com erro quando falta uma variável marcada como obrigatória. Usa valores fortes, únicos e fornecidos fora do controlo de versões; [.env.example](../.env.example) contém placeholders, não credenciais de produção.
+Staging e produção exigem `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET` e `JWT_REFRESH_SECRET`. O Compose termina com erro quando falta uma variável marcada como obrigatória. Usa valores fortes, únicos e fornecidos fora do controlo de versões; [.env.example](../.env.example) contém placeholders, não credenciais de produção.
 
 Na stack integrada, `REDIS_PASSWORD` configura o serviço Redis e é usada para construir os URLs Redis de Commerce, ChatOps e Logística. Os três clientes têm de usar a mesma password para partilhar locks de stock e eventos.
 
-As portas publicadas dos serviços de dados estão limitadas a `127.0.0.1`. A API Commerce publica `3001`; na configuração integrada, a interface de desenvolvimento da Logística também publica a porta de host `3001`, pelo que ambas não conseguem usar essa porta simultaneamente. O README da raiz descreve essa colisão.
+As portas publicadas dos serviços de dados estão limitadas a `127.0.0.1`. A API Commerce publica `3001`; a interface de desenvolvimento integrada da Logística publica `3003`.
 
 ## Construção da imagem
 
@@ -51,4 +51,7 @@ O ficheiro [docker-compose.capacity.yml](../docker-compose.capacity.yml) cria se
 - MongoDB, PostgreSQL, Redis e ClickHouse são instâncias únicas nas configurações Compose; não está configurada alta disponibilidade.
 - O Redis integrado é autenticado por `REDIS_PASSWORD`; não uses uma password diferente nos clientes que comunicam com a mesma instância.
 - Os manifests Kubernetes estão presentes em `k8s/`, mas não foram validados num cluster Kubernetes real.
-- O ChatOps continua a ter limitações próprias: `/auth/dev-token` é apenas para desenvolvimento, não há migrações Prisma versionadas e parte do estado é mantida em memória. O Compose autónomo ChatOps também mantém o bind mount `Chatops/pgdata` para os dados PostgreSQL.
+- O ChatOps autentica com contas do Commerce através de sessão protegida por cookie; Commerce e ChatOps têm de partilhar o mesmo `JWT_SECRET`. A antiga rota `/auth/dev-token` não está disponível.
+- As migrações Prisma do ChatOps estão versionadas em `Chatops/backend/prisma/migrations`. As mensagens e os grupos são persistidos, mas presença, ligações WebSocket e salas de chamada dependem do processo backend e não são partilhados entre réplicas; as chamadas em curso não são recuperadas após reinício.
+- Chamadas e partilha de ecrã usam WebRTC. Para redes restritivas pode ser necessário configurar e validar um servidor TURN; a configuração Kubernetes do ChatOps ainda não foi validada num cluster real.
+- O Compose autónomo ChatOps monta `./pgdata` para `/var/lib/postgresql/data`; preserva essa pasta se os dados locais forem necessários.

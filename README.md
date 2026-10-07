@@ -16,8 +16,8 @@ Plataforma composta por três serviços: Commerce, para operações de comércio
 ## Obter o código
 
 ```sh
-git clone https://github.com/GoncaloCoimbra/tranzor-platform.git
-cd tranzor-platform
+git clone https://github.com/GoncaloCoimbra/full-stack-distributed-commerce.git
+cd full-stack-distributed-commerce
 ```
 
 ## Estrutura do repositório
@@ -40,6 +40,8 @@ k8s/                             Manifests Kubernetes
 
 Documentação por serviço: [Commerce](./backend/README.md), [ChatOps](./Chatops/backend/README.md), [Logística](./logistica-multi-tenant-clean/README.md) e [guia de deployment da Logística](./logistica-multi-tenant-clean/docs/DEPLOYMENT.md).
 
+Para uma visão geral, arranque e testes do módulo de comunicação, consulte o [README do ChatOps](./Chatops/README.md).
+
 ## Docker Compose
 
 ### Desenvolvimento integrado
@@ -53,8 +55,6 @@ docker compose up --build
 
 O ficheiro base define MongoDB, Redis, PostgreSQL para os três serviços, ClickHouse e a API Commerce. A sobreposição acrescenta os serviços ChatOps e Logística e respetivas interfaces.
 
-Há uma colisão de portas publicada na configuração atual: a API Commerce e a interface de Logística tentam ambas usar a porta de host `3001`. A validação `docker compose config` confirma a sintaxe e a interpolação, mas não confirma que serviços com portas em conflito conseguem arrancar simultaneamente.
-
 ### Staging
 
 `docker-compose.staging.yml` é uma sobreposição ao ficheiro base, não uma stack autónoma:
@@ -64,7 +64,7 @@ docker compose -f docker-compose.yml -f docker-compose.staging.yml config
 docker compose -f docker-compose.yml -f docker-compose.staging.yml up --build
 ```
 
-Antes de executar, define `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET` no ambiente ou no ficheiro `.env` local. A interpolação usa expressões obrigatórias: se faltar uma destas variáveis, o Compose termina com erro em vez de usar uma credencial de staging predefinida.
+Antes de executar, define `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET` e `JWT_REFRESH_SECRET` no ambiente ou no ficheiro `.env` local. A interpolação usa expressões obrigatórias: se faltar uma destas variáveis, o Compose termina com erro em vez de usar uma credencial de staging predefinida.
 
 ### Produção
 
@@ -75,7 +75,7 @@ docker compose --env-file .env -f docker-compose.prod.yml config
 docker compose --env-file .env -f docker-compose.prod.yml up --build
 ```
 
-Em produção são obrigatórias `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET`. Os valores de `.env.example` são apenas placeholders: substitui-os por segredos fortes antes de qualquer utilização fora de desenvolvimento.
+Em produção são obrigatórias `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET` e `JWT_REFRESH_SECRET`. Os valores de `.env.example` são apenas placeholders: substitui-os por segredos fortes antes de qualquer utilização fora de desenvolvimento.
 
 ### Redis e portas dos serviços de dados
 
@@ -87,7 +87,7 @@ As portas publicadas dos serviços de dados estão limitadas a loopback:
 | --- | ---: |
 | MongoDB | 27017 |
 | Redis | 6379 |
-| PostgreSQL Commerce | 5432 |
+| PostgreSQL Commerce | 5435 |
 | PostgreSQL Logística | 5433 |
 | PostgreSQL ChatOps | 5434 |
 | ClickHouse HTTP | 8123 |
@@ -110,9 +110,10 @@ O objetivo usado no ensaio era P95 ≤1 s por rota e taxa de erro ≤0,1%: as ca
 
 ## Estado e limitações
 
-- O endpoint ChatOps `/auth/dev-token` emite um token de desenvolvimento fora de `NODE_ENV=production`; em produção responde como não encontrado. Não existe ainda um fluxo de autenticação de produção documentado para ChatOps.
+- O ChatOps autentica com contas do Commerce através de sessão protegida por cookie; Commerce e ChatOps têm de partilhar o mesmo `JWT_SECRET`. A antiga rota `/auth/dev-token` não está disponível.
 - O ChatOps mantém ligações WebSocket, metadados de ligação e estado de canais em memória do processo; esse estado não é partilhado entre réplicas e perde-se quando o processo termina.
-- O schema Prisma do ChatOps está no repositório, mas não existe histórico de migrações Prisma versionadas em `Chatops/backend/prisma/migrations`.
+- As migrações Prisma do ChatOps estão versionadas em `Chatops/backend/prisma/migrations`. Confirma o estado e a compatibilidade da base de dados antes de as aplicar a uma instalação existente.
+- Chamadas de áudio/vídeo e partilha de ecrã usam WebRTC; as salas e a sinalização dependem do processo backend ativo. Um reinício ou uma falha abrupta termina as chamadas em curso. Para redes restritivas, é necessário configurar e testar um serviço TURN real.
 - MongoDB, PostgreSQL, Redis e ClickHouse são executados como instâncias únicas nas configurações Compose; não está configurada uma topologia de alta disponibilidade.
 - O MongoDB do Compose não tem autenticação configurada.
 - O Compose autónomo de ChatOps monta `./pgdata` para `/var/lib/postgresql/data`. Esse bind mount contém os dados locais da base de dados; preserva-o e não o apagues como parte de uma limpeza do repositório.
