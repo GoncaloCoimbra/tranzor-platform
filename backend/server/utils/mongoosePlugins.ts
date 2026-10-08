@@ -59,7 +59,7 @@ export function softDeleteAuditPlugin(schema: Schema) {
     return this.save();
   };
 
-  const saveHook: any = function(this: any, next: any) {
+  const saveHook: any = function(this: any) {
     const doc = this as any;
     const currentUser = doc._currentUser;
 
@@ -77,7 +77,6 @@ export function softDeleteAuditPlugin(schema: Schema) {
       doc.deletedAt = new Date();
     }
 
-    next();
   };
 
   schema.pre('save', saveHook);

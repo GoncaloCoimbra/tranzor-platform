@@ -257,7 +257,7 @@ ProductSchema.virtual('discountPercentage').get(function() {
 // Pre-save middleware to generate slug
 ProductSchema.plugin(softDeleteAuditPlugin);
 
-ProductSchema.pre('save', function(next: any) {
+ProductSchema.pre('save', function() {
 	if (this.isModified('name') && !this.slug) {
 		this.slug = this.name
 			.toLowerCase()
@@ -265,7 +265,6 @@ ProductSchema.pre('save', function(next: any) {
 			.replace(/\s+/g, '-')
 			.substring(0, 50);
 	}
-	next();
 });
 
 // Static method to find featured products

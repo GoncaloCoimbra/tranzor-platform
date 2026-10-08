@@ -14,7 +14,7 @@ export const registerSchema = z.object({
   password: z.string().min(8, 'Senha deve ter no mínimo 8 caracteres'),
   confirmPassword: z.string(),
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  role: z.enum(['user', 'admin', 'b2b', 'b2b_buyer', 'b2b_manager']).optional(),
+  role: z.enum(['user', 'b2b']).optional(),
   company: z.string().min(2, 'Nome da empresa deve ter no mínimo 2 caracteres').optional(),
   taxId: z.string().regex(/^[0-9]{9}$/, 'NIF inválido. Deve ter 9 dígitos').optional(),
   phone: z.string().optional(),
@@ -25,10 +25,10 @@ export const registerSchema = z.object({
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'As senhas não correspondem',
   path: ['confirmPassword']
-}).refine((data) => !['b2b', 'b2b_buyer', 'b2b_manager'].includes(data.role || '') || !!data.company, {
+}).refine((data) => data.role !== 'b2b' || !!data.company, {
   message: 'Empresa é obrigatória para registo B2B',
   path: ['company']
-}).refine((data) => !['b2b', 'b2b_buyer', 'b2b_manager'].includes(data.role || '') || !!data.taxId, {
+}).refine((data) => data.role !== 'b2b' || !!data.taxId, {
   message: 'NIF é obrigatório para registo B2B',
   path: ['taxId']
 });

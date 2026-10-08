@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-const API_URL = 'http://localhost:3001/api/v1';
-const FRONTEND_URL = 'http://localhost:5174';
+const API_URL = process.env.PLAYWRIGHT_API_URL ?? 'http://localhost:3001/api/v1';
+const FRONTEND_URL = process.env.PLAYWRIGHT_FRONTEND_URL ?? 'http://localhost:5174';
 const debug = Boolean(process.env.DEBUG);
 
 test.describe('E2E - E-commerce Flow', () => {
@@ -177,12 +177,17 @@ test.describe('E2E - E-commerce Flow', () => {
   });
 
   test('Admin Dashboard Access', async ({ page }) => {
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminPassword) {
+      throw new Error('ADMIN_PASSWORD is required for the admin E2E test');
+    }
+
     await page.goto(`${FRONTEND_URL}/admin`);
     await page.waitForURL('**/auth/login', { timeout: 20000 });
 
     await page.waitForSelector('input[name="email"]', { state: 'visible', timeout: 15000 });
     await page.fill('input[name="email"]', 'admin@tranzor.pt');
-    await page.fill('input[name="password"]', 'ChangeMe123!');
+    await page.fill('input[name="password"]', adminPassword);
     await page.click('button[type="submit"]');
     await page.waitForURL('**/admin', { timeout: 20000 });
 

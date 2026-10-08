@@ -1,37 +1,22 @@
 import { test, expect } from '@playwright/test';
 
-const FRONTEND_URL = 'http://localhost:5174';
-const API_URL = 'http://localhost:3001/api/v1';
+const FRONTEND_URL = process.env.PLAYWRIGHT_FRONTEND_URL ?? 'http://localhost:5174';
+const API_URL = process.env.PLAYWRIGHT_API_URL ?? 'http://localhost:3001/api/v1';
 const ADMIN_EMAIL = 'admin@tranzor.pt';
-const ADMIN_PASSWORD = 'ChangeMe123!';
 
-async function ensureAdminUser(page: Parameters<typeof test>[0]['page']) {
-  const payload = {
-    name: 'Admin Test User',
-    email: ADMIN_EMAIL,
-    password: ADMIN_PASSWORD,
-    confirmPassword: ADMIN_PASSWORD,
-    role: 'admin',
-    agreeTerms: true
-  };
-
-  const response = await page.request.post(`${API_URL}/auth/register`, {
-    headers: { 'Content-Type': 'application/json' },
-    data: JSON.stringify(payload),
-  });
-
-  if (response.status() === 201 || response.status() === 409) {
-    return;
+function getAdminPassword() {
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) {
+    throw new Error('ADMIN_PASSWORD is required for admin CMS E2E tests');
   }
-
-  const body = await response.text();
-  throw new Error(`Failed to ensure admin user: ${response.status()} ${body}`);
+  return password;
 }
 
 async function signInAdmin(page: Parameters<typeof test>[0]['page']) {
+  const adminPassword = getAdminPassword();
   const response = await page.request.post(`${API_URL}/auth/login`, {
     headers: { 'Content-Type': 'application/json' },
-    data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
+    data: { email: ADMIN_EMAIL, password: adminPassword },
   });
 
   expect(response.ok()).toBeTruthy();
@@ -49,7 +34,6 @@ async function signInAdmin(page: Parameters<typeof test>[0]['page']) {
 
 test.describe('Admin CMS basic checks', () => {
   test('Admin can access Content and Coupons pages', async ({ page }) => {
-    await ensureAdminUser(page);
     await signInAdmin(page);
 
     await page.goto(`${FRONTEND_URL}/admin/content`, { waitUntil: 'networkidle' });
