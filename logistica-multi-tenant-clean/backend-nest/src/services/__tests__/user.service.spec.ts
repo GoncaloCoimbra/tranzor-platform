@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../database/prisma.service';
-import { ConflictException, NotFoundException } from '@nestjs/common';
 
 // TEMPLATE: Example test file for any NestJS service
 // To use this template:
@@ -12,7 +11,6 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('Service Template (Modify for your service)', () => {
   let service: any; // Replace 'any' with your actual service type
-  let prismaService: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,7 +40,6 @@ describe('Service Template (Modify for your service)', () => {
     }).compile();
 
     service = module.get('YourService');
-    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {

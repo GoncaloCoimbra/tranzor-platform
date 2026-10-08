@@ -14,7 +14,6 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductsService } from '../products.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
-import { FilterProductDto } from '../dto/filter-product.dto';
 import { ListProductsDto } from '../dto/list-products.dto';
 import { UpdateProductStatusDto } from '../dto/update-product-status.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -75,7 +74,10 @@ export class ProductsController {
   @Get('low-stock')
   @Public()
   @UseGuards(ApiKeyGuard)
-  @ApiOperation({ summary: 'Listar produtos com cinco ou menos unidades para integração ChatOps' })
+  @ApiOperation({
+    summary:
+      'Listar produtos com cinco ou menos unidades para integração ChatOps',
+  })
   async getLowStock(@Req() request: any) {
     return this.productsService.getLowStock(request.companyId);
   }

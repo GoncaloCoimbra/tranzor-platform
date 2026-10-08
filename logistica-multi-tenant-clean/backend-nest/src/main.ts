@@ -7,7 +7,7 @@ import { join } from 'path';
 import { LogisticsRedisSubscriber } from './integration/redis-subscriber';
 import { verifyStartupDependencies } from './common/startup-dependencies';
 import { PrismaService } from './database/prisma.service';
-const helmet = require('helmet');
+import helmet from 'helmet';
 
 // SERIALIZATION FIX (BigInt/Date)
 
@@ -141,19 +141,23 @@ if (process.env.NODE_ENV !== 'test' || process.env.FORCE_START === 'true') {
     try {
       const app = await createApp();
       await app.init();
-      const redisSubscriber = new LogisticsRedisSubscriber(app.get(PrismaService));
+      const redisSubscriber = new LogisticsRedisSubscriber(
+        app.get(PrismaService),
+      );
       await verifyStartupDependencies(
         [{ name: 'Redis', check: () => redisSubscriber.start() }],
         {
-          onAttemptFailure: (name, attempt, error) => logger.error(
-            `Startup dependency ${name} attempt ${attempt} failed`,
-            error instanceof Error ? error.stack : String(error),
-          ),
-          onDegraded: (name, error) => logger.warn(
-            `ALLOW_DEGRADED=true: continuing without ${name}: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          ),
+          onAttemptFailure: (name, attempt, error) =>
+            logger.error(
+              `Startup dependency ${name} attempt ${attempt} failed`,
+              error instanceof Error ? error.stack : String(error),
+            ),
+          onDegraded: (name, error) =>
+            logger.warn(
+              `ALLOW_DEGRADED=true: continuing without ${name}: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+            ),
         },
       );
       const port = process.env.PORT || 3000;

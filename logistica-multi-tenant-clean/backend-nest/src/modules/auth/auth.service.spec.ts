@@ -21,12 +21,15 @@ describe('AuthService public registration', () => {
     };
     const prisma = {
       user: {
-        findUnique: jest.fn()
+        findUnique: jest
+          .fn()
           .mockResolvedValueOnce(null)
           .mockResolvedValueOnce({ ...user, company }),
       },
       refreshToken: { create: jest.fn().mockResolvedValue({}) },
-      $transaction: jest.fn((callback: (client: typeof tx) => unknown) => callback(tx)),
+      $transaction: jest.fn((callback: (client: typeof tx) => unknown) =>
+        callback(tx),
+      ),
     } as unknown as PrismaService;
     const jwtService = {
       signAsync: jest.fn().mockResolvedValue('test-token'),

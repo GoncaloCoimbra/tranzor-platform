@@ -356,7 +356,7 @@ export class StockReservationsService {
           expiresAt: { lt: new Date() },
         },
       });
-      const expired: Array<Prisma.StockReservationGetPayload<{}>> = [];
+      const expired: Array<Prisma.StockReservationGetPayload<object>> = [];
 
       for (const candidate of candidates) {
         const result = await tx.stockReservation.updateMany({

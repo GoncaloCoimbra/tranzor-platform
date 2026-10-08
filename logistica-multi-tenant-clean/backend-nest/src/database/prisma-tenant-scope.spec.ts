@@ -20,17 +20,28 @@ describe('Prisma tenant scope middleware', () => {
       { companyId: 'tenant-a', userId: 'user-a' },
       async () => {
         for (const action of ['count', 'aggregate', 'groupBy']) {
-          await middleware({
-            model: 'Product',
-            action,
-            args: { where: { status: 'RECEIVED', companyId: 'tenant-b' } },
-          } as any, next);
+          await middleware(
+            {
+              model: 'Product',
+              action,
+              args: { where: { status: 'RECEIVED', companyId: 'tenant-b' } },
+            } as any,
+            next,
+          );
         }
-        await middleware({
-          model: 'Product',
-          action: 'createMany',
-          args: { data: [{ internalCode: 'A' }, { internalCode: 'B', companyId: 'tenant-b' }] },
-        } as any, next);
+        await middleware(
+          {
+            model: 'Product',
+            action: 'createMany',
+            args: {
+              data: [
+                { internalCode: 'A' },
+                { internalCode: 'B', companyId: 'tenant-b' },
+              ],
+            },
+          } as any,
+          next,
+        );
       },
     );
 

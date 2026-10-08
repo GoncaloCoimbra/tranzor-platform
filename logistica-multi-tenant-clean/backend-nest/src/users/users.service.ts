@@ -27,7 +27,9 @@ export class UsersService {
     const { password, ...userData } = data;
     if (password !== undefined) {
       if (!isStrongPassword(password)) {
-        throw new BadRequestException('Password must be at least 8 characters and contain one uppercase letter and one number');
+        throw new BadRequestException(
+          'Password must be at least 8 characters and contain one uppercase letter and one number',
+        );
       }
       userData.password = await bcrypt.hash(password, 10);
     }

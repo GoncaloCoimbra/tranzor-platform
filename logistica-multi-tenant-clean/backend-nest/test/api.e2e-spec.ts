@@ -191,11 +191,15 @@ describe('Multi-Tenant Data Isolation - E2E', () => {
   });
 
   afterAll(async () => {
-    if (productB) await prisma.product.deleteMany({ where: { id: productB.id } });
-    if (supplierB) await prisma.supplier.deleteMany({ where: { id: supplierB.id } });
+    if (productB)
+      await prisma.product.deleteMany({ where: { id: productB.id } });
+    if (supplierB)
+      await prisma.supplier.deleteMany({ where: { id: supplierB.id } });
     if (userA) await prisma.user.deleteMany({ where: { id: userA.id } });
-    if (companyB) await prisma.company.deleteMany({ where: { id: companyB.id } });
-    if (companyA) await prisma.company.deleteMany({ where: { id: companyA.id } });
+    if (companyB)
+      await prisma.company.deleteMany({ where: { id: companyB.id } });
+    if (companyA)
+      await prisma.company.deleteMany({ where: { id: companyA.id } });
     await app.close();
   });
 

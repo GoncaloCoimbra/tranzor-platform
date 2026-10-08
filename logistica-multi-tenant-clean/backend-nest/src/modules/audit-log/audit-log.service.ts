@@ -47,11 +47,11 @@ export class AuditLogService {
   }
 
   async findByEntity(entity: string, entityId: string, companyId: string) {
-    return this.auditLogRepository.findByEntity(entity, entityId);
+    return this.auditLogRepository.findByEntity(entity, entityId, companyId);
   }
 
   async findByUser(userId: string, companyId: string) {
-    return this.auditLogRepository.findByUser(userId);
+    return this.auditLogRepository.findByUser(userId, companyId);
   }
 
   async getActionStats(companyId: string) {

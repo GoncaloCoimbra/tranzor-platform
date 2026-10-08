@@ -72,7 +72,9 @@ const developmentCorsOrigins = [
   'http://localhost:3000',
   'http://localhost:3003',
 ];
-const gatewayCorsOrigins = ['production', 'staging'].includes(process.env.NODE_ENV ?? '')
+const gatewayCorsOrigins = ['production', 'staging'].includes(
+  process.env.NODE_ENV ?? '',
+)
   ? (process.env.CORS_ORIGIN ?? '')
       .split(',')
       .map((origin) => origin.trim())
@@ -114,7 +116,7 @@ export class AppGateway {
       await client.join(room);
 
       this.logger.log(`Client ${client.id} joined tenant room ${room}`);
-    } catch (error) {
+    } catch {
       this.logger.warn(`Rejected WebSocket connection ${client.id}`);
       client.disconnect(true);
     }

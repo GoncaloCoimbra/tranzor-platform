@@ -1,5 +1,8 @@
 import { PrismaService } from '../database/prisma.service';
-import { LogisticsRedisSubscriber, parseStockSyncEvent } from './redis-subscriber';
+import {
+  LogisticsRedisSubscriber,
+  parseStockSyncEvent,
+} from './redis-subscriber';
 
 describe('parseStockSyncEvent', () => {
   const validEvent = {
@@ -46,11 +49,13 @@ describe('parseStockSyncEvent', () => {
       processedStockSyncEvent: { create: jest.fn().mockResolvedValue({}) },
       product: {
         findFirst: jest.fn(async () => ({ id: 'product-1', updatedAt })),
-        updateMany: jest.fn(async ({ data }: { data: { quantity: number } }) => {
-          stock = data.quantity;
-          updatedAt = newerVersion;
-          return { count: 1 };
-        }),
+        updateMany: jest.fn(
+          async ({ data }: { data: { quantity: number } }) => {
+            stock = data.quantity;
+            updatedAt = newerVersion;
+            return { count: 1 };
+          },
+        ),
       },
     };
     const prisma = {

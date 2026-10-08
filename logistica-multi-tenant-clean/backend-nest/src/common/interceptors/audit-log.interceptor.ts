@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { AuditLogService } from '../../modules/audit-log/audit-log.service';
 
 @Injectable()
@@ -112,7 +111,7 @@ export class AuditLogInterceptor implements NestInterceptor {
             ' [INTERCEPTOR] Error na requisição (detalhes):',
             JSON.stringify(errorDetail),
           );
-        } catch (e) {
+        } catch {
           console.log(
             ' [INTERCEPTOR] Error na requisição (detalhes):',
             errorDetail,
@@ -133,7 +132,7 @@ export class AuditLogInterceptor implements NestInterceptor {
               );
             }
           }
-        } catch (auditError) {
+        } catch {
           // Silently ignores audit errors during errors
         }
 

@@ -163,7 +163,7 @@ export class TasksService {
     userRole: string,
     userCompanyId: string,
   ) {
-    const task = await this.findOne(id, userId, userRole, userCompanyId);
+    await this.findOne(id, userId, userRole, userCompanyId);
 
     const updateData: any = {};
 
@@ -209,7 +209,7 @@ export class TasksService {
     userRole: string,
     userCompanyId: string,
   ) {
-    const task = await this.findOne(id, userId, userRole, userCompanyId);
+    await this.findOne(id, userId, userRole, userCompanyId);
 
     const updatedTask = await this.prisma.task.update({
       where: { id },
@@ -230,7 +230,7 @@ export class TasksService {
     userRole: string,
     userCompanyId: string,
   ) {
-    const task = await this.findOne(id, userId, userRole, userCompanyId);
+    await this.findOne(id, userId, userRole, userCompanyId);
 
     await this.prisma.task.delete({
       where: { id },

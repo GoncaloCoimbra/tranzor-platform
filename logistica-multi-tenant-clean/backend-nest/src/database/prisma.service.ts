@@ -26,26 +26,31 @@ export class PrismaService
 
   async onModuleInit() {
     let connected = false;
-    await verifyStartupDependencies([
-      {
-        name: 'PostgreSQL',
-        check: async () => {
-          await this.$connect();
-          await this.$queryRaw`SELECT 1`;
-          connected = true;
+    await verifyStartupDependencies(
+      [
+        {
+          name: 'PostgreSQL',
+          check: async () => {
+            await this.$connect();
+            await this.$queryRaw`SELECT 1`;
+            connected = true;
+          },
         },
+      ],
+      {
+        onAttemptFailure: (name, attempt, error) =>
+          this.logger.error(
+            `Startup dependency ${name} attempt ${attempt} failed`,
+            error instanceof Error ? error.stack : String(error),
+          ),
+        onDegraded: (name, error) =>
+          this.logger.warn(
+            `ALLOW_DEGRADED=true: continuing without ${name}: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          ),
       },
-    ], {
-      onAttemptFailure: (name, attempt, error) => this.logger.error(
-        `Startup dependency ${name} attempt ${attempt} failed`,
-        error instanceof Error ? error.stack : String(error),
-      ),
-      onDegraded: (name, error) => this.logger.warn(
-        `ALLOW_DEGRADED=true: continuing without ${name}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      ),
-    });
+    );
     if (connected) this.logger.log('Prisma connected to database');
 
     // Add middleware to inject companyId

@@ -18,8 +18,7 @@ export class ListProductsDto extends FilterProductDto {
 
   @IsOptional()
   @IsIn(['createdAt', 'updatedAt', 'internalCode', 'quantity'])
-  sortBy: 'createdAt' | 'updatedAt' | 'internalCode' | 'quantity' =
-    'createdAt';
+  sortBy: 'createdAt' | 'updatedAt' | 'internalCode' | 'quantity' = 'createdAt';
 
   @IsOptional()
   @IsIn(['asc', 'desc'])

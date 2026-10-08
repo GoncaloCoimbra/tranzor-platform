@@ -20,13 +20,11 @@ import { TransportsService } from '../transports.service';
 import { CreateTransportDto } from '../dto/create-transport.dto';
 import { UpdateTransportDto } from '../dto/update-transport.dto';
 import { AddTransportProductDto } from '../dto/add-transport-product.dto';
-import { FilterTransportDto } from '../dto/filter-transport.dto';
 import { ListTransportsDto } from '../dto/list-transports.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { TenantGuard } from '../../auth/guards/tenant.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Role, TransportStatus } from '@prisma/client';
 
 @Controller('transports')

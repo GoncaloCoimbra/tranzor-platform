@@ -123,8 +123,12 @@ describe('Prisma tenant middleware', () => {
     expect(persistedMovement?.companyId).toBe(company.id);
     expect(persistedTransportProduct?.companyId).toBe(company.id);
 
-    await prisma.productMovement.deleteMany({ where: { id: createdMovement.id } });
-    await prisma.transportProduct.deleteMany({ where: { id: createdTransportProduct.id } });
+    await prisma.productMovement.deleteMany({
+      where: { id: createdMovement.id },
+    });
+    await prisma.transportProduct.deleteMany({
+      where: { id: createdTransportProduct.id },
+    });
     await prisma.transport.deleteMany({ where: { id: transport.id } });
     await prisma.vehicle.deleteMany({ where: { id: vehicle.id } });
     await prisma.product.deleteMany({ where: { id: product.id } });

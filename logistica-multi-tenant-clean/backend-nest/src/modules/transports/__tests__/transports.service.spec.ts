@@ -360,24 +360,18 @@ describe('TransportsService', () => {
             },
             transportProduct: { create: jest.fn() },
             product: {
-              update: jest
-                .fn()
-                .mockResolvedValue({
-                  status: 'DISPATCHED',
-                  quantity: stockQuantity,
-                }),
+              update: jest.fn().mockResolvedValue({
+                status: 'DISPATCHED',
+                quantity: stockQuantity,
+              }),
             },
             productMovement: { create: jest.fn() },
             vehicle: { update: jest.fn() },
           };
 
-          try {
-            const result = await callback(tx);
-            committedTransports.push(transportId);
-            return result;
-          } catch (error) {
-            throw error;
-          }
+          const result = await callback(tx);
+          committedTransports.push(transportId);
+          return result;
         },
       );
 

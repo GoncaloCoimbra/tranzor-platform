@@ -32,8 +32,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       typeof exceptionResponse === 'object' && exceptionResponse !== null
         ? (exceptionResponse as ExceptionResponseBody)
         : null;
-    const message = responseBody?.message ?? exceptionResponse ??
-      (exception instanceof Error ? exception.message : 'Internal server error');
+    const message =
+      responseBody?.message ??
+      exceptionResponse ??
+      (exception instanceof Error
+        ? exception.message
+        : 'Internal server error');
     const error =
       responseBody?.error ??
       (exception instanceof HttpException

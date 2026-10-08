@@ -32,9 +32,9 @@ export class AuditLogRepository extends BaseRepository<AuditLog> {
     return this.prisma.auditLog.count({ where });
   }
 
-  async findByUser(userId: string): Promise<AuditLog[]> {
+  async findByUser(userId: string, companyId: string): Promise<AuditLog[]> {
     return this.prisma.auditLog.findMany({
-      where: { userId },
+      where: { userId, companyId },
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
@@ -52,9 +52,10 @@ export class AuditLogRepository extends BaseRepository<AuditLog> {
   async findByEntity(
     entityType: string,
     entityId: string,
+    companyId: string,
   ): Promise<AuditLog[]> {
     return this.prisma.auditLog.findMany({
-      where: { entityId },
+      where: { entity: entityType, entityId, companyId },
       orderBy: { createdAt: 'desc' },
       include: {
         user: {

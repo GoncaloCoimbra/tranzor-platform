@@ -10,7 +10,6 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { UpdateProductStatusDto } from './dto/update-product-status.dto';
-import { FilterProductDto } from './dto/filter-product.dto';
 import { ListProductsDto } from './dto/list-products.dto';
 
 @Injectable()
@@ -125,7 +124,10 @@ export class ProductsService {
     return product;
   }
 
-  async findAll(companyId: string, filters: ListProductsDto = new ListProductsDto()) {
+  async findAll(
+    companyId: string,
+    filters: ListProductsDto = new ListProductsDto(),
+  ) {
     const where: any = {
       companyId, // Add companyId filter to restrict to current company
     };
@@ -315,7 +317,7 @@ export class ProductsService {
     id: string,
     updateProductDto: UpdateProductDto,
     companyId: string,
-    userId: string,
+    _userId: string,
   ) {
     const product = await this.findOne(id, companyId);
 
@@ -414,13 +416,17 @@ export class ProductsService {
   }
 
   //  MÉTODO REMOVE COM VALIDAÇÃO DE STATUS
-  async remove(id: string, companyId: string, userId: string) {
-    const productRecord = await this.prisma.product.findUnique({ where: { id } });
+  async remove(id: string, companyId: string, _userId: string) {
+    const productRecord = await this.prisma.product.findUnique({
+      where: { id },
+    });
     if (!productRecord) {
       throw new NotFoundException('product not found');
     }
     if (productRecord.companyId !== companyId) {
-      throw new ForbiddenException('Cannot delete a product from another company');
+      throw new ForbiddenException(
+        'Cannot delete a product from another company',
+      );
     }
     const product = await this.findOne(id, companyId);
 
