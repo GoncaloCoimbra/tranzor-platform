@@ -40,15 +40,6 @@ export class NotificationsController {
     @Body() createNotificationDto: CreateNotificationDto,
     @CurrentUser() user: UserPayload,
   ) {
-    console.log('📨 POST /notifications called');
-    console.log(' DTO received:', createNotificationDto);
-    console.log('👤 User from token:', {
-      id: user.id,
-      email: user.email,
-      companyId: user.companyId,
-      role: user.role,
-    });
-
     // SEMPRE usa o userId e companyId do token, ignorando o body
     // Isso garante segurança e evita problemas com ValidationPipe
     const userId = user.id;
@@ -60,9 +51,6 @@ export class NotificationsController {
       );
     }
 
-    console.log('🎯 Creating notification for userId:', userId);
-    console.log('🏢 Creating notification for companyId:', companyId);
-
     try {
       const result = await this.notificationsService.create({
         title: createNotificationDto.title,
@@ -71,7 +59,6 @@ export class NotificationsController {
         companyId: companyId,
       });
 
-      console.log('Notification created successfully');
       return result;
     } catch (error) {
       console.error(' Error in controller:', error.message);

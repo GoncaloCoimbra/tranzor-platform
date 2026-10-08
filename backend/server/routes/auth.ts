@@ -122,17 +122,11 @@ router.post('/login', validate(loginSchema), asyncHandler(async (req: Request, r
 // POST /auth/register
 router.post('/register', validate(registerSchema), asyncHandler(async (req: Request, res: Response) => {
 	const { name, email, password, role = 'user', company, taxId, phone } = req.body;
-	if (process.env.DEBUG) {
-		console.log('DEBUG POST /auth/register body:', JSON.stringify(req.body));
-	}
 	logger.info(`Register attempt for email: ${email}`);
 
 	try {
 		const existingUser = await User.findOne({ email });
 		if (existingUser) {
-			if (process.env.DEBUG) {
-				console.log(`DEBUG Register failed: email already exists: ${email}`);
-			}
 			logger.warn(`Register failed: email already exists: ${email}`);
 			throw new ConflictError('Email já registado');
 		}
