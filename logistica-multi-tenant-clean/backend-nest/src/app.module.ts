@@ -5,7 +5,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD, APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './controllers/app.controller';
 import { AppService } from './app.service';
-import { AppGateway } from './app.gateway';
 
 // DATABASE MODULES
 
@@ -76,6 +75,7 @@ import { TenantInterceptor } from '@common/interceptors/tenant.interceptor';
     VehiclesModule,
     NotificationsModule,
     TasksModule,
+    ReferralsModule,
     StockReservationsModule,
     RealtimeModule,
     TutorialsModule,

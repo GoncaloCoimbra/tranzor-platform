@@ -1,9 +1,12 @@
 ﻿import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import Redis from 'ioredis';
 import { app } from './server/config/app';
 import { logger } from './server/config/logger';
+import { env } from './server/config/env';
 import { disconnectPrismaClients, initializePrismaClients } from './server/config/prisma';
 import { disconnectRedis } from './server/utils/cache';
+import { verifyStartupDependencies } from './server/utils/startupDependencies';
 import connectDB from './server/config/db';
 import { initializeProductSearch } from './server/services/productSearch';
 
@@ -52,11 +55,46 @@ const shutdown = async (signal: string) => {
   }
 };
 
+async function checkRedisConnection(): Promise<void> {
+  if (!env.REDIS_URL) throw new Error('REDIS_URL is not configured');
+  const redis = new Redis(env.REDIS_URL, {
+    lazyConnect: true,
+    maxRetriesPerRequest: 1,
+    enableOfflineQueue: false,
+    retryStrategy: () => null,
+  });
+  redis.on('error', (error) => logger.error('Redis startup probe error:', error));
+
+  try {
+    await redis.connect();
+    if (await redis.ping() !== 'PONG') {
+      throw new Error('Redis startup ping returned an unexpected response');
+    }
+  } finally {
+    redis.disconnect();
+  }
+}
+
 const startServer = async () => {
   try {
     dotenv.config();
-    await initializePrismaClients();
-    await connectDB();
+    const dependencies = [
+      { name: 'MongoDB', check: connectDB },
+      ...(env.DATABASE_URL
+        ? [{ name: 'PostgreSQL', check: initializePrismaClients }]
+        : []),
+      { name: 'Redis', check: checkRedisConnection },
+    ];
+    await verifyStartupDependencies(dependencies, {
+      onAttemptFailure: (name, attempt, error) => logger.error(
+        `Startup dependency ${name} attempt ${attempt} failed`,
+        error,
+      ),
+      onDegraded: (name, error) => logger.warn(
+        `ALLOW_DEGRADED=true: continuing without ${name}`,
+        error,
+      ),
+    });
     await initializeProductSearch();
 
     server = app.listen(PORT, () => {

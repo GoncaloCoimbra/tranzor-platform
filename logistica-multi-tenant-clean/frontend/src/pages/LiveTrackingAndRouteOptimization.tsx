@@ -141,7 +141,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const selectedVehicle = React.useMemo(() => 
+  const selectedVehicle = React.useMemo(() =>
     vehicles.find(v => String(v.id) === String(selectedVehicleId)),
     [vehicles, selectedVehicleId]
   );
@@ -220,7 +220,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
         console.log('?? Vehicle selected via query:', match.id);
       }
     }
-  }, [location.search]);
+  }, [location.search, vehicles]);
 
   useEffect(() => {
     const totalFuelSaved = routes.reduce((acc, route) => acc + (route.estimatedFuel - route.optimizedFuel), 0);
@@ -264,7 +264,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     const params = new URLSearchParams(location.search);
     const transportId = params.get('transport');
     const vehicleId = params.get('vehicle');
-    
+
     if (transportId && trackingRoutes.length > 0) {
       // Procurar pela route usando v�rias propriedades poss�veis (id, transportId, transport.id)
       const match = trackingRoutes.find(r =>
@@ -284,7 +284,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
         console.warn('Available routes:', trackingRoutes.map(r => ({ id: r.id, transportId: (r as any).transportId || (r as any).transport?.id || null, name: r.name })));
       }
     }
-    
+
     // If vehicleId exists, also select the vehicle
     if (vehicleId && vehicles.length > 0) {
       const vehicleMatch = vehicles.find(v => String(v.id) === String(vehicleId));
@@ -329,7 +329,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
     }
   };
 
-  
+
 
   const getStatusColor = (status: Vehicle['status']) => {
     switch (status) {
@@ -768,7 +768,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                       <button
                         onClick={() => {
                           if (selectedVehicle) {
-                            const routesVehicle = trackingRoutes.filter(r => 
+                            const routesVehicle = trackingRoutes.filter(r =>
                               String(r.vehicle?.id) === String(selectedVehicle) || String(r.vehicleId) === String(selectedVehicle)
                             );
                             if (routesVehicle.length > 0) {
@@ -798,7 +798,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                             id: r.id,
                             name: r.name || r.origin + ' ? ' + r.destination,
                             locations: r.locations || [],
-                            status: (r.status === 'in_transit' || r.status === 'pending' || r.status === 'completed') 
+                            status: (r.status === 'in_transit' || r.status === 'pending' || r.status === 'completed')
                               ? r.status as 'in_progress' | 'pending' | 'completed'
                               : 'pending' as const
                           }))}
@@ -1031,7 +1031,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                       <div>
                         <label className="block text-sm font-bold text-slate-300 mb-2">Origin *</label>
-                        <Input type="text" 
+                        <Input type="text"
                           value={newRoute.origin}
                           onChange={(e) => setNewRoute({...newRoute, origin: e.target.value})}
                           className="w-full px-4 py-2 bg-slate-800 border-2 border-emerald-500/30 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
@@ -1040,7 +1040,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-slate-300 mb-2">Destination *</label>
-                        <Input type="text" 
+                        <Input type="text"
                           value={newRoute.destination}
                           onChange={(e) => setNewRoute({...newRoute, destination: e.target.value})}
                           className="w-full px-4 py-2 bg-slate-800 border-2 border-emerald-500/30 rounded-lg text-white focus:border-emerald-500 focus:outline-none"
@@ -1077,7 +1077,7 @@ const LiveTrackingRouteOptimization: React.FC = () => {
                             <div className="w-6 h-6 bg-slate-700 rounded-full flex items-center justify-center text-xs text-slate-300">
                               {index + 1}
                             </div>
-                            <Input type="text" 
+                            <Input type="text"
                               value={stop}
                               onChange={(e) => {
                                 const novasParadas = [...newRoute.stops];
@@ -1599,4 +1599,3 @@ const LiveTrackingRouteOptimization: React.FC = () => {
 };
 
 export default LiveTrackingRouteOptimization;
-

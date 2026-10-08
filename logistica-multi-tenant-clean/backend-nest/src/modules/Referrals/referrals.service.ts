@@ -182,7 +182,7 @@ export class ReferralsService {
     userRole: string,
     userCompanyId: string,
   ) {
-    const referral = await this.findOne(id, userId, userRole, userCompanyId);
+    await this.findOne(id, userId, userRole, userCompanyId);
 
     const updateData: any = {};
 
@@ -243,7 +243,7 @@ export class ReferralsService {
     userRole: string,
     userCompanyId: string,
   ) {
-    const referral = await this.findOne(id, userId, userRole, userCompanyId);
+    await this.findOne(id, userId, userRole, userCompanyId);
 
     const updatedReferral = await this.prisma.referral.update({
       where: { id },
@@ -264,7 +264,7 @@ export class ReferralsService {
     userRole: string,
     userCompanyId: string,
   ) {
-    const referral = await this.findOne(id, userId, userRole, userCompanyId);
+    await this.findOne(id, userId, userRole, userCompanyId);
 
     await this.prisma.referral.delete({
       where: { id },

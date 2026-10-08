@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { randomBytes, createHash } from 'crypto';
 
@@ -64,7 +60,10 @@ export class ApiKeysService {
       return null;
     }
 
-    await this.updateLastUsedAtIfNeeded(apiKeyRecord.id, apiKeyRecord.lastUsedAt);
+    await this.updateLastUsedAtIfNeeded(
+      apiKeyRecord.id,
+      apiKeyRecord.lastUsedAt,
+    );
 
     return {
       companyId: apiKeyRecord.companyId,

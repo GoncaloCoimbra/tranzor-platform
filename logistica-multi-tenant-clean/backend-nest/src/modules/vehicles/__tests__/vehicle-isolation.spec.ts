@@ -124,10 +124,11 @@ describe('Vehicle isolation across companies', () => {
       companyBFindOne,
     );
 
-    const companyBFindByLicensePlate = await vehicleRepository.findByLicensePlate(
-      vehicleA.licensePlate,
-      companyB.id,
-    );
+    const companyBFindByLicensePlate =
+      await vehicleRepository.findByLicensePlate(
+        vehicleA.licensePlate,
+        companyB.id,
+      );
     console.log(
       'vehicleRepository.findByLicensePlate(vehicleA.licensePlate, companyB.id) =>',
       companyBFindByLicensePlate,
@@ -155,7 +156,9 @@ describe('Vehicle isolation across companies', () => {
         vehicleA.id,
         companyB.id,
       );
-      console.log('checkVehicleAvailability(vehicleA.id, companyB.id) unexpectedly succeeded');
+      console.log(
+        'checkVehicleAvailability(vehicleA.id, companyB.id) unexpectedly succeeded',
+      );
     } catch (error) {
       checkAvailabilityError = error;
       console.log(

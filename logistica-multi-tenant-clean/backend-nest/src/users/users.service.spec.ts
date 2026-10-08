@@ -2,11 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { PrismaService } from '../database/prisma.service';
 import { UserRepository } from '../database/repositories/user.repository';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let prismaService: PrismaService;
 
   const mockPrismaService = {
     user: {
@@ -69,8 +67,7 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    // @ts-ignore
+    // @ts-expect-error test injects the repository into an otherwise private dependency.
     service['userRepository'] = mockUserRepository;
     jest.clearAllMocks();
   });

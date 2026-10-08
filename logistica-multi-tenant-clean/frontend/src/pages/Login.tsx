@@ -1,7 +1,6 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { debugApi, debugLogin } from '../utils/apiDebug';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme } from '../theme.config';
 
@@ -189,7 +188,7 @@ const Login: React.FC = () => {
               <label className="block text-sm font-medium mb-2" style={{ color: ds.textSecondary }}>
                 Email
               </label>
-              <Input type="email" 
+              <Input type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
@@ -203,7 +202,7 @@ const Login: React.FC = () => {
               <label className="block text-sm font-medium mb-2" style={{ color: ds.textSecondary }}>
                 Password
               </label>
-              <Input type="password" 
+              <Input type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required

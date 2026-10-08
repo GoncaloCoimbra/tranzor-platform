@@ -71,7 +71,7 @@ export class VehiclesService {
         if (isNaN(capacity) || capacity < 0) {
           throw new Error('Invalid capacity');
         }
-      } catch (error) {
+      } catch {
         this.logger.error(`? Invalid capacity: ${data.capacity}`);
         throw new BadRequestException(
           'Capacity must be a valid number greater than or equal to 0',
@@ -84,7 +84,7 @@ export class VehiclesService {
         if (isNaN(year) || year < 1900 || year > currentYear + 1) {
           throw new Error('Invalid year');
         }
-      } catch (error) {
+      } catch {
         this.logger.error(`? Invalid year: ${data.year}`);
         const currentYear = new Date().getFullYear();
         throw new BadRequestException(

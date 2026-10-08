@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
@@ -41,21 +41,21 @@ const getErrorMessage = (error: any, defaultMessage: string): string => {
   console.log('[ERROR DEBUG] Estrutura completa do error:', error);
   console.log('[ERROR DEBUG] error.response:', error?.response);
   console.log('[ERROR DEBUG] error.response.data:', error?.response?.data);
-  
+
   if (!error) return defaultMessage;
-  
+
   // 1️⃣ Tentar extrair de error.response.data
   if (error.response?.data) {
     const date = error.response.data;
     console.log('📦 [ERROR DEBUG] date type:', typeof date);
     console.log('📦 [ERROR DEBUG] date.message:', date.message);
-    
+
     // Se date é string diretamente
     if (typeof date === 'string') {
       console.log(' [ERROR DEBUG] Retornando date como string');
       return date;
     }
-    
+
     // Se date.message existe
     if (date.message) {
       // Se é array (validação do NestJS)
@@ -74,7 +74,7 @@ const getErrorMessage = (error: any, defaultMessage: string): string => {
         return date.message.message;
       }
     }
-    
+
     // Se date.error existe e é string
     if (date.error && typeof date.error === 'string') {
       console.log(' [ERROR DEBUG] Retornando date.error');
@@ -105,13 +105,13 @@ const getErrorMessage = (error: any, defaultMessage: string): string => {
       return error.response.statusText;
     }
   }
-  
+
   // 2️⃣ Tentar error.message
   if (error.message && typeof error.message === 'string') {
     console.log(' [ERROR DEBUG] Retornando error.message');
     return error.message;
   }
-  
+
   // 3️⃣ Se nada funcionar, retornar mensagem padrão
   console.log('⚠️ [ERROR DEBUG] Retornando mensagem padrão');
   return defaultMessage;
@@ -121,7 +121,7 @@ const SupplierList: React.FC = () => {
   const { language } = useLanguage();
   const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const { activeFilters, addFilter, removeFilter, clearAllFilters, getFilter } = useFilters();
-  
+
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -130,9 +130,9 @@ const SupplierList: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
-  
+
   const [searchTerm, setSearchTerm] = useState(getFilter('search'));
-  
+
   const [formData, setFormData] = useState({
     name: '',
     nif: '',
@@ -153,10 +153,6 @@ const SupplierList: React.FC = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    loadSuppliers();
-  }, [activeFilters]);
-
   const loadUser = async () => {
     try {
       const response = await api.get('/auth/me');
@@ -175,18 +171,18 @@ const SupplierList: React.FC = () => {
     }
   };
 
-  const loadSuppliers = async () => {
+  const loadSuppliers = useCallback(async () => {
     try {
       setError('');
-      
+
       const params = new URLSearchParams();
       activeFilters.forEach(filter => {
         params.append(filter.key, filter.value);
       });
-      
+
       const queryString = params.toString();
       const url = `/suppliers${queryString ? `?${queryString}` : ''}`;
-      
+
       const response = await api.get(url);
       setSuppliers(asList<Supplier>(response.data));
     } catch (error: any) {
@@ -195,7 +191,11 @@ const SupplierList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeFilters]);
+
+  useEffect(() => {
+    loadSuppliers();
+  }, [loadSuppliers]);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -209,7 +209,7 @@ const SupplierList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     try {
       if (!formData.name || !formData.email || !formData.phone || !formData.nif) {
         setError('Por favor, preencha todos os campos obrigatórios');
@@ -222,7 +222,7 @@ const SupplierList: React.FC = () => {
         return;
       }
 
-      const companyIdToUse = user?.role === 'SUPER_ADMIN' 
+      const companyIdToUse = user?.role === 'SUPER_ADMIN'
         ? (editingId ? user?.companyId : selectedCompanyId)
         : user?.companyId;
 
@@ -247,7 +247,7 @@ const SupplierList: React.FC = () => {
       } else {
         await api.post('/suppliers', dataToSend);
       }
-      
+
       await loadSuppliers();
       resetForm();
     } catch (error: any) {
@@ -283,11 +283,11 @@ const SupplierList: React.FC = () => {
         console.error(' Error deleting supplier:', error);
         console.error(' Status do error:', error?.response?.status);
         console.error(' Date do error:', error?.response?.data);
-        
+
         const errorMsg = getErrorMessage(error, 'Error deleting supplier');
         console.log('📝 Mensagem de error extraída:', errorMsg);
         setError(errorMsg);
-        
+
         // 🔔 Scroll suave para o topo para mostrar o error
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -369,7 +369,7 @@ const SupplierList: React.FC = () => {
 
       {/* Barra de Pesquisa */}
       <Card style={{ marginBottom: 'var(--space-lg)' }}>
-        <Input type="text" 
+        <Input type="text"
           placeholder="Name ou NIF..."
           value={searchTerm}
           onChange={(e) => handleSearchChange(e.target.value)}
@@ -431,14 +431,14 @@ const SupplierList: React.FC = () => {
               </Card>
             )}
 
-            <Input type="text" 
+            <Input type="text"
               label="Name Completo *"
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Ex: Supplier XYZ Ltd."
             />
-            <Input type="text" 
+            <Input type="text"
               label="NIF/NIPC *"
               required
               value={formData.nif}
@@ -446,7 +446,7 @@ const SupplierList: React.FC = () => {
               placeholder="Ex: 123456789"
               maxLength={9}
             />
-            <Input type="email" 
+            <Input type="email"
               label="Email *"
               required
               value={formData.email}
@@ -462,20 +462,20 @@ const SupplierList: React.FC = () => {
               placeholder="+351 912 345 678"
             />
             <div style={{ gridColumn: '1 / -1' }}>
-              <Input type="text" 
+              <Input type="text"
                 label="Address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 placeholder="Rua, número, andar"
               />
             </div>
-            <Input type="text" 
+            <Input type="text"
               label="City"
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               placeholder="Ex: Porto"
             />
-            <Input type="text" 
+            <Input type="text"
               label="País"
               value={formData.state}
               onChange={(e) => setFormData({ ...formData, state: e.target.value })}

@@ -200,7 +200,12 @@ describe('ProductsService - State Machine Tests', () => {
 
   it('lists only tenant products at or below the low-stock threshold', async () => {
     const products = [
-      { internalCode: 'SKU-1', description: 'Low quantity', quantity: 2, unit: 'pcs' },
+      {
+        internalCode: 'SKU-1',
+        description: 'Low quantity',
+        quantity: 2,
+        unit: 'pcs',
+      },
     ];
     (prisma.product.findMany as jest.Mock).mockResolvedValue(products);
     (prisma.product.count as jest.Mock).mockResolvedValue(1);

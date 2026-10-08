@@ -2,6 +2,7 @@
 
 import { ChatOpsEngine, logisticsCircuitBreaker } from '../src/chatOpsEngine';
 import { prisma } from '../src/prismaClient';
+import { publishPortfolioEvent, STOCK_SYNC_CHANNEL } from '../src/redisClient';
 
 jest.mock('../src/prismaClient', () => ({
   prisma: {
@@ -62,7 +63,12 @@ describe('ChatOpsEngine', () => {
     process.env.LOGISTICS_API_KEY = 'test-logistics-api-key';
     const mockFetch = jest.fn(async (_url: string, _options?: RequestInit) => ({
       ok: true,
-      json: async () => ({ stock: 15, description: 'Demo SKU' }),
+      json: async () => ({
+        stock: 15,
+        description: 'Demo SKU',
+        companyId: 'logistics-company-1',
+        updatedAt: '2026-10-06T12:00:00.000Z',
+      }),
     }));
     (global as any).fetch = mockFetch;
 
@@ -81,6 +87,22 @@ describe('ChatOpsEngine', () => {
     expect(mockFetch).toHaveBeenCalledWith(expectedUrl, expect.objectContaining({
       headers: { 'X-API-Key': 'test-logistics-api-key' },
     }));
+    expect(publishPortfolioEvent).toHaveBeenLastCalledWith(
+      STOCK_SYNC_CHANNEL,
+      expect.any(String),
+    );
+    const event = JSON.parse((publishPortfolioEvent as jest.Mock).mock.calls.at(-1)[1]);
+    expect(event).toMatchObject({
+      type: 'stock_sync',
+      companyId: 'logistics-company-1',
+      sku: 'SKU-123',
+      stock: 15,
+      productUpdatedAt: '2026-10-06T12:00:00.000Z',
+      source: 'chatops',
+    });
+    expect(event.eventId).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
   });
 
   it('reports an explicit configuration error when the Logistics API key is missing', async () => {
@@ -218,7 +240,12 @@ describe('ChatOpsEngine', () => {
       .mockRejectedValueOnce(networkError)
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ stock: 22, description: 'Recovered SKU' }),
+        json: async () => ({
+          stock: 22,
+          description: 'Recovered SKU',
+          companyId: 'logistics-company-1',
+          updatedAt: '2026-10-06T12:00:00.000Z',
+        }),
       });
 
     const originalGlobalFetch = (global as any).fetch;

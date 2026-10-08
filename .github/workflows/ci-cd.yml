@@ -18,7 +18,7 @@ jobs:
   # ============ BACKEND TESTS ============
   backend-test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15
@@ -46,15 +46,14 @@ jobs:
 
       - name: Install dependencies (Backend)
         working-directory: backend
-        run: npm ci || npm install
+        run: npm ci
 
       - name: Setup database
         working-directory: backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/Tranzor_test
         run: |
-          npx prisma migrate status --schema prisma/schema.prisma || true
-          npx prisma migrate deploy --schema prisma/schema.prisma || true
+          npx prisma migrate deploy --schema prisma/schema.prisma
 
       - name: Run unit tests
         working-directory: backend
@@ -83,11 +82,11 @@ jobs:
 
       - name: Install dependencies (Frontend)
         working-directory: frontend
-        run: npm ci || npm install
+        run: npm ci
 
-      - name: Lint
+      - name: Frontend typecheck
         working-directory: frontend
-        run: npm run lint 2>/dev/null || true
+        run: npx tsc --noEmit
 
       - name: Build
         working-directory: frontend
@@ -101,7 +100,7 @@ jobs:
   e2e-test:
     runs-on: ubuntu-latest
     needs: [backend-test, frontend-test]
-    
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     services:
@@ -145,12 +144,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/Tranzor_test
         run: |
-          npx prisma migrate status --schema prisma/schema.prisma || true
           npx prisma migrate deploy --schema prisma/schema.prisma
 
       - name: Install dependencies (Frontend)
         working-directory: frontend
-        run: npm ci || npm install
+        run: npm ci
 
       - name: Install Playwright browsers
         working-directory: backend
@@ -194,12 +192,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/Tranzor_test
         run: |
-          npx prisma migrate status --schema prisma/schema.prisma || true
-          npx prisma migrate deploy --schema prisma/schema.prisma || true
+          npx prisma migrate deploy --schema prisma/schema.prisma
 
       - name: Install dependencies (Frontend)
         working-directory: frontend
-        run: npm ci || npm install
+        run: npm ci
 
       - name: Install Playwright browsers
         working-directory: backend
@@ -213,7 +210,7 @@ jobs:
           PLAYWRIGHT_FULL: 'true'
         run: npm run test:e2e
         timeout-minutes: 60
-      
+
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         with:
@@ -276,7 +273,7 @@ jobs:
   deploy-staging:
     runs-on: ubuntu-latest
     needs: [backend-test, frontend-test, code-quality]
-    
+
     if: github.event_name == 'workflow_dispatch'
 
     steps:
@@ -298,45 +295,3 @@ jobs:
         if: failure()
         run: |
           bash scripts/rollback-staging.sh
-
-  # ============ DEPLOY TO PRODUCTION ============
-  deploy-production:
-    runs-on: ubuntu-latest
-    needs: [backend-test, frontend-test, e2e-test, code-quality]
-    
-    if: github.event_name == 'workflow_dispatch'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Make scripts executable
-        run: chmod +x scripts/*.sh
-
-      - name: Debug deployment script permissions
-        run: |
-          ls -la scripts/
-          stat -c '%n %A %a' scripts/validate-staging.sh scripts/deploy-staging.sh || true
-
-      - name: Deploy to production
-        run: |
-          echo "Deploying to production environment..."
-          bash scripts/deploy-staging.sh
-
-      - name: Notify Slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "Deployment completed successfully! 🚀",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Production Deployment Successful*\nVersion: ${{ github.sha }}\nBranch: main"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

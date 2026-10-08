@@ -11,7 +11,6 @@ import { PrismaService } from '../../database/prisma.service';
 import { TransportStatus, VehicleStatus, ProductStatus } from '@prisma/client';
 import { CreateTransportDto } from './dto/create-transport.dto';
 import { UpdateTransportDto } from './dto/update-transport.dto';
-import { FilterTransportDto } from './dto/filter-transport.dto';
 import { ListTransportsDto } from './dto/list-transports.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
@@ -984,7 +983,11 @@ export class TransportsService {
   }
 
   private emitTransportStatusChanged(
-    previousTransport: { companyId: string; id: string; status: TransportStatus },
+    previousTransport: {
+      companyId: string;
+      id: string;
+      status: TransportStatus;
+    },
     updatedTransport: { id: string; status: TransportStatus },
   ) {
     this.appGateway.emitToCompany(
@@ -1373,9 +1376,6 @@ export class TransportsService {
     const trackingRoutes = transports.map((t) => {
       const originCoords = this.getCityCoordinates(t.origin);
       const destCoords = this.getCityCoordinates(t.destination);
-      const midpointLat = (originCoords.lat + destCoords.lat) / 2;
-      const midpointLng = (originCoords.lng + destCoords.lng) / 2;
-
       // Garantir que as coordenadas são números válidos
       const safeOriginLat = Number(originCoords.lat) || 39.5;
       const safeOriginLng = Number(originCoords.lng) || -8.0;
@@ -1441,7 +1441,7 @@ export class TransportsService {
     return trackingRoutes;
   }
 
-  async deleteTrackingRoute(id: string, companyId?: string, userId?: string) {
+  async deleteTrackingRoute(id: string, companyId?: string, _userId?: string) {
     this.logger.log(`🗑️ Deleting route de rastreamento ${id}`);
 
     const transport = await this.findOne(id, companyId);

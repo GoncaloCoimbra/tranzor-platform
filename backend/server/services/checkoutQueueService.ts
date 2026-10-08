@@ -124,6 +124,11 @@ export interface CheckoutQueueData {
 checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<CheckoutQueueData>) => {
   const { orderId, items } = job.data;
   const locks: Map<string, string> = new Map();
+  const decrementedItems: Array<{
+    productId: string;
+    quantity: number;
+    previousInStock: boolean;
+  }> = [];
 
   try {
     console.log(`[CHECKOUT QUEUE] Processando ordem ${orderId}...`);
@@ -134,12 +139,6 @@ checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<Checkou
       const lockId = await acquireStockLock(item.productId, 10000); // 10s timeout
 
       if (!lockId) {
-        const lockDisabled = !process.env.REDIS_URL?.trim() || process.env.DISABLE_REDIS === 'true' || process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
-        if (lockDisabled) {
-          console.warn(`[CHECKOUT QUEUE] Lock distribuído indisponível; a continuar sem lock para produto ${item.productId}`);
-          continue;
-        }
-
         throw new Error(`TIMEOUT ao adquirir lock para produto ${item.productId}`);
       }
 
@@ -159,9 +158,14 @@ checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<Checkou
         );
       }
 
-      // Decrement atômico
-      const updatedProduct = await Product.findByIdAndUpdate(
-        item.productId,
+      // Keep the stock check and decrement in one MongoDB operation so concurrent
+      // checkouts cannot both consume the last units.
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.productId,
+          inStock: true,
+          stockQuantity: { $gte: item.quantity },
+        },
         {
           $inc: {
             stockQuantity: -item.quantity,
@@ -172,8 +176,14 @@ checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<Checkou
       );
 
       if (!updatedProduct) {
-        throw new Error(`Falha ao atualizar stock para produto ${item.productId}`);
+        throw new Error(`Stock insuficiente ou alterado para produto ${item.productId}`);
       }
+
+      decrementedItems.push({
+        productId: item.productId,
+        quantity: item.quantity,
+        previousInStock: product.inStock,
+      });
 
       // Marcar como out-of-stock se necessário
       if (updatedProduct.stockQuantity === 0) {
@@ -201,10 +211,14 @@ checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<Checkou
     try {
       console.log(`[CHECKOUT QUEUE] Executando compensação (rollback)...`);
 
-      // Reverter stock para todos os produtos
-      for (const item of items) {
+      // Reverter apenas os decrementos confirmados.
+      for (const item of decrementedItems) {
         await Product.findByIdAndUpdate(item.productId, {
-          $inc: { stockQuantity: item.quantity }, // Rollback: adicionar de volta
+          $inc: {
+            stockQuantity: item.quantity,
+            salesCount: -item.quantity,
+          },
+          $set: { inStock: item.previousInStock },
         });
       }
 

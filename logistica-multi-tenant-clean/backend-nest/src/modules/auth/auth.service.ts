@@ -12,6 +12,7 @@ import { RegisterDto } from './dto/register.dto';
 import { AuthResponseDto } from './dto/auth-response.dto';
 import { UpdateProfileDto, ChangePasswordDto } from './dto/update-profile.dto';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import { Role } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -36,7 +37,7 @@ export class AuthService {
 
   //  REGISTER
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const { email, password, name, role, companyId } = registerDto;
+    const { email, password, name } = registerDto;
 
     this.logger.log(`🔵 Starting registration for: ${email}`);
 
@@ -53,27 +54,21 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     //  CORREÇÃO: Usar transação para garantir que tudo seja salvo
-    const result = await this.prisma.$transaction(async (tx) => {
-      let finalCompanyId = companyId;
+    await this.prisma.$transaction(async (tx) => {
+      this.logger.log(` Creating default company for: ${name}`);
 
-      // If no companyId and not SUPER_ADMIN, create default company
-      if (!companyId && role !== Role.SUPER_ADMIN) {
-        this.logger.log(` Creating default company for: ${name}`);
+      const company = await tx.company.create({
+        data: {
+          name: `${name}'s Company`,
+          nif: `TEMP-${Date.now()}`,
+          email,
+          phone: null,
+          address: null,
+          isActive: true,
+        },
+      });
 
-        const company = await tx.company.create({
-          data: {
-            name: `${name}'s Company`,
-            nif: `TEMP-${Date.now()}`, // Gerar NIF temporário único
-            email: email,
-            phone: null,
-            address: null,
-            isActive: true,
-          },
-        });
-
-        finalCompanyId = company.id;
-        this.logger.log(` Company created with ID: ${company.id}`);
-      }
+      this.logger.log(` Company created with ID: ${company.id}`);
 
       // Create o usuário
       const user = await tx.user.create({
@@ -81,8 +76,8 @@ export class AuthService {
           name,
           email,
           password: hashedPassword,
-          role: role || Role.OPERATOR,
-          companyId: finalCompanyId ?? undefined,
+          role: Role.OPERATOR,
+          companyId: company.id,
         },
       });
 
@@ -173,7 +168,10 @@ export class AuthService {
       const errorMessage =
         error instanceof Error ? error.message : JSON.stringify(error);
       const errorStack = error instanceof Error ? error.stack : undefined;
-      this.logger.error(`Login error for ${email}: ${errorMessage}`, errorStack);
+      this.logger.error(
+        `Login error for ${email}: ${errorMessage}`,
+        errorStack,
+      );
       throw error;
     }
   }
@@ -314,7 +312,6 @@ export class AuthService {
             where: { id: t.id },
             data: { revoked: true },
           });
-          break;
         }
       }
 
@@ -391,6 +388,7 @@ export class AuthService {
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: process.env.JWT_SECRET || 'replace-with-a-secure-random-secret',
       expiresIn: '30d',
+      jwtid: randomUUID(),
     });
 
     // Persist refresh token (hashed) for revocation support
@@ -416,16 +414,17 @@ export class AuthService {
     const tokens = await (this.prisma as any).refreshToken.findMany({
       where: { revoked: false },
     });
+    let revoked = false;
     for (const t of tokens) {
       if (await bcrypt.compare(refreshToken, t.tokenHash)) {
         await (this.prisma as any).refreshToken.update({
           where: { id: t.id },
           data: { revoked: true },
         });
-        return { revoked: true };
+        revoked = true;
       }
     }
-    return { revoked: false };
+    return { revoked };
   }
 
   private formatUser(user: any) {

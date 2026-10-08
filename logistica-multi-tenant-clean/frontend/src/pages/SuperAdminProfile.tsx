@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/api';
@@ -10,7 +10,7 @@ const SuperAdminProfile: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserData, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
-  
+
   // Profile form
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -67,9 +67,9 @@ const SuperAdminProfile: React.FC = () => {
     setPasswordLoading(true);
 
     try {
-      await api.put('/auth/change-password', { 
-        currentPassword, 
-        newPassword 
+      await api.put('/auth/change-password', {
+        currentPassword,
+        newPassword
       });
       setPasswordSuccess('Password alterada com success!');
       setCurrentPassword('');
@@ -183,7 +183,7 @@ const SuperAdminProfile: React.FC = () => {
             <button className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white font-semibold hover:from-amber-600 hover:to-amber-700 transition-all">
               {user?.name?.charAt(0).toUpperCase() || 'S'}
             </button>
-            
+
             {/* Dropdown Menu */}
             <div className="absolute right-0 mt-2 w-48 bg-slate-800 rounded-lg shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50 border border-slate-700">
               <button
@@ -234,9 +234,9 @@ const SuperAdminProfile: React.FC = () => {
               <div className="relative">
                 <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center border-4 border-slate-800 shadow-lg">
                   {getAvatarUrl() ? (
-                    <img 
-                      src={getAvatarUrl()!} 
-                      alt="Avatar" 
+                    <img
+                      src={getAvatarUrl()!}
+                      alt="Avatar"
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -343,7 +343,7 @@ const SuperAdminProfile: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-300 mb-2">
                         Name Completo
                       </label>
-                      <Input type="text" 
+                      <Input type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className={`${theme.inputs.base} w-full`}
@@ -355,7 +355,7 @@ const SuperAdminProfile: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-300 mb-2">
                         Email
                       </label>
-                      <Input type="email" 
+                      <Input type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className={`${theme.inputs.base} w-full`}
@@ -402,7 +402,7 @@ const SuperAdminProfile: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-300 mb-2">
                         Password Atual
                       </label>
-                      <Input type="password" 
+                      <Input type="password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         className={`${theme.inputs.base} w-full`}
@@ -414,7 +414,7 @@ const SuperAdminProfile: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-300 mb-2">
                         Nova Password
                       </label>
-                      <Input type="password" 
+                      <Input type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         className={`${theme.inputs.base} w-full`}
@@ -428,7 +428,7 @@ const SuperAdminProfile: React.FC = () => {
                       <label className="block text-sm font-medium text-slate-300 mb-2">
                         Confirmar Nova Password
                       </label>
-                      <Input type="password" 
+                      <Input type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className={`${theme.inputs.base} w-full`}

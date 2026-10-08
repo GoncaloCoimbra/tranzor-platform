@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
@@ -67,7 +67,7 @@ const Referrals: React.FC = () => {
     commission: 0,
   });
 
-  const loadReferrals = async () => {
+  const loadReferrals = useCallback(async () => {
     try {
       setLoadingReferrals(true);
       setReferralsError('');
@@ -96,7 +96,7 @@ const Referrals: React.FC = () => {
     } finally {
       setLoadingReferrals(false);
     }
-  };
+  }, [selectedCompanyId, user]);
 
   const toggleAdminMode = () => {
     if (!user || !updateUserData) return;
@@ -106,7 +106,7 @@ const Referrals: React.FC = () => {
 
   useEffect(() => {
     loadReferrals();
-  }, [user, selectedCompanyId]);
+  }, [loadReferrals]);
 
   const filteredReferrals = referrals.filter(referral => {
     if (user?.role === 'SUPER_ADMIN') {
@@ -739,7 +739,7 @@ const Referrals: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Estimated Value (€)</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">Estimated Value (ï¿½)</label>
                 <Input type="number"  value={formData.estimatedValue} placeholder="0"
                   onChange={(e) => setFormData({...formData, estimatedValue: parseFloat(e.target.value) || 0})} className={inputCls} />
               </div>
@@ -822,7 +822,7 @@ const Referrals: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-300 mb-2">Estimated Value (€)</label>
+                <label className="block text-sm font-bold text-slate-300 mb-2">Estimated Value (ï¿½)</label>
                 <Input type="number"  value={formData.estimatedValue} onChange={(e) => setFormData({...formData, estimatedValue: parseFloat(e.target.value) || 0})} className={inputCls} />
               </div>
               <div>
@@ -1001,5 +1001,4 @@ const Referrals: React.FC = () => {
 };
 
 export default Referrals;
-
 

@@ -56,6 +56,9 @@ services:
       JWT_SECRET: capacity-test-jwt-secret-not-for-production
       JWT_REFRESH_SECRET: capacity-test-refresh-secret-not-for-production
       APP_SHUTDOWN_TIMEOUT_MS: 5000
+      ALLOW_DEGRADED: ${ALLOW_DEGRADED:-false}
+      STARTUP_MAX_ATTEMPTS: ${STARTUP_MAX_ATTEMPTS:-5}
+      STARTUP_RETRY_DELAY_MS: ${STARTUP_RETRY_DELAY_MS:-250}
       RATE_LIMIT_MAX_REQUESTS: 500000
       RATE_LIMIT_WINDOW_MS: 900000
     depends_on:

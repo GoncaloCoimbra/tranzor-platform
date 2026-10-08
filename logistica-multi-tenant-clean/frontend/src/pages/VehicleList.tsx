@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
@@ -36,21 +36,21 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
   console.log('?? [ERROR DEBUG] Estrutura completa do error:', error);
   console.log('?? [ERROR DEBUG] error.response:', error?.response);
   console.log('?? [ERROR DEBUG] error.response.data:', error?.response?.data);
-  
+
   if (!error) return defaultMessage;
-  
+
   // 1?? Tentar extrair de error.response.data
   if (error.response?.data) {
     const date = error.response.data;
     console.log('?? [ERROR DEBUG] date type:', typeof date);
     console.log('?? [ERROR DEBUG] date.message:', date.message);
-    
+
     // Se date � string diretamente
     if (typeof date === 'string') {
       console.log(' [ERROR DEBUG] Retornando date como string');
       return date;
     }
-    
+
     // Se date.message existe
     if (date.message) {
       // Se � array (valida��o do NestJS)
@@ -69,7 +69,7 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
         return date.message.message;
       }
     }
-    
+
     // Se date.error existe e � string
     if (date.error && typeof date.error === 'string') {
       console.log(' [ERROR DEBUG] Retornando date.error');
@@ -82,13 +82,13 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
       return error.response.statusText;
     }
   }
-  
+
   // 2?? Tentar error.message
   if (error.message && typeof error.message === 'string') {
     console.log(' [ERROR DEBUG] Retornando error.message');
     return error.message;
   }
-  
+
   // 3?? Se nada funcionar, retornar mensagem padr�o
   console.log('?? [ERROR DEBUG] Retornando mensagem padr�o');
   return defaultMessage;
@@ -129,7 +129,6 @@ const VehicleList: React.FC = () => {
 
   useEffect(() => {
     loadUser();
-    loadVehicles();
   }, []);
 
   useEffect(() => {
@@ -156,15 +155,15 @@ const VehicleList: React.FC = () => {
     }
   };
 
-  const loadVehicles = async () => {
+  const loadVehicles = useCallback(async () => {
     try {
       setError('');
-      
+
       const params = new URLSearchParams();
       if (searchTerm) params.set('search', searchTerm);
       if (getFilter('status')) params.set('status', getFilter('status')!);
       if (getFilter('transport')) params.set('transportId', getFilter('transport')!);
-      
+
       const response = await api.get(`/vehicles?${params.toString()}`);
       setVehicles(response.data);
     } catch (error: any) {
@@ -173,7 +172,11 @@ const VehicleList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getFilter, searchTerm]);
+
+  useEffect(() => {
+    loadVehicles();
+  }, [loadVehicles]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -202,7 +205,7 @@ const VehicleList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     try {
       if (!formData.licensePlate || !formData.model || !formData.brand) {
         setError('Please fill in all required fields');
@@ -219,7 +222,7 @@ const VehicleList: React.FC = () => {
         return;
       }
 
-      const companyIdToUse = user?.role === 'SUPER_ADMIN' 
+      const companyIdToUse = user?.role === 'SUPER_ADMIN'
         ? (editingId ? user?.companyId : selectedCompanyId)
         : user?.companyId;
 
@@ -230,12 +233,12 @@ const VehicleList: React.FC = () => {
 
       const capacity = Number(formData.capacity);
       const year = Number(formData.year);
-      
+
       if (isNaN(capacity) || capacity <= 0) {
         setError('Invalid capacity. Please enter a number greater than zero.');
         return;
       }
-      
+
       if (isNaN(year) || year < 1900 || year > new Date().getFullYear() + 1) {
         setError('Invalid year. Please enter a valid year');
         return;
@@ -259,7 +262,7 @@ const VehicleList: React.FC = () => {
       } else {
         await api.post('/vehicles', dataToSend);
       }
-      
+
       await loadVehicles();
       resetForm();
     } catch (error: any) {
@@ -296,11 +299,11 @@ const VehicleList: React.FC = () => {
         console.error('? Error deleting vehicle:', error);
         console.error(' Status do error:', error?.response?.status);
         console.error(' Date do error:', error?.response?.data);
-        
+
         const errorMsg = extractErrorMessage(error, 'Error deleting vehicle');
         console.log('?? Extracted error message:', errorMsg);
         setError(errorMsg);
-        
+
         // ?? Scroll suave para o topo para mostrar o error
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -408,7 +411,7 @@ const VehicleList: React.FC = () => {
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <Input type="text" 
+          <Input type="text"
             placeholder={t('searchVehicles')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -491,12 +494,12 @@ const VehicleList: React.FC = () => {
                 </select>
               </div>
             )}
-            
+
             <div>
               <label className="block text-sm font-medium mb-1 text-amber-200">
                 License Plate *
               </label>
-              <Input type="text" 
+              <Input type="text"
                 required
                 value={formData.licensePlate}
                 onChange={(e) => setFormData({ ...formData, licensePlate: e.target.value })}
@@ -508,7 +511,7 @@ const VehicleList: React.FC = () => {
               <label className="block text-sm font-medium mb-1 text-amber-200">
                 Model *
               </label>
-              <Input type="text" 
+              <Input type="text"
                 required
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
@@ -520,7 +523,7 @@ const VehicleList: React.FC = () => {
               <label className="block text-sm font-medium mb-1 text-amber-200">
                 Brand *
               </label>
-              <Input type="text" 
+              <Input type="text"
                 required
                 value={formData.brand}
                 onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
@@ -532,7 +535,7 @@ const VehicleList: React.FC = () => {
               <label className="block text-sm font-medium mb-1 text-amber-200">
                 Year *
               </label>
-              <Input type="number" 
+              <Input type="number"
                 required
                 min="1900"
                 max={new Date().getFullYear() + 1}
@@ -545,7 +548,7 @@ const VehicleList: React.FC = () => {
               <label className="block text-sm font-medium mb-1 text-amber-200">
                 Capacity (kg) *
               </label>
-              <Input type="number" 
+              <Input type="number"
                 required
                 min="1"
                 step="1"
@@ -770,4 +773,3 @@ const VehicleList: React.FC = () => {
 };
 
 export default VehicleList;
-

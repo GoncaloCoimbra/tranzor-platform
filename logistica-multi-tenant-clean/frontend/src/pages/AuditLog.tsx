@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage, translateText, TRANSLATIONS } from '../i18n';
 import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
@@ -50,11 +50,7 @@ const AuditLog: React.FC = () => {
     entity: '',
   });
 
-  useEffect(() => {
-    loadData();
-  }, [page, filters]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -82,7 +78,11 @@ const AuditLog: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, page]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleDeleteLog = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this record from history?')) return;
@@ -105,15 +105,15 @@ const AuditLog: React.FC = () => {
       setStats(prev => prev ? { ...prev, totalActions: 0 } : null);
       setClearSuccess(true);
       setShowClearModal(false);
-      
+
       // Clear success message after 4 seconds
       setTimeout(() => setClearSuccess(false), 4000);
     } catch (error: any) {
       console.error('Error clearing history:', error);
-      
+
       // Garantir que errorMsg � sempre uma string
       let errorMsg = 'Error clearing history. Please try again later.';
-      
+
       if (error.response?.data) {
         const date = error.response.data;
         if (typeof date.message === 'string') {
@@ -126,7 +126,7 @@ const AuditLog: React.FC = () => {
       } else if (typeof error.message === 'string') {
         errorMsg = error.message;
       }
-      
+
       setClearError(errorMsg);
     } finally {
       setClearingLogs(false);
@@ -151,49 +151,49 @@ const AuditLog: React.FC = () => {
 
   const getActionBadge = (action: string) => {
     const actionConfig: Record<string, { color: string; label: string }> = {
-      CREATE: { 
+      CREATE: {
         color: 'bg-gradient-to-r from-emerald-900/40 to-emerald-800/30 text-emerald-300 border-emerald-500/30',
         label: 'Create'
       },
-      UPDATE: { 
+      UPDATE: {
         color: 'bg-gradient-to-r from-amber-900/40 to-amber-800/30 text-amber-300 border-amber-500/30',
         label: 'Update'
       },
-      DELETE: { 
+      DELETE: {
         color: 'bg-gradient-to-r from-red-900/40 to-red-800/30 text-red-300 border-red-500/30',
         label: 'Delete'
       },
-      LOGIN: { 
+      LOGIN: {
         color: 'bg-gradient-to-r from-red-900/40 to-red-800/30 text-red-300 border-red-500/30',
         label: 'Login'
       },
-      LOGOUT: { 
+      LOGOUT: {
         color: 'bg-gradient-to-r from-gray-900/40 to-gray-800/30 text-gray-300 border-gray-500/30',
         label: 'Logout'
       },
-      RECEIVE: { 
+      RECEIVE: {
         color: 'bg-gradient-to-r from-purple-900/40 to-purple-800/30 text-purple-300 border-purple-500/30',
         label: 'Receive'
       },
-      DISPATCH: { 
+      DISPATCH: {
         color: 'bg-gradient-to-r from-indigo-900/40 to-indigo-800/30 text-indigo-300 border-indigo-500/30',
         label: 'Send'
       },
-      APPROVE: { 
+      APPROVE: {
         color: 'bg-gradient-to-r from-green-900/40 to-green-800/30 text-green-300 border-green-500/30',
         label: 'Approve'
       },
-      REJECT: { 
+      REJECT: {
         color: 'bg-gradient-to-r from-orange-900/40 to-orange-800/30 text-orange-300 border-orange-500/30',
         label: 'Reject'
       },
-      CANCEL: { 
+      CANCEL: {
         color: 'bg-gradient-to-r from-slate-900/40 to-slate-800/30 text-slate-300 border-slate-500/30',
         label: 'Cancel'
       },
     };
 
-    const config = actionConfig[action] || { 
+    const config = actionConfig[action] || {
       color: 'bg-gradient-to-r from-gray-900/40 to-gray-800/30 text-gray-300 border-gray-500/30',
       label: action
     };
@@ -412,7 +412,7 @@ const AuditLog: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-amber-300 mb-2">User</label>
-            <Input type="text" 
+            <Input type="text"
               placeholder="User ID"
               value={filters.userId}
               onChange={(e) => handleFilterChange('userId', e.target.value)}
@@ -563,7 +563,7 @@ const AuditLog: React.FC = () => {
       {/* Clear History Confirmation Modal */}
       {showClearModal && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-black/60 z-40"
             onClick={() => !clearingLogs && setShowClearModal(false)}
           />
@@ -640,4 +640,3 @@ const AuditLog: React.FC = () => {
 };
 
 export default AuditLog;
-

@@ -191,9 +191,9 @@ describe('StockReservationsService', () => {
   it('does not expose a reservation owned by another company', async () => {
     (prisma.stockReservation.findFirst as jest.Mock).mockResolvedValue(null);
 
-    await expect(
-      service.findOne('reservation-a', 'company-b'),
-    ).rejects.toThrow(NotFoundException);
+    await expect(service.findOne('reservation-a', 'company-b')).rejects.toThrow(
+      NotFoundException,
+    );
 
     expect(prisma.stockReservation.findFirst).toHaveBeenCalledWith({
       where: {

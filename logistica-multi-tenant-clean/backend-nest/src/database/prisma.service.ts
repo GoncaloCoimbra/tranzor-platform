@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { TenantContextService } from '../common/tenant-context.service';
+import { verifyStartupDependencies } from '../common/startup-dependencies';
 
 @Injectable()
 export class PrismaService
@@ -24,8 +25,33 @@ export class PrismaService
   }
 
   async onModuleInit() {
-    await this.$connect();
-    this.logger.log(' Prisma connected to database');
+    let connected = false;
+    await verifyStartupDependencies(
+      [
+        {
+          name: 'PostgreSQL',
+          check: async () => {
+            await this.$connect();
+            await this.$queryRaw`SELECT 1`;
+            connected = true;
+          },
+        },
+      ],
+      {
+        onAttemptFailure: (name, attempt, error) =>
+          this.logger.error(
+            `Startup dependency ${name} attempt ${attempt} failed`,
+            error instanceof Error ? error.stack : String(error),
+          ),
+        onDegraded: (name, error) =>
+          this.logger.warn(
+            `ALLOW_DEGRADED=true: continuing without ${name}: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          ),
+      },
+    );
+    if (connected) this.logger.log('Prisma connected to database');
 
     // Add middleware to inject companyId
     this.$use(async (params, next) => {
@@ -66,6 +92,19 @@ export class PrismaService
             ...params.args.where,
             companyId,
           };
+        } else if (
+          params.action === 'count' ||
+          params.action === 'aggregate' ||
+          params.action === 'groupBy'
+        ) {
+          params.args.where = {
+            ...params.args.where,
+            companyId,
+          };
+        } else if (params.action === 'createMany') {
+          params.args.data = Array.isArray(params.args.data)
+            ? params.args.data.map((data) => ({ ...data, companyId }))
+            : { ...params.args.data, companyId };
         }
       }
 
@@ -90,6 +129,7 @@ export class PrismaService
       'TransportProduct',
       'ProductMovement',
       'StockReservation',
+      'ProcessedStockSyncEvent',
       'AuditLog',
       'Settings',
       'Notification',

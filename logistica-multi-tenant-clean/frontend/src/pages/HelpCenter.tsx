@@ -1,20 +1,22 @@
 import React, { useMemo, useState } from 'react';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 
+const HELP_ARTICLES = [
+  { id: 1, title: 'How to set up real-time tracking', tags: ['tracking', 'gps'] },
+  { id: 2, title: 'Managing multiple tenants', tags: ['tenants', 'multi-tenant'] },
+  { id: 3, title: 'Best practices for route optimization', tags: ['routes', 'optimization'] },
+];
+
 const HelpCenter: React.FC = () => {
   const [query, setQuery] = useState('');
 
-  const articles = [
-    { id: 1, title: 'How to set up real-time tracking', tags: ['tracking', 'gps'] },
-    { id: 2, title: 'Managing multiple tenants', tags: ['tenants', 'multi-tenant'] },
-    { id: 3, title: 'Best practices for route optimization', tags: ['routes', 'optimization'] },
-  ];
+  const articles = HELP_ARTICLES;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return articles;
     return articles.filter(a => a.title.toLowerCase().includes(q) || a.tags.some(t => t.includes(q)));
-  }, [query]);
+  }, [articles, query]);
 
   const openTicket = () => {
     window.location.href = 'mailto:support@example.com?subject=Support%20Logistics%20Multi-Tenant';
@@ -77,4 +79,3 @@ const HelpCenter: React.FC = () => {
 };
 
 export default HelpCenter;
-

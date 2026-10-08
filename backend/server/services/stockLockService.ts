@@ -23,15 +23,16 @@ async function getRedisClient(): Promise<Redis | null> {
       enableReadyCheck: false,
     });
 
-    redisClient.on('error', () => {
-      // Swallow connection noise in degraded/demo environments.
+    redisClient.on('error', (error) => {
+      console.error('[STOCK LOCK] Redis client error:', error);
     });
   }
 
   if (redisClient.status !== 'ready') {
     try {
       await redisClient.connect();
-    } catch {
+    } catch (error) {
+      console.error('[STOCK LOCK] Failed to connect to Redis:', error);
       return null;
     }
   }
@@ -40,7 +41,9 @@ async function getRedisClient(): Promise<Redis | null> {
 }
 
 const LOCK_PREFIX = 'stock:lock:';
-const LOCK_TTL = 30; // 30 segundos - tempo máximo para operação
+// The 30-second lease bounds abandoned locks after a worker crash. Without renewal,
+// checkout work must finish within this lease to retain mutual exclusion.
+const LOCK_TTL = 30;
 const LOCK_WAIT = 100; // ms entre tentativas
 
 /**

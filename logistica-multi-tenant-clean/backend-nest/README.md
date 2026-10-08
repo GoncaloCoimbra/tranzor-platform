@@ -4,6 +4,8 @@ Código ativo e produtivo da API NestJS com Prisma, Swagger e design modular.
 
 ## Quick Start
 
+O arranque confirma PostgreSQL e Redis com cinco tentativas por omissão; `ALLOW_DEGRADED=true` é a única opção para continuar sem uma dependência, e `STARTUP_MAX_ATTEMPTS`/`STARTUP_RETRY_DELAY_MS` configuram o número de tentativas e o backoff.
+
 ```bash
 # Instalar dependências (na raiz)
 npm install

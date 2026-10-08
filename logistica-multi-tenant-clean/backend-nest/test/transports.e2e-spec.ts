@@ -99,8 +99,6 @@ describeOrSkip('Transports e2e', () => {
   });
 
   test('create transport, add product and set delivered', async () => {
-    const ts = Date.now();
-
     const createTransport = await request(server)
       .post('/api/transports')
       .set('Authorization', `Bearer ${token}`)

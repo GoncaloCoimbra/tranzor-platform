@@ -6,17 +6,16 @@ const debug = Boolean(process.env.DEBUG);
 
 test.describe('E2E - E-commerce Flow', () => {
   test('User Registration and Login Flow', async ({ page }) => {
-    page.on('console', msg => { if (debug) console.log('BROWSER:', msg.text()); });
     page.on('pageerror', err => { if (debug) console.log('PAGE ERROR:', err.message); });
 
     page.on('request', req => {
       if (req.url().startsWith('http://localhost:3001')) {
-        debug && console.log(`[${new Date().toISOString()}] REQUEST:`, req.method(), req.url(), 'Cookie header:', req.headers()['cookie']);
+        debug && console.log(`[${new Date().toISOString()}] REQUEST:`, req.method(), req.url());
       }
     });
     page.on('response', res => {
       if (res.url().startsWith('http://localhost:3001')) {
-        debug && console.log(`[${new Date().toISOString()}] RESPONSE:`, res.status(), res.url(), 'Set-Cookie:', res.headers()['set-cookie']);
+        debug && console.log(`[${new Date().toISOString()}] RESPONSE:`, res.status(), res.url());
       }
     });
     page.on('requestfinished', req => {
@@ -34,21 +33,20 @@ test.describe('E2E - E-commerce Flow', () => {
     await page.goto(`${FRONTEND_URL}/auth/register`);
     await page.waitForSelector('input[name="email"]', { state: 'visible', timeout: 15000 });
     await page.waitForSelector('input[name="name"]', { state: 'visible', timeout: 15000 });
-    
+
     const email = `test${Date.now()}@example.com`;
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', 'TestPassword123!');
     await page.fill('input[name="name"]', 'John Doe');
     await page.fill('input[name="confirmPassword"]', 'TestPassword123!');
     await page.check('input[type="checkbox"]');
-    
+
     const [response] = await Promise.all([
       page.waitForResponse(res => res.url().includes('/auth/register') && res.request().method() === 'POST'),
       page.click('button[type="submit"]')
     ]);
     const cookies = await page.context().cookies();
-    debug && console.log('COOKIES IN CONTEXT AFTER REGISTER:', JSON.stringify(cookies, null, 2));
-    
+
     // Should be redirected to profile
     const [profileResponse] = await Promise.all([
       page.waitForResponse(res => res.url().includes('/account/profile') && res.request().method() === 'GET'),
@@ -57,25 +55,25 @@ test.describe('E2E - E-commerce Flow', () => {
     const body = await profileResponse.json();
     debug && console.log('PROFILE RESPONSE BODY:', JSON.stringify(body));
     await expect(page.locator('input[name="email"]').first()).toHaveValue(email);
-    
+
     // Logout via API cleanup if available
     await page.goto(`${FRONTEND_URL}/auth/login`);
     await page.waitForSelector('input[name="email"]', { state: 'visible', timeout: 15000 });
     await page.fill('input[name="email"]', email);
     await page.fill('input[name="password"]', 'TestPassword123!');
     await page.click('button[type="submit"]');
-    
+
     await expect(page).toHaveURL(`${FRONTEND_URL}/account/profile`);
   });
 
   test('Product browsing and filtering', async ({ page }) => {
     await page.goto(`${FRONTEND_URL}/shop/enhanced`);
     await page.waitForSelector('[data-testid="product-card"]', { state: 'visible', timeout: 15000 });
-    
+
     // Check products are displayed
     const productCards = page.locator('[data-testid="product-card"]');
     await expect(productCards.first()).toBeVisible();
-    
+
     // Filter by category using the visible category label
     await page.locator('label', { hasText: 'Artes' }).first().click();
     await expect(page.locator('label.filter-option.active', { hasText: 'Artes' })).toContainText('Artes');
@@ -92,7 +90,7 @@ test.describe('E2E - E-commerce Flow', () => {
     });
     page.on('request', req => {
       if (req.url().startsWith(API_URL)) {
-        debug && console.log(`[${new Date().toISOString()}] REQUEST:`, req.method(), req.url(), 'Cookie:', req.headers()['cookie']);
+        debug && console.log(`[${new Date().toISOString()}] REQUEST:`, req.method(), req.url());
       }
     });
     page.on('response', async res => {
@@ -197,22 +195,22 @@ test.describe('E2E - E-commerce Flow', () => {
 test.describe('Performance Tests', () => {
   test('Page load time - Homepage', async ({ page }) => {
     const startTime = Date.now();
-    
+
     await page.goto(`${FRONTEND_URL}/`);
-    
+
     const loadTime = Date.now() - startTime;
-    
+
     // Should load in less than 5 seconds (CI-friendly)
     expect(loadTime).toBeLessThan(5000);
   });
 
   test('Page load time - Shop', async ({ page }) => {
     const startTime = Date.now();
-    
+
     await page.goto(`${FRONTEND_URL}/shop`);
-    
+
     const loadTime = Date.now() - startTime;
-    
+
     // Increased threshold for CI shared runners
     expect(loadTime).toBeLessThan(4000);
   });
@@ -221,14 +219,14 @@ test.describe('Performance Tests', () => {
 test.describe('Accessibility Tests', () => {
   test('Homepage accessibility', async ({ page }) => {
     await page.goto(`${FRONTEND_URL}/`);
-    
+
     // Check for main landmark
     await expect(page.locator('main')).toBeVisible();
-    
+
     // Check for proper heading hierarchy
     const h1 = await page.locator('h1');
     await expect(h1).toHaveCount(1);
-    
+
     // Check for proper link text
     const links = await page.locator('a');
     const count = await links.count();
@@ -237,7 +235,7 @@ test.describe('Accessibility Tests', () => {
 
   test('Keyboard navigation', async ({ page }) => {
     await page.goto(`${FRONTEND_URL}/`);
-    
+
     // Tab through interactive elements
     await page.press('body', 'Tab');
     const focused = page.locator(':focus');

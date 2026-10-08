@@ -5,12 +5,12 @@ import { pipeline } from 'stream/promises';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyMultipart from '@fastify/multipart';
-import fastifyStatic from '@fastify/static';
 import { createServer } from 'http';
 import WebSocket, { WebSocketServer } from 'ws';
 import Redis from 'ioredis';
 import client from 'prom-client';
-import { publishPortfolioEvent } from './redisClient';
+import { checkRedisConnection, publishPortfolioEvent } from './redisClient';
+import { verifyStartupDependencies } from './startupDependencies';
 import { ChatOpsEngine } from './chatOpsEngine';
 import { prisma } from './prismaClient';
 import { getJwtSecret, verifyCommerceToken, type CommerceIdentity } from './auth';
@@ -41,8 +41,7 @@ fastify.register(fastifyCors, {
   origin: allowedCorsOrigins,
   credentials: true,
 });
-fastify.register(fastifyMultipart);
-fastify.register(fastifyStatic, { root: UPLOAD_DIR, prefix: '/uploads/', decorateReply: false });
+fastify.register(fastifyMultipart, { preservePath: true });
 
 interface ChatMessage {
   id: string;
@@ -63,6 +62,11 @@ interface FileRecord {
   name: string;
   url: string;
   size: number;
+}
+
+interface StoredUpload {
+  channelId: string;
+  path: string;
 }
 
 interface ConnectionMeta {
@@ -97,11 +101,23 @@ const knownUsers = new Map<string, ChatUser>();
 const channelMemberCache = new Map<string, Array<{ id: string; name: string }>>();
 const callRooms = new Map<string, CallRoom>();
 const publicChannelIds = new Set(['logistica', 'geral', 'comercial', 'suporte', 'alertas']);
-const channelFiles = new Map<string, FileRecord[]>([
-  ['logistica', [
-    { id: 'file-1', name: 'relatorio-de-estoque.pdf', url: '/uploads/relatorio-de-estoque.pdf', size: 154321 }
-  ]],
-]);
+const channelFiles = new Map<string, FileRecord[]>();
+const storedUploads = new Map<string, StoredUpload>();
+const allowedUploadTypes: Record<string, string> = {
+  '.csv': 'text/csv',
+  '.doc': 'application/msword',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.gif': 'image/gif',
+  '.jpeg': 'image/jpeg',
+  '.jpg': 'image/jpeg',
+  '.pdf': 'application/pdf',
+  '.png': 'image/png',
+  '.txt': 'text/plain',
+  '.webp': 'image/webp',
+  '.xls': 'application/vnd.ms-excel',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.zip': 'application/zip',
+};
 
 const metrics = {
   httpRequests: 0,
@@ -852,9 +868,9 @@ fastify.get('/health', async () => {
       completed: startupCompleted,
       error: startupError,
     },
-    db: process.env.SKIP_PRISMA
+    db: process.env.NODE_ENV === 'test'
       ? { enabled: false, status: 'skipped' }
-      : { enabled: true, status: 'connected' },
+      : { enabled: true, status: databaseConnected ? 'connected' : 'unavailable' },
     redis: redisHealth,
     websocket: WS_PORT ? 'enabled' : 'disabled',
     timestamp: new Date().toISOString(),
@@ -915,8 +931,8 @@ fastify.get('/metrics/prometheus', async (request, reply) => {
 });
 
 async function checkRedisHealth() {
-  const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
-  const configured = Boolean(process.env.REDIS_URL);
+  const redisUrl = process.env.REDIS_URL?.trim();
+  const configured = Boolean(redisUrl);
   const health = {
     configured,
     connected: false,
@@ -929,6 +945,10 @@ async function checkRedisHealth() {
     health.error = 'disabled';
     return health;
   }
+  if (!redisUrl) {
+    health.error = 'REDIS_URL is not configured';
+    return health;
+  }
 
   const redis = new Redis(redisUrl, {
     lazyConnect: true,
@@ -937,9 +957,7 @@ async function checkRedisHealth() {
     retryStrategy: () => null,
   });
 
-  redis.on('error', () => {
-    // silence expected connection failures so health checks stay stable
-  });
+  redis.on('error', (error) => console.error('[chatops] Redis health probe error:', error));
 
   try {
     const start = Date.now();
@@ -1115,17 +1133,82 @@ fastify.get('/channels/:channelId/files', { preHandler: requireAuthentication },
 fastify.post('/upload', { preHandler: requireAuthentication }, async (request, reply) => {
   const data = await request.file();
   if (!data) return reply.code(400).send({ error: 'Nenhum ficheiro enviado' });
-  const extension = path.extname(data.filename || '');
-  const safeName = `${Date.now()}-${data.filename?.replace(/[^a-zA-Z0-9.\-_/]/g, '_') || 'upload'}${extension}`;
-  const filePath = path.join(UPLOAD_DIR, safeName);
-  await pipeline(data.file, fs.createWriteStream(filePath));
+  const channelField = data.fields.channelId;
+  const field = Array.isArray(channelField) ? channelField[0] : channelField;
+  const channelId = field && 'value' in field && typeof field.value === 'string'
+    ? field.value
+    : '';
+  if (!channelId || typeof channelId !== 'string') {
+    data.file.resume();
+    return reply.code(400).send({ error: 'Canal inválido' });
+  }
+  const identity = getRequestIdentity(request)!;
+  if (!(await canAccessChannel(channelId, identity.id))) {
+    data.file.resume();
+    return reply.code(403).send({ error: 'Não tem acesso a este canal.' });
+  }
+
+  const filename = data.filename || '';
+  if (filename.includes('/') || filename.includes('\\') || filename.includes('\0')) {
+    data.file.resume();
+    return reply.code(400).send({ error: 'Nome de ficheiro inválido' });
+  }
+  const extension = path.extname(filename).toLowerCase();
+  const contentType = allowedUploadTypes[extension];
+  if (!contentType || path.basename(filename) !== filename) {
+    data.file.resume();
+    return reply.code(400).send({ error: 'Tipo ou nome de ficheiro não permitido' });
+  }
+
+  const id = randomUUID();
+  const storageName = `${id}${extension}`;
+  const uploadRoot = path.resolve(UPLOAD_DIR);
+  const filePath = path.resolve(uploadRoot, storageName);
+  const relativePath = path.relative(uploadRoot, filePath);
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+    data.file.resume();
+    return reply.code(400).send({ error: 'Caminho de ficheiro inválido' });
+  }
+  await pipeline(data.file, fs.createWriteStream(filePath, { flags: 'wx' }));
   const stats = await fs.promises.stat(filePath);
-  const fileUrl = `/uploads/${safeName}`;
-  return {
+  const fileUrl = `/channels/${encodeURIComponent(channelId)}/files/${id}`;
+  const record = {
+    id,
+    name: filename,
     url: fileUrl,
-    name: data.filename,
     size: stats.size,
   };
+  storedUploads.set(id, { channelId, path: filePath });
+  channelFiles.set(channelId, [...(channelFiles.get(channelId) || []), record]);
+  return {
+    url: fileUrl,
+    name: filename,
+    size: stats.size,
+  };
+});
+
+fastify.get('/channels/:channelId/files/:fileId', { preHandler: requireAuthentication }, async (request, reply) => {
+  const { channelId, fileId } = request.params as { channelId: string; fileId: string };
+  const identity = getRequestIdentity(request)!;
+  if (!(await canAccessChannel(channelId, identity.id))) {
+    return reply.code(403).send({ error: 'Não tem acesso a este canal.' });
+  }
+
+  const upload = storedUploads.get(fileId);
+  const record = channelFiles.get(channelId)?.find((file) => file.id === fileId);
+  if (!upload || upload.channelId !== channelId || !record) {
+    return reply.code(404).send({ error: 'Ficheiro não encontrado' });
+  }
+
+  const uploadRoot = path.resolve(UPLOAD_DIR);
+  const filePath = path.resolve(upload.path);
+  const relativePath = path.relative(uploadRoot, filePath);
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+    return reply.code(404).send({ error: 'Ficheiro não encontrado' });
+  }
+  const contentType = allowedUploadTypes[path.extname(filePath).toLowerCase()];
+  if (!contentType) return reply.code(404).send({ error: 'Ficheiro não encontrado' });
+  return reply.type(contentType).header('Content-Disposition', `inline; filename="${fileId}${path.extname(filePath)}"`).send(fs.createReadStream(filePath));
 });
 
 const httpServer = createServer();
@@ -1133,23 +1216,40 @@ export const wss = new WebSocketServer({ server: httpServer });
 
 let hasStarted = false;
 let isShuttingDown = false;
+let databaseConnected = false;
 
 export async function startServer() {
   if (hasStarted) return;
   hasStarted = true;
   startupCompleted = false;
   startupError = null;
+  databaseConnected = false;
 
   try {
     getJwtSecret();
-    // SKIP_PRISMA is a development/test flag only. It skips the database
-    // connect step but does not change authentication logic or WebSocket
-    // token parsing. Do not set this in production.
-    if (!process.env.SKIP_PRISMA) {
-      await prisma.$connect();
-      console.log('Prisma connected');
+    if (process.env.NODE_ENV !== 'test') {
+      await verifyStartupDependencies([
+        {
+          name: 'PostgreSQL',
+          check: async () => {
+            await prisma.$connect();
+            await prisma.$queryRaw`SELECT 1`;
+            databaseConnected = true;
+          },
+        },
+        { name: 'Redis', check: checkRedisConnection },
+      ], {
+        onAttemptFailure: (name, attempt, error) => console.error(
+          `Startup dependency ${name} attempt ${attempt} failed:`,
+          error,
+        ),
+        onDegraded: (name, error) => console.warn(
+          `ALLOW_DEGRADED=true: continuing without ${name}:`,
+          error,
+        ),
+      });
     } else {
-      console.log('SKIP_PRISMA set — skipping prisma.$connect()');
+      databaseConnected = false;
     }
 
     await fastify.listen({ host: '0.0.0.0', port: HTTP_PORT });
@@ -1947,7 +2047,7 @@ if (process.env.NODE_ENV !== 'test') {
         enableOfflineQueue: false,
         reconnectOnError: () => false,
       });
-      redis.on('error', () => undefined);
+      redis.on('error', (error: unknown) => console.error('[chatops] Redis connection error:', error));
       await redis.psubscribe('channel:*');
       redis.on('pmessage', (_pattern: string, channel: string, message: string) => {
         const channelId = channel.replace('channel:', '');

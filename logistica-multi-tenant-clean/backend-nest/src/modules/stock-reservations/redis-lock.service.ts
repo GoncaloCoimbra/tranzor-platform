@@ -1,10 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 
 @Injectable()
-export class RedisLockService {
+export class RedisLockService implements OnModuleDestroy {
   private readonly logger = new Logger(RedisLockService.name);
   private redisClient: Redis | null = null;
+
+  async onModuleDestroy(): Promise<void> {
+    const client = this.redisClient;
+    this.redisClient = null;
+    if (!client) return;
+
+    try {
+      if (client.status === 'ready') {
+        await client.quit();
+      }
+    } finally {
+      client.disconnect();
+    }
+  }
 
   async acquireLock(key: string): Promise<string | null> {
     const redis = await this.getRedisClient();
@@ -82,7 +96,7 @@ export class RedisLockService {
     try {
       await this.redisClient.connect();
       return this.redisClient;
-    } catch (error) {
+    } catch {
       this.logger.warn(
         'Redis lock client could not connect; reservations will be rejected safely.',
       );

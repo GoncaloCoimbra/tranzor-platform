@@ -168,19 +168,15 @@ export async function initializePrismaClients(): Promise<void> {
     return;
   }
 
-  try {
-    await primaryPrisma.$connect();
-    await primaryPrisma.$queryRaw`SELECT 1`;
+  await primaryPrisma.$connect();
+  await primaryPrisma.$queryRaw`SELECT 1`;
 
-    if (replicaPrisma && replicaPrisma !== primaryPrisma) {
-      await replicaPrisma.$connect();
-      await replicaPrisma.$queryRaw`SELECT 1`;
-    }
-
-    logger.info('Prisma clients connected successfully');
-  } catch (error) {
-    logger.warn('Prisma clients unavailable during startup; continuing in degraded mode', error);
+  if (replicaPrisma && replicaPrisma !== primaryPrisma) {
+    await replicaPrisma.$connect();
+    await replicaPrisma.$queryRaw`SELECT 1`;
   }
+
+  logger.info('Prisma clients connected successfully');
 }
 
 export async function disconnectPrismaClients() {

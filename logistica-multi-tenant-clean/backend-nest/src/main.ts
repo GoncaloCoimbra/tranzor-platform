@@ -5,7 +5,9 @@ import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { LogisticsRedisSubscriber } from './integration/redis-subscriber';
-const helmet = require('helmet');
+import { verifyStartupDependencies } from './common/startup-dependencies';
+import { PrismaService } from './database/prisma.service';
+import helmet from 'helmet';
 
 // SERIALIZATION FIX (BigInt/Date)
 
@@ -20,13 +22,6 @@ const helmet = require('helmet');
 
 export async function createApp(): Promise<NestExpressApplication> {
   const logger = new Logger('Bootstrap');
-
-  // ensure required env vars
-  if (!process.env.DATABASE_URL) {
-    logger.warn(
-      '⚠️ DATABASE_URL is not set; continuing in degraded mode so health checks remain available.',
-    );
-  }
 
   // CREATE NEST APPLICATION
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -130,15 +125,6 @@ export async function createApp(): Promise<NestExpressApplication> {
   });
   logger.log('📁 Pasta de uploads configurada: /uploads/');
 
-  const redisSubscriber = new LogisticsRedisSubscriber();
-  if (process.env.NODE_ENV !== 'test') {
-    console.log('Starting Redis subscriber...');
-    await redisSubscriber.start();
-    console.log('Redis subscriber started');
-  } else {
-    logger.log('⚠️ Skipping Redis subscriber initialization in test environment');
-  }
-
   // INITIALIZATION LOGS (just information — `listen` is controlled by the caller)
   logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   logger.log('✅ NestJS application ready (no listener).');
@@ -151,8 +137,37 @@ export async function createApp(): Promise<NestExpressApplication> {
 // Only start the server when not in test environment, unless forced for smoke validation.
 if (process.env.NODE_ENV !== 'test' || process.env.FORCE_START === 'true') {
   (async () => {
-    const app = await createApp();
-    const port = process.env.PORT || 3000;
-    await app.listen(port);
+    const logger = new Logger('Bootstrap');
+    try {
+      const app = await createApp();
+      await app.init();
+      const redisSubscriber = new LogisticsRedisSubscriber(
+        app.get(PrismaService),
+      );
+      await verifyStartupDependencies(
+        [{ name: 'Redis', check: () => redisSubscriber.start() }],
+        {
+          onAttemptFailure: (name, attempt, error) =>
+            logger.error(
+              `Startup dependency ${name} attempt ${attempt} failed`,
+              error instanceof Error ? error.stack : String(error),
+            ),
+          onDegraded: (name, error) =>
+            logger.warn(
+              `ALLOW_DEGRADED=true: continuing without ${name}: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+            ),
+        },
+      );
+      const port = process.env.PORT || 3000;
+      await app.listen(port);
+    } catch (error) {
+      logger.error(
+        'Application startup failed; exiting with status 1',
+        error instanceof Error ? error.stack : String(error),
+      );
+      process.exit(1);
+    }
   })();
 }

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useProduct, useProductWithMovements } from '../hooks/useProducts';
 import { apiClient } from '../api/config';
@@ -58,53 +58,53 @@ const ProductDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
+
   const { data: product, isLoading: loading, error } = useProductWithMovements(id!);
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [showAddFilter, setShowAddFilter] = useState(false);
   const [newFilterType, setNewFilterType] = useState<'supplier' | 'vehicle' | 'status' | 'location'>('supplier');
   const [newFilterValue, setNewFilterValue] = useState('');
-  
+
   // States to delete product
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Load filters from URL params
-  const loadFiltersFromURL = () => {
+  const loadFiltersFromURL = useCallback(() => {
     const params = new URLSearchParams(searchParams);
     const filters: ActiveFilter[] = [];
-    
+
     // Parse supplier filter
     const supplier = params.get('supplier');
     if (supplier) {
       filters.push({ type: 'supplier', label: 'Supplier', value: supplier });
     }
-    
+
     // Parse vehicle filter
     const vehicle = params.get('vehicle');
     if (vehicle) {
       filters.push({ type: 'vehicle', label: 'Vehicle', value: vehicle });
     }
-    
+
     // Parse status filter
     const status = params.get('status');
     if (status) {
       filters.push({ type: 'status', label: 'Status', value: status });
     }
-    
+
     // Parse location filter
     const location = params.get('location');
     if (location) {
       filters.push({ type: 'location', label: 'Location', value: location });
     }
-    
+
     setActiveFilters(filters);
-  };
+  }, [searchParams]);
 
   useEffect(() => {
     loadFiltersFromURL();
-  }, [id]);
+  }, [id, loadFiltersFromURL]);
 
   // Function to delete product
   const handleDeleteProduct = async () => {
@@ -115,10 +115,10 @@ const ProductDetails: React.FC = () => {
 
     try {
       await apiClient.delete(`/products/${product.id}`);
-      
+
       // Success - redirect to products list
-      navigate('/products', { 
-        state: { 
+      navigate('/products', {
+        state: {
           message: `Product "${product.description}" was successfully deleted!`,
           type: 'success'
         }
@@ -126,13 +126,13 @@ const ProductDetails: React.FC = () => {
     } catch (error: any) {
       console.error('Error deleting product:', error);
       console.error('Full response:', error.response);
-      
+
       // Capture error message from API - ensure it is always a string
       let errorMessage = 'Error deleting product. Please try again.';
-      
+
       if (error.response) {
         const { status, data } = error.response;
-        
+
         // Handle 403 (Forbidden) specifically
         if (status === 403) {
           errorMessage = '🔒 You do not have permission to delete this product. Please check your access permissions.';
@@ -162,7 +162,7 @@ const ProductDetails: React.FC = () => {
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setDeleteError(errorMessage);
       setDeleting(false);
     }
@@ -198,11 +198,11 @@ const ProductDetails: React.FC = () => {
 
   const handleBackToList = () => {
     const params = new URLSearchParams();
-    
+
     activeFilters.forEach((filter: ActiveFilter) => {
       params.append(filter.type, filter.value);
     });
-    
+
     const queryString = params.toString();
     navigate(`/products${queryString ? `?${queryString}` : ''}`);
   };
@@ -336,7 +336,7 @@ const ProductDetails: React.FC = () => {
                   <label className="block text-sm font-medium text-amber-300 mb-2">
                     Value
                   </label>
-                  <Input type="text" 
+                  <Input type="text"
                     value={newFilterValue}
                     onChange={(e) => setNewFilterValue(e.target.value)}
                     placeholder="Enter a value..."
@@ -412,7 +412,7 @@ const ProductDetails: React.FC = () => {
       {/* Movement History */}
       <div className="bg-gradient-to-br from-[#1e293b]/80 to-[#0f172a]/80 rounded-xl shadow-2xl border border-amber-500/30 p-8">
         <h3 className="text-xl font-semibold text-white mb-6">📜 Movement History</h3>
-        
+
         {!product.movements || product.movements.length === 0 ? (
           <div className="text-center py-8">
             <svg className="w-16 h-16 text-amber-500/30 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -423,16 +423,16 @@ const ProductDetails: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {product.movements.map((movement: Movement) => (
-              <div 
-                key={movement.id} 
+              <div
+                key={movement.id}
                 className="bg-gradient-to-br from-amber-900/20 to-amber-900/10 rounded-lg p-4 border border-amber-500/20 hover:border-amber-500/40 transition-all"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="mb-3">
                       <span className="font-medium text-white">
-                        {movement.previousStatus 
-                          ? `${statusLabels.product[movement.previousStatus]} → ` 
+                        {movement.previousStatus
+                          ? `${statusLabels.product[movement.previousStatus]} → `
                           : ''}
                         <span className="text-amber-400">
                           {statusLabels.product[movement.newStatus]}
@@ -466,7 +466,7 @@ const ProductDetails: React.FC = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-black/60 z-40"
             onClick={() => !deleting && setShowDeleteModal(false)}
           />
@@ -537,4 +537,3 @@ const ProductDetails: React.FC = () => {
 };
 
 export default ProductDetails;
-

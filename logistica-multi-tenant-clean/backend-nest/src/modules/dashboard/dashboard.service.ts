@@ -76,10 +76,12 @@ export class DashboardService {
       ]);
       const totalReservedQuantity = reservedStock._sum.quantity ?? 0;
       const totalProductQuantity =
-        (await this.prisma.product.aggregate({
-          _sum: { quantity: true },
-          where,
-        }))._sum.quantity ?? 0;
+        (
+          await this.prisma.product.aggregate({
+            _sum: { quantity: true },
+            where,
+          })
+        )._sum.quantity ?? 0;
       const totalAvailableQuantity = Math.max(
         0,
         totalProductQuantity - totalReservedQuantity,
@@ -92,17 +94,32 @@ export class DashboardService {
       // Os status disponíveis no Prisma são:
       // RECEIVED, IN_ANALYSIS, IN_STORAGE, APPROVED, DISPATCHED
 
-      const movementDateRange = dateRange || this.getDateRange({ period: '30d' });
+      const movementDateRange =
+        dateRange || this.getDateRange({ period: '30d' });
 
-      const [productsByStatusRaw, received, inAnalysis, delivered, topSuppliers, recentMovements] =
-        await Promise.all([
-          this.prisma.product.groupBy({ by: ['status'], where, _count: true }),
-          this.prisma.product.count({ where: { ...where, status: ProductStatus.RECEIVED } }),
-          this.prisma.product.count({ where: { ...where, status: ProductStatus.IN_ANALYSIS } }),
-          this.prisma.product.count({ where: { ...where, status: ProductStatus.DISPATCHED } }),
-          this.getTopSuppliersForDashboard(companyId),
-          this.prisma.product.count({ where: { ...where, updatedAt: movementDateRange } }),
-        ]);
+      const [
+        productsByStatusRaw,
+        received,
+        inAnalysis,
+        delivered,
+        topSuppliers,
+        recentMovements,
+      ] = await Promise.all([
+        this.prisma.product.groupBy({ by: ['status'], where, _count: true }),
+        this.prisma.product.count({
+          where: { ...where, status: ProductStatus.RECEIVED },
+        }),
+        this.prisma.product.count({
+          where: { ...where, status: ProductStatus.IN_ANALYSIS },
+        }),
+        this.prisma.product.count({
+          where: { ...where, status: ProductStatus.DISPATCHED },
+        }),
+        this.getTopSuppliersForDashboard(companyId),
+        this.prisma.product.count({
+          where: { ...where, updatedAt: movementDateRange },
+        }),
+      ]);
 
       const productsByStatus = productsByStatusRaw.map((p) => ({
         status: p.status,
@@ -213,7 +230,9 @@ export class DashboardService {
 
   private async getTopSuppliersForDashboard(companyId?: string) {
     const rows = companyId
-      ? await this.prisma.$queryRaw<Array<{ id: string; name: string; productCount: bigint }>>(
+      ? await this.prisma.$queryRaw<
+          Array<{ id: string; name: string; productCount: bigint }>
+        >(
           Prisma.sql`SELECT s."id", s."name", COUNT(p."id") AS "productCount"
             FROM "Supplier" s
             LEFT JOIN "Product" p ON p."supplierId" = s."id" AND p."companyId" = ${companyId}
@@ -223,7 +242,9 @@ export class DashboardService {
             ORDER BY COUNT(p."id") DESC
             LIMIT 5`,
         )
-      : await this.prisma.$queryRaw<Array<{ id: string; name: string; productCount: bigint }>>(
+      : await this.prisma.$queryRaw<
+          Array<{ id: string; name: string; productCount: bigint }>
+        >(
           Prisma.sql`SELECT s."id", s."name", COUNT(p."id") AS "productCount"
             FROM "Supplier" s
             LEFT JOIN "Product" p ON p."supplierId" = s."id"

@@ -1,4 +1,13 @@
-import { Body, Controller, ForbiddenException, Get, Logger, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  Logger,
+  Param,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from '../../../users/users.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -43,12 +52,22 @@ export class UsersController {
   @Patch(':id')
   @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @ApiOperation({ summary: 'Update a user with strong password validation' })
-  async update(@Param('id') id: string, @Body() data: any, @CurrentUser() user: any) {
+  async update(
+    @Param('id') id: string,
+    @Body() data: any,
+    @CurrentUser() user: any,
+  ) {
     const target = await this.usersService.findById(id);
-    if (!target || (user.role !== Role.SUPER_ADMIN && target.companyId !== user.companyId)) {
+    if (
+      !target ||
+      (user.role !== Role.SUPER_ADMIN && target.companyId !== user.companyId)
+    ) {
       throw new ForbiddenException('Cannot update a user from another company');
     }
-    if (user.role !== Role.SUPER_ADMIN && Object.prototype.hasOwnProperty.call(data, 'role')) {
+    if (
+      user.role !== Role.SUPER_ADMIN &&
+      Object.prototype.hasOwnProperty.call(data, 'role')
+    ) {
       throw new ForbiddenException('Only super admins can change user roles');
     }
     return this.usersService.update(id, data);

@@ -1230,7 +1230,11 @@ function ChatWorkspace({ currentUser, onLogout }: {
       } catch { setOnlineMembers([]); }
       try {
         const fRes = await fetch(`${API_URL}/channels/${activeChannel}/files`, { credentials: 'include' });
-        setChannelFiles(fRes.ok ? await fRes.json() : []);
+        const files = fRes.ok ? await fRes.json() : [];
+        setChannelFiles(files.map((file: { url: string }) => ({
+          ...file,
+          url: `${API_URL}${file.url}`,
+        })));
       } catch { setChannelFiles([]); }
     })();
     let cancelled = false;
@@ -1432,8 +1436,8 @@ function ChatWorkspace({ currentUser, onLogout }: {
 
   const doUpload = async (file: File): Promise<string> => {
     const fd = new FormData();
-    fd.append('file', file);
     fd.append('channelId', activeChannel);
+    fd.append('file', file);
     setUploadProgress(0);
     try {
       const xhr = new XMLHttpRequest();
@@ -1448,7 +1452,7 @@ function ChatWorkspace({ currentUser, onLogout }: {
           try {
             const payload = JSON.parse(xhr.responseText);
             if (typeof payload.url !== 'string') throw new Error(t('uploadFailed'));
-            resolve(payload.url);
+            resolve(`${API_URL}${payload.url}`);
           } catch (error) {
             reject(error instanceof Error ? error : new Error(t('uploadFailed')));
           }
