@@ -13,6 +13,13 @@ const mockProduct = {
     stockQuantity: 9,
     save: jest.fn().mockResolvedValue(undefined),
   }),
+  findOneAndUpdate: jest.fn().mockResolvedValue({
+    _id: '507f1f77bcf86cd799439011',
+    name: 'Laptop',
+    inStock: true,
+    stockQuantity: 9,
+    save: jest.fn().mockResolvedValue(undefined),
+  }),
 };
 
 const mockOrder = {
@@ -97,10 +104,10 @@ describe('checkout queue fallback', () => {
       stockQuantity: 0,
       save: jest.fn().mockResolvedValue(undefined),
     };
-    mockProduct.findByIdAndUpdate
+    mockProduct.findOneAndUpdate
       .mockResolvedValueOnce(firstUpdatedProduct)
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ stockQuantity: 4, inStock: true });
+      .mockResolvedValueOnce(null);
+    mockProduct.findByIdAndUpdate.mockResolvedValueOnce({ stockQuantity: 4, inStock: true });
 
     const { enqueueCheckout } = require('../server/services/checkoutQueueService');
     const job = await enqueueCheckout({
@@ -114,21 +121,84 @@ describe('checkout queue fallback', () => {
     });
 
     await expect(job.finished()).rejects.toThrow(
-      'Falha ao atualizar stock para produto product-2',
+      'Stock insuficiente ou alterado para produto product-2',
+    );
+    expect(mockProduct.findOneAndUpdate).toHaveBeenNthCalledWith(
+      1,
+      { _id: 'product-1', inStock: true, stockQuantity: { $gte: 4 } },
+      { $inc: { stockQuantity: -4, salesCount: 4 } },
+      { returnDocument: 'after' },
+    );
+    expect(mockProduct.findOneAndUpdate).toHaveBeenNthCalledWith(
+      2,
+      { _id: 'product-2', inStock: true, stockQuantity: { $gte: 2 } },
+      { $inc: { stockQuantity: -2, salesCount: 2 } },
+      { returnDocument: 'after' },
     );
     expect(mockProduct.findByIdAndUpdate).toHaveBeenNthCalledWith(
-      3,
+      1,
       'product-1',
       {
         $inc: { stockQuantity: 4, salesCount: -4 },
         $set: { inStock: true },
       },
     );
-    expect(mockProduct.findByIdAndUpdate).toHaveBeenCalledTimes(3);
+    expect(mockProduct.findByIdAndUpdate).toHaveBeenCalledTimes(1);
     expect(mockOrder.findByIdAndUpdate).toHaveBeenCalledWith(
       'order-mid-checkout-failure',
       expect.objectContaining({ status: 'failed', paymentStatus: 'failed' }),
     );
     expect(mockReleaseStockLock).toHaveBeenCalledTimes(2);
+  });
+
+  it('allows only one concurrent checkout to buy the last unit', async () => {
+    let stockQuantity = 1;
+    let lockNumber = 0;
+    mockAcquireStockLock.mockImplementation(async () => `lock-${++lockNumber}`);
+    mockProduct.findById.mockImplementation(async () => ({
+      _id: 'last-unit',
+      name: 'Last unit',
+      inStock: true,
+      stockQuantity: 1,
+      save: jest.fn().mockResolvedValue(undefined),
+    }));
+    mockProduct.findOneAndUpdate.mockImplementation(async (filter, update) => {
+      if (
+        filter._id !== 'last-unit' ||
+        filter.inStock !== true ||
+        stockQuantity < filter.stockQuantity.$gte
+      ) {
+        return null;
+      }
+
+      stockQuantity += update.$inc.stockQuantity;
+      return {
+        stockQuantity,
+        inStock: stockQuantity > 0,
+        save: jest.fn().mockResolvedValue(undefined),
+      };
+    });
+
+    const { enqueueCheckout } = require('../server/services/checkoutQueueService');
+    const jobs = await Promise.all([
+      enqueueCheckout({
+        orderId: 'last-unit-order-1',
+        userId: 'user-1',
+        items: [{ productId: 'last-unit', quantity: 1 }],
+        timestamp: Date.now(),
+      }),
+      enqueueCheckout({
+        orderId: 'last-unit-order-2',
+        userId: 'user-2',
+        items: [{ productId: 'last-unit', quantity: 1 }],
+        timestamp: Date.now(),
+      }),
+    ]);
+
+    const results = await Promise.allSettled(jobs.map((job) => job.finished()));
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    expect(results.filter((result) => result.status === 'rejected')).toHaveLength(1);
+    expect(stockQuantity).toBe(0);
+    expect(mockProduct.findOneAndUpdate).toHaveBeenCalledTimes(2);
   });
 });

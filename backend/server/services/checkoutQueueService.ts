@@ -158,9 +158,14 @@ checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<Checkou
         );
       }
 
-      // Decrement atômico
-      const updatedProduct = await Product.findByIdAndUpdate(
-        item.productId,
+      // Keep the stock check and decrement in one MongoDB operation so concurrent
+      // checkouts cannot both consume the last units.
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: item.productId,
+          inStock: true,
+          stockQuantity: { $gte: item.quantity },
+        },
         {
           $inc: {
             stockQuantity: -item.quantity,
@@ -171,7 +176,7 @@ checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<Checkou
       );
 
       if (!updatedProduct) {
-        throw new Error(`Falha ao atualizar stock para produto ${item.productId}`);
+        throw new Error(`Stock insuficiente ou alterado para produto ${item.productId}`);
       }
 
       decrementedItems.push({
