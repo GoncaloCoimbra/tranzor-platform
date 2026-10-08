@@ -57,9 +57,12 @@ jobs:
       - run: npx eslint "{src,apps,libs,test}/**/*.ts"
       - run: npm test -- --runInBand
       - run: npm run build
+        env:
+          CI: true
 
   backend-e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:16
