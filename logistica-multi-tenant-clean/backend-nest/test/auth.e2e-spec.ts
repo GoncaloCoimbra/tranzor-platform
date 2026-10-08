@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { createApp } from '../src/main';
 import { INestApplication } from '@nestjs/common';
@@ -45,7 +44,7 @@ describeOrSkip('Auth e2e: refresh/revoke', () => {
     await app.close();
   });
 
-  test('register -> login -> refresh -> revoke', async () => {
+  test('register, log in with valid credentials, reject invalid credentials, refresh and revoke', async () => {
     const ts = Date.now();
     const reg = await request(server)
       .post('/api/auth/register')
@@ -58,7 +57,25 @@ describeOrSkip('Auth e2e: refresh/revoke', () => {
     expect(reg.status).toBe(201);
     expect(reg.body.refreshToken).toBeTruthy();
 
-    refreshToken = reg.body.refreshToken;
+    const login = await request(server)
+      .post('/api/auth/login')
+      .send({
+        email: `e2e.auth.${ts}@example.com`,
+        password: 'password123',
+      });
+    expect(login.status).toBe(200);
+    expect(login.body.token).toBeTruthy();
+    expect(login.body.refreshToken).toBeTruthy();
+
+    const invalidLogin = await request(server)
+      .post('/api/auth/login')
+      .send({
+        email: `e2e.auth.${ts}@example.com`,
+        password: 'invalid-password',
+      });
+    expect(invalidLogin.status).toBe(401);
+
+    refreshToken = login.body.refreshToken;
     userCompanyId = reg.body.user.companyId;
 
     // Use refresh endpoint
@@ -68,6 +85,7 @@ describeOrSkip('Auth e2e: refresh/revoke', () => {
 
     expect(refreshed.status).toBe(200);
     expect(refreshed.body.token).toBeTruthy();
+    refreshToken = refreshed.body.refreshToken;
 
     // Revoke
     const revoked = await request(server)
