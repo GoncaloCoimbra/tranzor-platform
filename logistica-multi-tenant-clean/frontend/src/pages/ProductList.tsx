@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { getStatusBadgeClass, statusLabels } from '../theme.config';
@@ -13,20 +13,20 @@ const ProductList: React.FC = () => {
   const { language } = useLanguage();
   const t = (key: keyof typeof TRANSLATIONS) => translateText(TRANSLATIONS[key], language);
   const { activeFilters, addFilter, removeFilter, clearAllFilters, getFilter } = useFilters();
-  
+
   const [searchTerm, setSearchTerm] = useState(getFilter('search'));
   const [statusFilter, setStatusFilter] = useState(getFilter('status'));
   const [filterLocation, setFilterLocation] = useState(getFilter('location'));
   const [filterDateFrom, setFilterDateFrom] = useState(getFilter('dateFrom'));
   const [filterDateTo, setFilterDateTo] = useState(getFilter('dateTo'));
 
-  const filters = {
+  const filters = useMemo(() => ({
     search: searchTerm,
     status: statusFilter,
     location: filterLocation,
     dateFrom: filterDateFrom,
     dateTo: filterDateTo,
-  };
+  }), [searchTerm, statusFilter, filterLocation, filterDateFrom, filterDateTo]);
 
   interface Product {
     id: string;

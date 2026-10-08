@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
@@ -63,14 +63,14 @@ interface SelectedProduct {
 
 const extractErrorMessage = (error: any, defaultMessage: string = 'Error processing request'): string => {
   if (!error) return defaultMessage;
-  
+
   if (error.response?.data) {
     const date = error.response.data;
-    
+
     if (typeof date === 'string') {
       return date;
     }
-    
+
     if (date.message) {
       if (Array.isArray(date.message)) {
         return date.message[0] || defaultMessage;
@@ -79,16 +79,16 @@ const extractErrorMessage = (error: any, defaultMessage: string = 'Error process
         return date.message;
       }
     }
-    
+
     if (date.error && typeof date.error === 'string') {
       return date.error;
     }
   }
-  
+
   if (error.message && typeof error.message === 'string') {
     return error.message;
   }
-  
+
   return defaultMessage;
 };
 
@@ -124,7 +124,7 @@ const TransportList: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentFilterType, setCurrentFilterType] = useState<'vehicle' | 'status' | null>(null);
   const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     vehicleId: '',
     origin: '',
@@ -144,7 +144,6 @@ const TransportList: React.FC = () => {
 
   useEffect(() => {
     loadUser();
-    loadTransports();
     loadVehicles();
   }, []);
 
@@ -158,7 +157,6 @@ const TransportList: React.FC = () => {
     try {
       const response = await api.get('/auth/me');
       setUser(response.data);
-      console.log('?? User loaded:', response.data);
     } catch (error) {
       console.error('Error loading user:', error);
     }
@@ -173,17 +171,17 @@ const TransportList: React.FC = () => {
     }
   };
 
-  const loadTransports = async () => {
+  const loadTransports = useCallback(async () => {
     try {
       setError('');
-      
+
       const params = new URLSearchParams();
       if (searchTerm) params.set('search', searchTerm);
       if (getFilter('vehicle')) params.set('vehicleId', getFilter('vehicle')!);
       if (getFilter('status')) params.set('status', getFilter('status')!);
       if (getFilter('dateFrom')) params.set('dateFrom', getFilter('dateFrom')!);
       if (getFilter('dateTo')) params.set('dateTo', getFilter('dateTo')!);
-      
+
       const response = await api.get(`/transports?${params.toString()}`);
       setTransports(asList<Transport>(response.data));
     } catch (error: any) {
@@ -192,7 +190,11 @@ const TransportList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getFilter, searchTerm]);
+
+  useEffect(() => {
+    loadTransports();
+  }, [loadTransports]);
 
   const loadVehicles = async () => {
     try {
@@ -242,7 +244,7 @@ const TransportList: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     try {
       if (!formData.vehicleId || !formData.origin || !formData.destination || !formData.departureDate) {
         setError('Por favor, preencha todos os campos obrigat�rios');
@@ -262,7 +264,7 @@ const TransportList: React.FC = () => {
         if (!confirm) return;
       }
 
-      const companyIdToUse = editingId 
+      const companyIdToUse = editingId
         ? undefined
         : (user?.role === 'SUPER_ADMIN' ? selectedCompanyId : user?.companyId);
 
@@ -295,7 +297,7 @@ const TransportList: React.FC = () => {
         };
 
         console.log('?? EDIT MODE: Products WILL NOT be sent');
-        
+
       } else {
         //  CREATE MODE: SENDS PRODUCTS
         dataToSend = {
@@ -500,7 +502,7 @@ const TransportList: React.FC = () => {
 
       <form onSubmit={handleSearch} className="flex gap-3 mb-4">
         <div className="flex-1 relative">
-          <Input type="text" 
+          <Input type="text"
             placeholder="Search transports..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -597,7 +599,7 @@ const TransportList: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-amber-200">Weight Total (kg) *</label>
-              <Input type="number" 
+              <Input type="number"
                 required
                 step="0.01"
                 min="0"
@@ -609,7 +611,7 @@ const TransportList: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-amber-200">Origin *</label>
-              <Input type="text" 
+              <Input type="text"
                 required
                 value={formData.origin}
                 onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
@@ -619,7 +621,7 @@ const TransportList: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium mb-1 text-amber-200">Destination *</label>
-              <Input type="text" 
+              <Input type="text"
                 required
                 value={formData.destination}
                 onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
@@ -685,7 +687,7 @@ const TransportList: React.FC = () => {
                     </span>
                   )}
                 </div>
-                
+
                 {/*  Bot�o s� aparece na CRIA��O */}
                 {!editingId && (
                   <button
@@ -757,7 +759,7 @@ const TransportList: React.FC = () => {
                           </span>
                         </p>
                       </div>
-                      
+
                       {/*  Bot�o remove s� aparece na CRIA��O */}
                       {!editingId && (
                         <button
@@ -977,5 +979,3 @@ const TransportList: React.FC = () => {
 };
 
 export default TransportList;
-
-

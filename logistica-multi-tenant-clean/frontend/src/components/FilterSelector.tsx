@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronDown, X } from 'lucide-react';
 import api from '../api/api';
 
 interface FilterSelectorProps {
   // Props para modo DROPDOWN (ProductList)
   label?: string;
-  
+
   // Props para modo MODAL (TransportList, VehicleList)
   open?: boolean;
   onClose?: () => void;
-  
+
   // Props comuns
   type: 'supplier' | 'product' | 'vehicle' | 'transport' | 'status';
   onSelect: (id: string, name: string) => void;
@@ -78,13 +78,7 @@ const FilterSelector: React.FC<FilterSelectorProps> = ({
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadItems();
-    }
-  }, [isOpen, currentFilters]);
-
-  const loadItems = async () => {
+  const loadItems = useCallback(async () => {
     setLoading(true);
     try {
       let endpoint = '';
@@ -134,7 +128,13 @@ const FilterSelector: React.FC<FilterSelectorProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentFilters, type]);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadItems();
+    }
+  }, [isOpen, loadItems]);
 
   const filteredItems = items.filter((item) => {
     const searchLower = searchTerm.toLowerCase();
@@ -144,13 +144,13 @@ const FilterSelector: React.FC<FilterSelectorProps> = ({
 
   const handleSelect = (item: any) => {
     onSelect(item.id, getItemName(item, type));
-    
+
     if (isModalMode && onClose) {
       onClose();
     } else {
       setIsDropdownOpen(false);
     }
-    
+
     setSearchTerm('');
   };
 
@@ -174,7 +174,7 @@ const FilterSelector: React.FC<FilterSelectorProps> = ({
           className="fixed inset-0 bg-black/50 z-40"
           onClick={handleClose}
         />
-        
+
         {/* Modal */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-500/50 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">

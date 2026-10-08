@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/api';
 import { useFilters } from '../hooks/useFilters';
 import FilterChips from '../components/FilterChips';
@@ -85,13 +85,6 @@ const Tasks: React.FC = () => {
 
   useEffect(() => { loadUser(); }, []);
 
-  useEffect(() => {
-    if (user) {
-      loadTasks();
-      if (user.role === 'SUPER_ADMIN') loadCompanies();
-    }
-  }, [user, selectedCompanyId]);
-
   const loadUser = async () => {
     try {
       const response = await api.get('/auth/me');
@@ -111,7 +104,7 @@ const Tasks: React.FC = () => {
     }
   };
 
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
       setLoadingTasks(true);
       setTasksError('');
@@ -130,7 +123,14 @@ const Tasks: React.FC = () => {
     } finally {
       setLoadingTasks(false);
     }
-  };
+  }, [selectedCompanyId, user]);
+
+  useEffect(() => {
+    if (user) {
+      loadTasks();
+      if (user.role === 'SUPER_ADMIN') loadCompanies();
+    }
+  }, [loadTasks, user]);
 
   const handleCreateTask = async () => {
     if (!formData.title || !formData.description || !formData.dueDate) {
@@ -674,5 +674,3 @@ const Tasks: React.FC = () => {
 };
 
 export default Tasks;
-
-

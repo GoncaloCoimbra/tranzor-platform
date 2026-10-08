@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/api';
 import UserManagementTable from '../components/UserManagementTable';
@@ -31,19 +31,11 @@ const Settings: React.FC = () => {
     phone: '',
   });
 
-  useEffect(() => {
-    if (user?.role === 'SUPER_ADMIN') {
-      setLoading(false);
-      return;
-    }
-    loadCompanyInfo();
-  }, []);
-
   const extractErrorMessage = (err: any, fallback: string): string => {
     return err.response?.data?.message || err.message || fallback;
   };
 
-  const loadCompanyInfo = async () => {
+  const loadCompanyInfo = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -61,7 +53,15 @@ const Settings: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user?.role === 'SUPER_ADMIN') {
+      setLoading(false);
+      return;
+    }
+    loadCompanyInfo();
+  }, [loadCompanyInfo, user?.role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,7 +187,7 @@ const Settings: React.FC = () => {
                   <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
                     Company Name *
                   </label>
-                  <Input type="text" 
+                  <Input type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
@@ -202,7 +202,7 @@ const Settings: React.FC = () => {
                   <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
                     Tax ID *
                   </label>
-                  <Input type="text" 
+                  <Input type="text"
                     name="nif"
                     value={formData.nif}
                     onChange={handleChange}
@@ -221,7 +221,7 @@ const Settings: React.FC = () => {
                   <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
                     Email
                   </label>
-                  <Input type="email" 
+                  <Input type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -252,7 +252,7 @@ const Settings: React.FC = () => {
                   <label className="block text-sm font-medium text-[#cbd5e1] mb-2">
                     Address
                   </label>
-                  <Input type="text" 
+                  <Input type="text"
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
@@ -312,4 +312,3 @@ const Settings: React.FC = () => {
 };
 
 export default Settings;
-

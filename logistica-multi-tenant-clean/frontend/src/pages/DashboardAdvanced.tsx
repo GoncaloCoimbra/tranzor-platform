@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   PieChart, Pie, Cell,
@@ -150,9 +150,7 @@ const DashboardAdvanced: React.FC = () => {
     period: '30d', supplierId: null, startDate: null, endDate: null, useCustomDate: false,
   });
 
-  useEffect(() => { injectFonts(); loadStats(currentFilters); }, []);
-
-  const loadStats = async (filters: FilterState) => {
+  const loadStats = useCallback(async (filters: FilterState) => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -171,7 +169,12 @@ const DashboardAdvanced: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    injectFonts();
+    loadStats(currentFilters);
+  }, [currentFilters, loadStats]);
 
   const handleFilterChange = (filters: FilterState) => loadStats(filters);
 
@@ -685,4 +688,3 @@ const DashboardAdvanced: React.FC = () => {
 };
 
 export default DashboardAdvanced;
-

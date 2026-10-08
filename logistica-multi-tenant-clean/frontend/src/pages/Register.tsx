@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/api';
@@ -68,11 +68,7 @@ const Register: React.FC = () => {
     if (isAuthenticated) navigate('/dashboard', { replace: true });
   }, [isAuthenticated, navigate]);
 
-  useEffect(() => {
-    if (activeTab === 'operator' && companies.length === 0) loadCompanies();
-  }, [activeTab]);
-
-  const loadCompanies = async () => {
+  const loadCompanies = useCallback(async () => {
     setLoadingCompanies(true);
     try {
       const response = await api.get('/companies/public');
@@ -82,7 +78,11 @@ const Register: React.FC = () => {
     } finally {
       setLoadingCompanies(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'operator' && companies.length === 0) loadCompanies();
+  }, [activeTab, companies.length, loadCompanies]);
 
   const validateCompanyForm = (): string | null => {
     if (!companyData.companyName.trim()) return 'Company name is required';
