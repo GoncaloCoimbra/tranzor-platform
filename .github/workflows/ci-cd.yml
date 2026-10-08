@@ -126,6 +126,15 @@ jobs:
           --health-retries 5
         ports:
           - 27017:27017
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
 
     steps:
       - uses: actions/checkout@v4
@@ -154,11 +163,17 @@ jobs:
         working-directory: backend
         run: npx playwright install --with-deps
 
+      - name: Generate ephemeral E2E admin password
+        run: node -e "require('node:fs').appendFileSync(process.env.GITHUB_ENV, 'ADMIN_PASSWORD=' + require('node:crypto').randomBytes(32).toString('base64url') + '\n')"
+
       - name: Run E2E tests
         working-directory: backend
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/Tranzor_test
           MONGODB_URI: mongodb://localhost:27017/tranzor_test
+          REDIS_URL: redis://localhost:6379
+          AUTH_RATE_LIMIT_MAX_REQUESTS: 1000
+          RATE_LIMIT_MAX_REQUESTS: 1000
         run: npm run test:e2e
         timeout-minutes: 30
 
