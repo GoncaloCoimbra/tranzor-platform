@@ -12,7 +12,6 @@ import User from '../server/models/User';
 dotenv.config();
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@tranzor.pt';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ChangeMe123!';
 
 async function ensureAdminUser() {
   const existingAdmin = await User.findOne({ email: ADMIN_EMAIL });
@@ -20,7 +19,12 @@ async function ensureAdminUser() {
     return existingAdmin;
   }
 
-  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    throw new Error('ADMIN_PASSWORD is required to create the admin user.');
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
   const adminUser = new User({
     name: 'Admin Tranzor',

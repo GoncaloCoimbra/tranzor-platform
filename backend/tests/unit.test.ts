@@ -133,6 +133,40 @@ describe('Authentication Controller', () => {
       expect(response.body.message).toBeDefined();
     });
 
+    it('should reject a client-supplied admin role during public registration', async () => {
+      const response = await request(server)
+        .post('/api/v1/auth/register')
+        .send({
+          email: `role-escalation${Date.now()}@example.com`,
+          password: 'TestPassword123!',
+          confirmPassword: 'TestPassword123!',
+          name: 'Public User',
+          role: 'admin',
+          agreeTerms: true,
+        });
+
+      expect(response.status).toBe(422);
+    });
+
+    it('should allow B2B registration with the default B2B discount', async () => {
+      const response = await request(server)
+        .post('/api/v1/auth/register')
+        .send({
+          email: `b2b-register${Date.now()}@example.com`,
+          password: 'TestPassword123!',
+          confirmPassword: 'TestPassword123!',
+          name: 'B2B User',
+          role: 'b2b',
+          company: 'Example Trading Ltd',
+          taxId: '123456789',
+          agreeTerms: true,
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.data.user.role).toBe('b2b');
+      expect(response.body.data.user.b2bDiscountRate).toBe(10);
+    });
+
     it('should accept registration with a plus-addressed email', async () => {
       const response = await request(server)
         .post('/api/v1/auth/register')
