@@ -20,5 +20,5 @@ data:
   TRANZOR_FRONTEND_URL: http://tranzor.local
   TRANZOR_CORS_ORIGIN: http://tranzor.local
   CHATOPS_NODE_ENV: development
-  CHATOPS_CORS_ORIGIN: http://localhost:3006,http://127.0.0.1:3006
+  CHATOPS_CORS_ORIGIN: http://chatops.local,http://localhost:3006,http://127.0.0.1:3006
   APP_SHUTDOWN_TIMEOUT_MS: "10000"
