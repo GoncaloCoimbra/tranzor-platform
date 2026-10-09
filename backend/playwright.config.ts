@@ -3,6 +3,10 @@ import { defineConfig, devices } from '@playwright/test';
 import * as path from 'path';
 
 const isCI = !!process.env.CI && !process.env.PLAYWRIGHT_FULL; // when CI is set, limit projects unless PLAYWRIGHT_FULL is provided
+const frontendUrl = process.env.PLAYWRIGHT_FRONTEND_URL ?? 'http://localhost:5174';
+const backendPort = process.env.PORT ?? '3001';
+const backendHealthUrl = process.env.PLAYWRIGHT_BACKEND_HEALTH_URL ?? `http://localhost:${backendPort}/health`;
+const frontendPort = process.env.PLAYWRIGHT_FRONTEND_PORT ?? '5174';
 
 export default defineConfig({
   testDir: './tests',
@@ -14,7 +18,7 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://localhost:5174',
+    baseURL: frontendUrl,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -50,19 +54,15 @@ export default defineConfig({
 
   webServer: [
     {
-      command: 'npm run dev',
-      url: 'http://localhost:5174',
+      command: `npm run dev -- --host 0.0.0.0 --port ${frontendPort}`,
+      url: frontendUrl,
       reuseExistingServer: !process.env.CI,
       cwd: path.resolve(process.cwd(), '../frontend'),
       timeout: 120000,
     },
     {
-      // Ensure migrations are applied before starting the backend server in CI
-      // Run migrate deploy, attempt to seed data for tests and then start dev server.
-      // Behavior: in CI (process.env.CI set) run seed and fail loudly if it fails; locally, attempt seed but ignore failures.
-      // Use a Node wrapper for cross-platform behavior.
-      command: `npx prisma migrate deploy --schema prisma/schema.prisma && node -e "const cp=require('child_process'); if(process.env.CI){ const r=cp.spawnSync('npm',['run','db:seed'],{stdio:'inherit'}); if(r.status!==0){ console.error('Seed failed in CI with code', r.status); process.exit(r.status);} } else { try{ cp.spawnSync('npm',['run','db:seed'],{stdio:'inherit'}); } catch(e){} }" && npm run dev`,
-      url: 'http://localhost:3001/health',
+      command: 'npx prisma migrate deploy --schema prisma/schema.prisma && npm run dev',
+      url: backendHealthUrl,
       reuseExistingServer: !process.env.CI,
       cwd: process.cwd(),
       env: {
