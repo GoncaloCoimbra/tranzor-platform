@@ -1,4 +1,7 @@
-import nodemailer from 'nodemailer';
+import nodemailer, {
+	type TransportOptions,
+	type Transporter,
+} from 'nodemailer';
 import { env } from '../config/env';
 import { logger } from '../config/logger';
 
@@ -10,7 +13,7 @@ interface EmailOptions {
 }
 
 class EmailService {
-	private transporter: nodemailer.Transporter;
+	private transporter: Transporter;
 
 	constructor() {
 		const port = Number(env.SMTP_PORT) || 587;
@@ -22,7 +25,7 @@ class EmailService {
 				user: env.SMTP_USER,
 				pass: env.SMTP_PASS
 			} : undefined
-		} as unknown as nodemailer.TransportOptions;
+		} as unknown as TransportOptions;
 
 		this.transporter = nodemailer.createTransport(transportOptions);
 	}

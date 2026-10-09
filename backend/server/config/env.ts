@@ -31,6 +31,7 @@ const envSchema = z.object({
 	CORS_ORIGIN: z.string().default('http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174'),
 	RATE_LIMIT_WINDOW_MS: z.string().pipe(z.coerce.number()).default('900000'),
 	RATE_LIMIT_MAX_REQUESTS: z.string().pipe(z.coerce.number()).default('100'),
+	AUTH_RATE_LIMIT_MAX_REQUESTS: z.string().pipe(z.coerce.number().int().positive()).default('5'),
 	STRIPE_SECRET_KEY: z.string().optional(),
 	STRIPE_WEBHOOK_SECRET: z.string().optional(),
 	CLICKHOUSE_HTTP_URL: z.string().url().optional(),

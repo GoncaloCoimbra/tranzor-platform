@@ -30,7 +30,7 @@ Na stack integrada, o serviço backend está definido em [docker-compose.overrid
 
 Na stack integrada, o ChatOps partilha o serviço Redis da raiz com Commerce e Logística. `REDIS_PASSWORD` autentica o Redis e o `REDIS_URL` do ChatOps tem de conter a mesma password que os outros dois clientes. Usa o mesmo valor ao configurar os serviços que comunicam entre si.
 
-O Compose autónomo de [Chatops/docker-compose.yml](../docker-compose.yml) cria um Redis separado e, atualmente, não configura password nesse serviço. Não confundas essa instância local com o Redis autenticado da stack integrada.
+O Compose autónomo de [Chatops/docker-compose.yml](../docker-compose.yml) cria um Redis separado com password obrigatória e publica as portas apenas em `127.0.0.1`. Copia [Chatops/.env.example](../.env.example) para `Chatops/.env` e substitui os placeholders antes de iniciar.
 
 O ficheiro [staging.env.example](./staging.env.example) está versionado e inclui placeholders para `REDIS_PASSWORD`, `REDIS_URL`, `JWT_SECRET`, `DATABASE_URL`, `PORT` e `WS_PORT`. Substitui os placeholders por valores adequados ao ambiente; não coloques segredos reais no repositório.
 

@@ -11,6 +11,8 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  StreamableFile,
+  Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -142,9 +144,38 @@ export class AuthController {
   //  UPLOAD AVATAR
   @Post('avatar')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      preservePath: true,
+      limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+      fileFilter: (_request, file, callback) => {
+        const allowedTypes: Record<string, string> = {
+          '.gif': 'image/gif',
+          '.jpeg': 'image/jpeg',
+          '.jpg': 'image/jpeg',
+          '.png': 'image/png',
+          '.webp': 'image/webp',
+        };
+        const extension = file.originalname
+          .slice(file.originalname.lastIndexOf('.'))
+          .toLowerCase();
+        if (
+          file.originalname.includes('..') ||
+          /[\\/]/.test(file.originalname) ||
+          allowedTypes[extension] !== file.mimetype
+        ) {
+          callback(
+            new BadRequestException('Formato de avatar inválido'),
+            false,
+          );
+          return;
+        }
+        callback(null, true);
+      },
+    }),
+  )
   @ApiBearerAuth()
-  @ApiConsumes('multipart/form-date')
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Fazer upload do avatar' })
   @ApiResponse({ status: 200, description: 'Avatar atualizado com success' })
   @ApiResponse({ status: 400, description: 'Ficheiro inválido' })
@@ -156,12 +187,6 @@ export class AuthController {
       throw new BadRequestException('Nenhum ficheiro enviado');
     }
 
-    // Validate tipo
-    if (!file.mimetype.startsWith('image/')) {
-      throw new BadRequestException('O ficheiro deve ser uma imagem');
-    }
-
-    // Validate tamanho (5MB)
     if (file.size > 5 * 1024 * 1024) {
       throw new BadRequestException('A imagem deve ter no máximo 5MB');
     }
@@ -177,5 +202,19 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Avatar removido com success' })
   async removeAvatar(@CurrentUser() user: any) {
     return this.authService.removeAvatar(user.id);
+  }
+
+  @Get('avatar')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Header('Cache-Control', 'private, no-store')
+  @Header('X-Content-Type-Options', 'nosniff')
+  @ApiOperation({ summary: 'Obter o avatar do utilizador autenticado' })
+  async getAvatar(@CurrentUser() user: any) {
+    const avatar = await this.authService.getAvatar(user.id);
+    return new StreamableFile(avatar.data, {
+      type: avatar.contentType,
+      disposition: 'inline',
+    });
   }
 }

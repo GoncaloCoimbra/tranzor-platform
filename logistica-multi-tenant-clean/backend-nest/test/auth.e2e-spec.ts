@@ -45,6 +45,9 @@ describeOrSkip('Auth e2e: refresh/revoke', () => {
   });
 
   test('register, log in with valid credentials, reject invalid credentials, refresh and revoke', async () => {
+    const unauthorizedAvatar = await request(server).get('/api/auth/avatar');
+    expect(unauthorizedAvatar.status).toBe(401);
+
     const ts = Date.now();
     const reg = await request(server)
       .post('/api/auth/register')
@@ -56,6 +59,22 @@ describeOrSkip('Auth e2e: refresh/revoke', () => {
 
     expect(reg.status).toBe(201);
     expect(reg.body.refreshToken).toBeTruthy();
+
+    const boundary = `avatar-test-${ts}`;
+    const traversalAvatar = await request(server)
+      .post('/api/auth/avatar')
+      .set('Authorization', `Bearer ${reg.body.token}`)
+      .set('Content-Type', `multipart/form-data; boundary=${boundary}`)
+      .send(
+        Buffer.concat([
+          Buffer.from(
+            `--${boundary}\r\nContent-Disposition: form-data; name="avatar"; filename="../../avatar.png"\r\nContent-Type: image/png\r\n\r\n`,
+          ),
+          Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+          Buffer.from(`\r\n--${boundary}--\r\n`),
+        ]),
+      );
+    expect(traversalAvatar.status).toBe(400);
 
     const login = await request(server)
       .post('/api/auth/login')

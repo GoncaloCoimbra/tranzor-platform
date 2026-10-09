@@ -36,7 +36,9 @@ O ficheiro usa o [Dockerfile do backend](./backend-nest/Dockerfile) com contexto
 
 ## Redis e bases de dados
 
-O Compose autónomo cria uma instância própria de Redis. O backend usa `REDIS_PASSWORD` para construir o URL Redis; se a variável não for definida, o Compose tem um valor de fallback local. A porta de Redis publicada no host está limitada a `127.0.0.1`.
+O Compose autónomo cria uma instância própria de Redis e exige `POSTGRES_PASSWORD`, `REDIS_PASSWORD` e `JWT_SECRET`; não inicia com credenciais predefinidas. Copia [.env.example](./.env.example) para `.env` e substitui os placeholders. As portas publicadas no host estão limitadas a `127.0.0.1`.
+
+Os avatares são guardados num volume persistente e só são servidos pela rota autenticada `GET /auth/avatar`; o diretório não é publicado como ficheiro estático.
 
 Na stack integrada definida na raiz, Logística, ChatOps e Commerce partilham o mesmo Redis autenticado. Define uma única `REDIS_PASSWORD` para o servidor Redis e para os três URLs clientes. Não reutilizes credenciais de desenvolvimento em staging ou produção.
 

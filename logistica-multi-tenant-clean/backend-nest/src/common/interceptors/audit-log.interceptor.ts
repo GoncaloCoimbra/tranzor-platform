@@ -23,56 +23,28 @@ export class AuditLogInterceptor implements NestInterceptor {
     const user = request.user;
     const body = request.body;
 
-    console.log('[INTERCEPTOR] Executed!');
-    console.log('[INTERCEPTOR] Method:', method);
-    console.log('[INTERCEPTOR] URL:', url);
-    console.log('[INTERCEPTOR] User:', user ? user.email : 'NO USER');
-    console.log('[INTERCEPTOR] Body:', JSON.stringify(body));
-
     // Apenas captura ações relevantes
     const shouldLog = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
 
-    console.log('[INTERCEPTOR] Should log?', shouldLog);
-    console.log('[INTERCEPTOR] Has user?', !!user);
-
     if (!shouldLog || !user) {
-      console.log(
-        '⚠️ [INTERCEPTOR] Skipping log - shouldLog:',
-        shouldLog,
-        'user:',
-        !!user,
-      );
       return next.handle();
     }
 
-    console.log(' [INTERCEPTOR] Will process the log!');
-
     return next.handle().pipe(
       tap(async (response) => {
-        console.log(
-          '[INTERCEPTOR TAP] Response received:',
-          JSON.stringify(response),
-        );
-
         try {
           const { entity, action } = this.extractEntityAndAction(method, url);
-          console.log('[INTERCEPTOR] Entity:', entity, 'Action:', action);
 
           if (!entity) {
-            console.log(
-              '⚠️ [INTERCEPTOR] Nenhuma entity encontrada, saindo...',
-            );
             return;
           }
 
           //  EXTRAÇÃO MELHORADA DO ID DA ENTIDADE
           const entityId = this.extractEntityId(response, body, url);
-          console.log('[INTERCEPTOR] Entity ID extracted:', entityId);
 
           const ipAddress = request.ip || request.connection?.remoteAddress;
 
           // Registra no audit log
-          console.log('[INTERCEPTOR] Calling auditLogService.createLog...');
           await this.auditLogService.createLog({
             action,
             entity,
@@ -106,18 +78,6 @@ export class AuditLogInterceptor implements NestInterceptor {
             : undefined) ||
           error?.message ||
           'Unknown error';
-        try {
-          console.log(
-            ' [INTERCEPTOR] Error na requisição (detalhes):',
-            JSON.stringify(errorDetail),
-          );
-        } catch {
-          console.log(
-            ' [INTERCEPTOR] Error na requisição (detalhes):',
-            errorDetail,
-          );
-        }
-
         // If there is an error in the request, also tries to register
         try {
           if (user) {

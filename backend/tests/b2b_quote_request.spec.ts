@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const FRONTEND_URL = 'http://localhost:5174';
+const FRONTEND_URL = process.env.PLAYWRIGHT_FRONTEND_URL ?? 'http://localhost:5174';
 
 test.describe('B2B Quote Request Flow', () => {
   test('should submit a B2B quote request successfully', async ({ page }) => {

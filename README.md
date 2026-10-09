@@ -49,11 +49,15 @@ Para uma visão geral, arranque e testes do módulo de comunicação, consulte o
 O Compose carrega automaticamente `docker-compose.override.yml` quando se executa o ficheiro base:
 
 ```sh
+cp .env.example .env
+# Substitui todos os valores replace-with-* por credenciais locais únicas.
 docker compose config
 docker compose up --build
 ```
 
-O ficheiro base define MongoDB, Redis, PostgreSQL para os três serviços, ClickHouse e a API Commerce. A sobreposição acrescenta os serviços ChatOps e Logística e respetivas interfaces.
+O Compose exige autenticação em MongoDB e Redis e credenciais definidas para as bases de dados e serviços auxiliares. As portas de desenvolvimento são publicadas apenas em `127.0.0.1`. O ficheiro base define MongoDB, Redis, PostgreSQL para os três serviços, ClickHouse e a API Commerce; a sobreposição acrescenta ChatOps, Logística e as respetivas interfaces.
+
+MongoDB cria o utilizador root apenas quando inicializa um volume de dados vazio. Para um volume já existente, não apagues nem recries dados: faz backup e configura a autenticação/utilizador com um procedimento de migração aprovado antes de apontar `MONGODB_URI` autenticado para essa instância.
 
 ### Staging
 
@@ -75,11 +79,12 @@ docker compose --env-file .env -f docker-compose.prod.yml config
 docker compose --env-file .env -f docker-compose.prod.yml up --build
 ```
 
-Em produção são obrigatórias `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET` e `JWT_REFRESH_SECRET`. Os valores de `.env.example` são apenas placeholders: substitui-os por segredos fortes antes de qualquer utilização fora de desenvolvimento.
+Em produção são obrigatórias as credenciais de MongoDB, PostgreSQL, Redis, ClickHouse, Typesense e JWT usadas pela stack; consulta [.env.example](./.env.example) para a lista completa de chaves. Substitui todos os valores `replace-with-*` por segredos fortes, únicos e URL-safe antes de iniciar.
+O backend de produção publica a API apenas em `127.0.0.1:3001`; expõe tráfego externo através de um reverse proxy com TLS e regras de acesso apropriadas.
 
 ### Redis e portas dos serviços de dados
 
-Na stack integrada, o Redis exige autenticação. `REDIS_PASSWORD` configura o servidor e é usada para construir o URL Redis dos três serviços — Commerce, ChatOps e Logística. Em desenvolvimento existe um valor de fallback local; staging e produção exigem a variável. O mesmo valor tem de ser usado pelos três clientes para preservar o acesso a locks de stock e eventos partilhados.
+Na stack integrada, o Redis exige autenticação. `REDIS_PASSWORD` configura o servidor e é usada para construir o URL Redis dos três serviços — Commerce, ChatOps e Logística. A variável é obrigatória em todas as configurações Compose; o mesmo valor tem de ser usado pelos três clientes para preservar o acesso a locks de stock e eventos partilhados.
 
 As portas publicadas dos serviços de dados estão limitadas a loopback:
 
@@ -97,16 +102,16 @@ Esta restrição aplica-se às configurações Compose da raiz. Os Compose autó
 
 ## Desempenho e teste de capacidade
 
-Foi executado um ensaio local de 30 minutos com 100 utilizadores virtuais e um catálogo de 100.000 produtos (350 produtos copiados da base local e o restante sintético), usando uma stack Docker isolada com limites explícitos de CPU e memória. O ensaio completou 191.600 pedidos, cerca de 106 pedidos/s, sem erros HTTP.
+Foi executado um ensaio local de 30 minutos com 100 utilizadores virtuais e um catálogo de 100.000 produtos (350 produtos copiados da base local e 99.650 sintéticos), usando uma stack Docker isolada com limites explícitos de CPU e memória. O ensaio completou 189.525 pedidos (105,22 pedidos/s), sem erros HTTP.
 
 | Rota | P95 observado |
 | --- | ---: |
-| Listagem de produtos | 1.086 ms |
-| Categorias | 680 ms |
-| Detalhe do produto | 803 ms |
-| Pesquisa | 957 ms |
+| Listagem de produtos | 1.082,3 ms |
+| Categorias | 720,4 ms |
+| Detalhe do produto | 834,7 ms |
+| Pesquisa | 982,6 ms |
 
-O objetivo usado no ensaio era P95 ≤1 s por rota e taxa de erro ≤0,1%: as categorias, o detalhe, a pesquisa e a taxa de erros cumpriram-no; a listagem ficou 86 ms acima do limite. Estes resultados descrevem um teste local controlado, não uma certificação de produção nem uma previsão de tráfego real. O procedimento, as métricas e os limites da stack estão documentados em [backend/README.md](./backend/README.md).
+O objetivo usado no ensaio era P95 ≤1 s por rota e taxa de erro ≤0,1%: categorias, detalhe, pesquisa e taxa de erros cumpriram-no; a listagem ficou 82,3 ms acima do limite. Estes resultados descrevem um teste local controlado, não uma certificação de produção nem uma previsão de tráfego real. Os dados completos e a análise das métricas estão em [backend/docs/capacity/2026-10-08-200847-full-30min-100vu-summary.md](./backend/docs/capacity/2026-10-08-200847-full-30min-100vu-summary.md); o procedimento e os limites da stack estão documentados em [backend/README.md](./backend/README.md).
 
 ## Estado e limitações
 

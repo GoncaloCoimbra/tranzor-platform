@@ -3,7 +3,6 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 import { LogisticsRedisSubscriber } from './integration/redis-subscriber';
 import { verifyStartupDependencies } from './common/startup-dependencies';
 import { PrismaService } from './database/prisma.service';
@@ -117,13 +116,6 @@ export async function createApp(): Promise<NestExpressApplication> {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
   logger.log('📖 Swagger/OpenAPI available at: /api/docs');
-
-  // STATIC ASSETS (Uploads)
-
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
-  logger.log('📁 Pasta de uploads configurada: /uploads/');
 
   // INITIALIZATION LOGS (just information — `listen` is controlled by the caller)
   logger.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

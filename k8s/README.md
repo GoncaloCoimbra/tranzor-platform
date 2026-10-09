@@ -34,8 +34,12 @@ command for other local Kubernetes distributions.
 ## Secrets
 
 Copy `k8s/secrets.env.example` to `k8s/secrets.env`, replace every example value
-with unique credentials, and keep that file out of version control. Passwords
-used in database URLs must be URL-safe or URL-encoded. Create the namespace and
+with unique credentials, and keep that file out of version control. Keep each
+database URL password identical to the password in the matching
+`POSTGRES_*_PASSWORD` entry, each MongoDB URI credential identical to the
+MongoDB root entries, and all Redis URLs synchronized with `REDIS_PASSWORD`.
+`CHATOPS_JWT_SECRET` must be the same value as `TRANZOR_JWT_SECRET`.
+Passwords in URLs must be URL-safe or URL-encoded. Create the namespace and
 Secret before applying the workloads:
 
 ```sh

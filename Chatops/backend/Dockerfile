@@ -23,9 +23,10 @@ RUN apt-get update \
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY prisma ./prisma
-RUN npx prisma generate
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/dist ./dist
-RUN mkdir -p /app/uploads
+RUN mkdir -p /app/uploads && chown -R node:node /app
 
 EXPOSE 3002 9001
+USER node
 CMD ["node", "dist/server.js"]

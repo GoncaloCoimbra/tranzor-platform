@@ -29,16 +29,21 @@ ENV PORT=3001
 ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
 
 COPY package*.json ./
-RUN npm ci --omit=dev && npm install prisma@5.7.0 @prisma/client@5.7.0 --no-save && npm cache clean --force
+RUN npm ci --omit=dev \
+    && npm install --no-save --package-lock=false prisma@5.7.0 @prisma/client@5.7.0
 
 COPY prisma ./prisma
-RUN npx prisma generate
+RUN npx prisma generate \
+    && npm cache clean --force \
+    && mkdir -p /app/logs
 
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
 COPY --from=build /app/scripts ./scripts
 COPY --from=build /app/data ./data
+RUN chown -R node:node /app
 
 EXPOSE 3001
 
-ENTRYPOINT ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && exec node dist/server.js"]
+USER node
+ENTRYPOINT ["sh", "-c", "npx prisma migrate deploy && exec node dist/server.js"]

@@ -48,7 +48,10 @@ spec:
                   name: deployment-secrets
                   key: CHATOPS_DATABASE_URL
             - name: REDIS_URL
-              value: redis://redis:6379
+              valueFrom:
+                secretKeyRef:
+                  name: deployment-secrets
+                  key: CHATOPS_REDIS_URL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
