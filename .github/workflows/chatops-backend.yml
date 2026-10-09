@@ -8,10 +8,12 @@ on:
   push:
     paths:
       - 'Chatops/backend/**'
+      - 'Chatops/frontend/**'
       - '.github/workflows/chatops-backend.yml'
   pull_request:
     paths:
       - 'Chatops/backend/**'
+      - 'Chatops/frontend/**'
       - '.github/workflows/chatops-backend.yml'
 
 jobs:
@@ -44,4 +46,22 @@ jobs:
           cache-dependency-path: Chatops/backend/package-lock.json
       - run: npm ci
       - run: npx prisma generate
+      - run: npm run check
       - run: npm test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Chatops/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Chatops/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
