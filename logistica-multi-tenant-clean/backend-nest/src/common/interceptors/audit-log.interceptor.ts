@@ -69,9 +69,7 @@ export class AuditLogInterceptor implements NestInterceptor {
           if (user) {
             const { entity, action } = this.extractEntityAndAction(method, url);
             if (entity) {
-              this.logger.warn(
-                `⚠️ [AUDIT] ${action} ${entity} request failed`,
-              );
+              this.logger.warn(`⚠️ [AUDIT] ${action} ${entity} request failed`);
             }
           }
         } catch {
@@ -206,5 +204,4 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     return null;
   }
-
 }

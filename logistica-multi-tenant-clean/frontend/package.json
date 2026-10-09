@@ -30,6 +30,7 @@
   },
   "name": "frontend",
   "scripts": {
+    "postinstall": "node ../scripts/patch-braces.js",
     "dev": "react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
