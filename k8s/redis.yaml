@@ -16,13 +16,15 @@ spec:
       containers:
         - name: redis
           image: redis:7-alpine
+          command: ["sh", "-c"]
           args:
-            - redis-server
-            - --appendonly
-            - "yes"
-            - --save
-            - "60"
-            - "1"
+            - exec redis-server --appendonly yes --save 60 1 --requirepass "$REDIS_PASSWORD"
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: deployment-secrets
+                  key: REDIS_PASSWORD
           ports:
             - name: redis
               containerPort: 6379
@@ -31,16 +33,16 @@ spec:
               mountPath: /data
           startupProbe:
             exec:
-              command: ["redis-cli", "ping"]
+              command: ["sh", "-c", "REDISCLI_AUTH=\"$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
             periodSeconds: 5
             failureThreshold: 30
           livenessProbe:
             exec:
-              command: ["redis-cli", "ping"]
+              command: ["sh", "-c", "REDISCLI_AUTH=\"$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
             periodSeconds: 10
           readinessProbe:
             exec:
-              command: ["redis-cli", "ping"]
+              command: ["sh", "-c", "REDISCLI_AUTH=\"$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
             periodSeconds: 5
           resources:
             requests:

@@ -12,10 +12,17 @@ spec:
       labels:
         app: logistica-backend
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
         - name: backend
           image: logistica-backend:local
           imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
           ports:
             - name: http
               containerPort: 3000
@@ -36,7 +43,10 @@ spec:
                   name: deployment-secrets
                   key: LOGISTICA_DATABASE_URL
             - name: REDIS_URL
-              value: redis://redis:6379
+              valueFrom:
+                secretKeyRef:
+                  name: deployment-secrets
+                  key: LOGISTICA_REDIS_URL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:

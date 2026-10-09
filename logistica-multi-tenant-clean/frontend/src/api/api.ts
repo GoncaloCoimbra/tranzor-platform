@@ -2,12 +2,6 @@ import axios from 'axios';
 
 const BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
-console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('📡 API Service inicializado');
-console.log('🔗 Base URL:', BASE_URL);
-console.log('🔗 Env Variable:', process.env.REACT_APP_API_URL);
-console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
@@ -15,7 +9,6 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
 
 // REQUEST INTERCEPTOR
 
@@ -27,39 +20,27 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    const fullUrl = `${config.baseURL}${config.url}`;
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`🔵 [REQUEST] ${config.method?.toUpperCase()} ${fullUrl}`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-
     return config;
   },
   (error) => {
-    console.error('[REQUEST ERROR]', error);
+    console.error(
+      '[REQUEST ERROR]',
+      error instanceof Error ? error.message : 'Unknown request error'
+    );
     return Promise.reject(error);
   }
 );
-
 
 // RESPONSE INTERCEPTOR
 
 api.interceptors.response.use(
   (response) => {
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`[RESPONSE] ${response.status} ${response.config.url}`);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     return response;
   },
   (error) => {
     const status = error.response?.status;
-    const url = error.config?.url;
-    const errorData = error.response?.data;
 
-    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.error(`[ERROR] ${status || 'NETWORK ERROR'} ${url}`);
-    console.error('[ERROR DATA]', errorData);
-    console.error('[ATTEMPTED URL]', error.config?.baseURL + error.config?.url);
-    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error(`[API ERROR] ${status || 'NETWORK ERROR'}`);
 
     // ✅ Normalize error date to always be a plain string
     // This prevents "Objects are not valid as a React child" crashes
@@ -90,7 +71,9 @@ api.interceptors.response.use(
         message = date.error;
       } else {
         // Fall back to status code message
-        message = statusMessages[status] || `❌ Erro do servidor (${status}). Tente novamente ou contate o suporte.`;
+        message =
+          statusMessages[status] ||
+          `❌ Erro do servidor (${status}). Tente novamente ou contate o suporte.`;
       }
 
       error.response.data = { message };

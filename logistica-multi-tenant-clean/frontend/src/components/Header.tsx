@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationPanel from './NotificationPanel';
 import { SITE_FULL_NAME } from '../site.config';
+import { usePrivateAvatar } from '../hooks/usePrivateAvatar';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const privateAvatarUrl = usePrivateAvatar(user?.avatarUrl);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -17,8 +19,7 @@ const Header: React.FC = () => {
   };
 
   const getAvatarUrl = () => {
-    if (user?.avatarUrl) return `${process.env.REACT_APP_API_URL}${user.avatarUrl}`;
-    return null;
+    return privateAvatarUrl;
   };
 
   const getRoleLabel = (role: string) => {

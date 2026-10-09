@@ -16,5 +16,7 @@ COPY --from=builder /app/node_modules /app/node_modules
 COPY --from=builder /app/backend-nest/dist ./dist
 COPY --from=builder /app/backend-nest/prisma ./prisma
 COPY --from=builder /app/backend-nest/tsconfig.json ./tsconfig.json
+RUN mkdir -p uploads && chown -R node:node /app/backend-nest
 EXPOSE 3000
+USER node
 CMD ["node", "-r", "tsconfig-paths/register", "dist/src/main.js"]

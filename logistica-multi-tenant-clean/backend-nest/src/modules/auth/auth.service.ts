@@ -254,36 +254,135 @@ export class AuthService {
       throw new BadRequestException('No file uploaded');
     }
 
+    const allowedTypes: Record<string, string> = {
+      '.gif': 'image/gif',
+      '.jpeg': 'image/jpeg',
+      '.jpg': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+    };
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    if (
+      file.originalname.includes('..') ||
+      /[\\/]/.test(file.originalname) ||
+      allowedTypes[fileExt] !== file.mimetype ||
+      !this.hasValidImageSignature(fileExt, file.buffer)
+    ) {
+      throw new BadRequestException('Unsupported avatar image format');
+    }
     const uploadDir = path.join(process.cwd(), 'uploads', 'avatars');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
-
-    const fileExt = path.extname(file.originalname);
-    const fileName = `${userId}-${Date.now()}${fileExt}`;
-    const filePath = path.join(uploadDir, fileName);
-
-    fs.writeFileSync(filePath, file.buffer);
-
+    const fileName = `${randomUUID()}${fileExt}`;
+    const avatarUrl = `/uploads/avatars/${fileName}`;
+    const filePath = this.resolveAvatarPath(avatarUrl);
     const user = (await this.prisma.user.findUnique({
       where: { id: userId },
     })) as any;
 
+    fs.writeFileSync(filePath, file.buffer, { flag: 'wx' });
+    const updatedUser = await this.prisma.user
+      .update({
+        where: { id: userId },
+        data: { avatarUrl } as any,
+      })
+      .catch((error: unknown) => {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (cleanupError) {
+          this.logger.error(
+            'Unable to remove an uncommitted avatar file',
+            cleanupError,
+          );
+        }
+        throw error;
+      });
+
     if (user?.avatarUrl) {
-      const oldAvatarPath = path.join(process.cwd(), user.avatarUrl);
-      if (fs.existsSync(oldAvatarPath)) {
-        fs.unlinkSync(oldAvatarPath);
+      try {
+        this.removeAvatarFile(user.avatarUrl);
+      } catch (error) {
+        this.logger.error('Unable to remove the previous avatar file', error);
       }
     }
 
-    const avatarUrl = `/uploads/avatars/${fileName}`;
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data: { avatarUrl } as any,
-    });
-
     this.logger.log(`Avatar updated: ${updatedUser.email}`);
     return { user: this.formatUser(updatedUser) };
+  }
+
+  async getAvatar(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarUrl: true },
+    });
+    if (!user?.avatarUrl) {
+      throw new BadRequestException('Avatar not found');
+    }
+
+    const filePath = this.resolveAvatarPath(user.avatarUrl);
+    const contentType: Record<string, string> = {
+      '.gif': 'image/gif',
+      '.jpeg': 'image/jpeg',
+      '.jpg': 'image/jpeg',
+      '.png': 'image/png',
+      '.webp': 'image/webp',
+    };
+    const type = contentType[path.extname(filePath).toLowerCase()];
+    if (!type || !fs.existsSync(filePath)) {
+      throw new BadRequestException('Avatar not found');
+    }
+    return { data: fs.readFileSync(filePath), contentType: type };
+  }
+
+  private resolveAvatarPath(avatarUrl: string) {
+    const uploadDir = path.resolve(process.cwd(), 'uploads', 'avatars');
+    const filePath = path.resolve(
+      process.cwd(),
+      avatarUrl.replace(/^[/\\]+/, ''),
+    );
+    if (
+      path.dirname(filePath) !== uploadDir ||
+      !filePath.startsWith(`${uploadDir}${path.sep}`)
+    ) {
+      throw new BadRequestException('Invalid avatar path');
+    }
+    return filePath;
+  }
+
+  private hasValidImageSignature(extension: string, buffer: Buffer) {
+    if (extension === '.png') {
+      return buffer
+        .subarray(0, 8)
+        .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+    }
+    if (extension === '.jpg' || extension === '.jpeg') {
+      return (
+        buffer.length >= 3 &&
+        buffer[0] === 0xff &&
+        buffer[1] === 0xd8 &&
+        buffer[2] === 0xff
+      );
+    }
+    if (extension === '.gif') {
+      return (
+        buffer.subarray(0, 6).toString('ascii') === 'GIF87a' ||
+        buffer.subarray(0, 6).toString('ascii') === 'GIF89a'
+      );
+    }
+    if (extension === '.webp') {
+      return (
+        buffer.length >= 12 &&
+        buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
+        buffer.subarray(8, 12).toString('ascii') === 'WEBP'
+      );
+    }
+    return false;
+  }
+
+  private removeAvatarFile(avatarUrl: string) {
+    const filePath = this.resolveAvatarPath(avatarUrl);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   }
 
   //  REFRESH TOKEN
@@ -355,10 +454,7 @@ export class AuthService {
     })) as any;
 
     if (user?.avatarUrl) {
-      const avatarPath = path.join(process.cwd(), user.avatarUrl);
-      if (fs.existsSync(avatarPath)) {
-        fs.unlinkSync(avatarPath);
-      }
+      this.removeAvatarFile(user.avatarUrl);
     }
 
     const updatedUser = await this.prisma.user.update({

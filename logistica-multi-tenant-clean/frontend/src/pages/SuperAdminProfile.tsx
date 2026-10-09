@@ -5,10 +5,12 @@ import api from '../api/api';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme } from '../theme.config';
 import { SITE_FULL_NAME } from '../site.config';
+import { usePrivateAvatar } from '../hooks/usePrivateAvatar';
 
 const SuperAdminProfile: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserData, logout } = useAuth();
+  const privateAvatarUrl = usePrivateAvatar(user?.avatarUrl);
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
 
   // Profile form
@@ -148,8 +150,7 @@ const SuperAdminProfile: React.FC = () => {
 
   const getAvatarUrl = () => {
     if (avatarPreview) return avatarPreview;
-    if (user?.avatarUrl) return `${process.env.REACT_APP_API_URL}${user.avatarUrl}`;
-    return null;
+    return privateAvatarUrl;
   };
 
   return (

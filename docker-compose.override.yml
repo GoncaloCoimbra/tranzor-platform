@@ -14,20 +14,20 @@ services:
       PORT: 3002
       WS_PORT: 9001
       CORS_ORIGIN: http://localhost:5173,http://localhost:3006,http://localhost:5177,http://127.0.0.1:5177
-      DATABASE_URL: postgresql://${POSTGRES_CHATOPS_USER:-chatops}:${POSTGRES_CHATOPS_PASSWORD:-chatops}@postgres_chatops:5432/${POSTGRES_CHATOPS_DB:-chatops_db}
-      REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_CHATOPS_USER:-chatops}:${POSTGRES_CHATOPS_PASSWORD:?POSTGRES_CHATOPS_PASSWORD must be set}@postgres_chatops:5432/${POSTGRES_CHATOPS_DB:-chatops_db}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379
       ALLOW_DEGRADED: ${ALLOW_DEGRADED:-false}
       STARTUP_MAX_ATTEMPTS: ${STARTUP_MAX_ATTEMPTS:-5}
       STARTUP_RETRY_DELAY_MS: ${STARTUP_RETRY_DELAY_MS:-250}
-      JWT_SECRET: ${JWT_SECRET:-replace-with-a-secure-random-secret}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       COMMERCE_API_URL: http://backend:3001/api/v1
       LOGISTICS_URL: http://logistica-backend:3000
       LOGISTICS_API_KEY: ${LOGISTICS_API_KEY:-}
       TURN_URLS: ${CHATOPS_TURN_URLS:-}
       TURN_SHARED_SECRET: ${CHATOPS_TURN_SHARED_SECRET:-}
     ports:
-      - "3002:3002"
-      - "9001:9001"
+      - "127.0.0.1:3002:3002"
+      - "127.0.0.1:9001:9001"
     depends_on:
       postgres_chatops:
         condition: service_healthy
@@ -57,7 +57,7 @@ services:
       PORT: 5173
       BROWSER: none
     ports:
-      - "3006:5173"
+      - "127.0.0.1:3006:5173"
     depends_on:
       - chatops-backend
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
@@ -68,12 +68,12 @@ services:
       context: ./logistica-multi-tenant-clean
       dockerfile: backend-nest/Dockerfile
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_LOGISTICA_USER:-postgres}:${POSTGRES_LOGISTICA_PASSWORD:-postgres}@postgres_logistica:5432/${POSTGRES_LOGISTICA_DB:-logistica}
-      REDIS_URL: redis://:${REDIS_PASSWORD:-local-dev-redis-password}@redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_LOGISTICA_USER:-postgres}:${POSTGRES_LOGISTICA_PASSWORD:?POSTGRES_LOGISTICA_PASSWORD must be set}@postgres_logistica:5432/${POSTGRES_LOGISTICA_DB:-logistica}
+      REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set}@redis:6379
       ALLOW_DEGRADED: ${ALLOW_DEGRADED:-false}
       STARTUP_MAX_ATTEMPTS: ${STARTUP_MAX_ATTEMPTS:-5}
       STARTUP_RETRY_DELAY_MS: ${STARTUP_RETRY_DELAY_MS:-250}
-      JWT_SECRET: ${JWT_SECRET:-local-dev-logistica-jwt-secret}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       CORS_ORIGIN: http://localhost:3003
       PORT: 3000
       NODE_ENV: development
@@ -82,6 +82,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - logistica_uploads:/app/backend-nest/uploads
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3000/health', res => process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
@@ -93,7 +95,7 @@ services:
   logistica-proxy:
     image: nginx:1.27-alpine
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - ./infra/nginx/logistica.conf:/etc/nginx/nginx.conf:ro
     depends_on:
@@ -116,8 +118,11 @@ services:
       WDS_SOCKET_PORT: 3003
       BROWSER: none
     ports:
-      - "3003:3000"
+      - "127.0.0.1:3003:3000"
     depends_on:
       - logistica-backend
     command: sh -c "npm install && npm run start -- --host 0.0.0.0 --port 3000"
     restart: unless-stopped
+
+volumes:
+  logistica_uploads:

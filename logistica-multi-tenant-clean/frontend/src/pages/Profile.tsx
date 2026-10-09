@@ -4,10 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../api/api';
 import { Button, Input, Card, Badge, Alert } from '../components/common';
 import { theme, statusLabels, getStatusBadgeClass } from '../theme.config';
+import { usePrivateAvatar } from '../hooks/usePrivateAvatar';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { user, updateUserData } = useAuth();
+  const privateAvatarUrl = usePrivateAvatar(user?.avatarUrl);
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile');
   
   // Profile form
@@ -158,8 +160,7 @@ const Profile: React.FC = () => {
 
   const getAvatarUrl = () => {
     if (avatarPreview) return avatarPreview;
-    if (user?.avatarUrl) return `${process.env.REACT_APP_API_URL}${user.avatarUrl}`;
-    return null;
+    return privateAvatarUrl;
   };
 
   const getRoleLabel = (role?: string) => {
@@ -416,4 +417,3 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
-
