@@ -17,14 +17,20 @@ describe('AuditLogInterceptor', () => {
         owner: { name: 'Private Person', email: 'private@example.com' },
         credentials: { password: 'private-password' },
       },
-      user: { id: 'user-1', email: 'private@example.com', companyId: 'company-1' },
+      user: {
+        id: 'user-1',
+        email: 'private@example.com',
+        companyId: 'company-1',
+      },
     };
     const context = {
       switchToHttp: () => ({ getRequest: () => request }),
     } as ExecutionContext;
     const next = { handle: () => of({ id: 'product-1' }) };
 
-    await expect(lastValueFrom(interceptor.intercept(context, next))).resolves.toEqual({
+    await expect(
+      lastValueFrom(interceptor.intercept(context, next)),
+    ).resolves.toEqual({
       id: 'product-1',
     });
     expect(auditLogService.createLog).toHaveBeenCalledWith({
