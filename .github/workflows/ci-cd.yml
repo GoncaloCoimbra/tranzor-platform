@@ -21,7 +21,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: public.ecr.aws/docker/library/postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -107,7 +107,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: public.ecr.aws/docker/library/postgres:15
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -120,7 +120,7 @@ jobs:
         ports:
           - 5432:5432
       mongo:
-        image: mongo:7
+        image: public.ecr.aws/docker/library/mongo:7
         options: >-
           --health-cmd "mongosh --quiet --eval \"db.adminCommand({ ping: 1 })\" || mongo --eval \"db.adminCommand({ ping: 1 })\""
           --health-interval 10s
@@ -129,7 +129,7 @@ jobs:
         ports:
           - 27017:27017
       redis:
-        image: redis:7
+        image: public.ecr.aws/docker/library/redis:7
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
