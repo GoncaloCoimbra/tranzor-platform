@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { catchError, concatMap } from 'rxjs/operators';
 import { AuditLogService } from '../../modules/audit-log/audit-log.service';
 
 @Injectable()
@@ -31,7 +31,7 @@ export class AuditLogInterceptor implements NestInterceptor {
     }
 
     return next.handle().pipe(
-      tap(async (response) => {
+      concatMap(async (response) => {
         try {
           const { entity, action } = this.extractEntityAndAction(method, url);
 
@@ -42,66 +42,43 @@ export class AuditLogInterceptor implements NestInterceptor {
           //  EXTRAÇÃO MELHORADA DO ID DA ENTIDADE
           const entityId = this.extractEntityId(response, body, url);
 
-          const ipAddress = request.ip || request.connection?.remoteAddress;
-
-          // Registra no audit log
           await this.auditLogService.createLog({
             action,
             entity,
             entityId: entityId || undefined,
             userId: user.id,
             companyId: user.companyId,
-            ipAddress: ipAddress ? String(ipAddress) : undefined,
             metadata: {
               method,
-              url,
-              body: this.sanitizeBody(body),
             },
           });
 
           this.logger.log(
-            ` [AUDIT] ${action} ${entity}${entityId ? ` (${entityId})` : ''} by ${user.email}`,
+            ` [AUDIT] ${action} ${entity}${entityId ? ` (${entityId})` : ''} by user ${user.id}`,
           );
         } catch (error) {
           this.logger.error(
-            ` [AUDIT ERROR] Could not register audit: ${error.message}`,
+            ' [AUDIT ERROR] Could not register audit event',
             error.stack,
           );
-          // DOES NOT fail the request if audit log fails
         }
+        return response;
       }),
       catchError((error) => {
-        const errorDetail =
-          error?.response ||
-          (typeof error?.getResponse === 'function'
-            ? error.getResponse()
-            : undefined) ||
-          error?.message ||
-          'Unknown error';
-        // If there is an error in the request, also tries to register
         try {
           if (user) {
             const { entity, action } = this.extractEntityAndAction(method, url);
             if (entity) {
-              const errMsg =
-                typeof errorDetail === 'string'
-                  ? errorDetail
-                  : errorDetail?.message || JSON.stringify(errorDetail);
               this.logger.warn(
-                `⚠️ [AUDIT] ${action} ${entity} falhou - ${errMsg}`,
+                `⚠️ [AUDIT] ${action} ${entity} request failed`,
               );
             }
           }
         } catch {
-          // Silently ignores audit errors during errors
+          this.logger.warn('⚠️ [AUDIT] Could not classify failed request');
         }
 
-        // For diagnosis, also log the stack if present
-        if (error && error.stack) {
-          this.logger.debug(` [INTERCEPTOR] Stack: ${error.stack}`);
-        }
-
-        throw error; // IMPORTANT: Propagates the original error
+        throw error;
       }),
     );
   }
@@ -230,18 +207,4 @@ export class AuditLogInterceptor implements NestInterceptor {
     return null;
   }
 
-  private sanitizeBody(body: any): any {
-    if (!body) return null;
-
-    const sanitized = { ...body };
-    const sensitiveFields = ['password', 'token', 'refreshToken', 'secret'];
-
-    sensitiveFields.forEach((field) => {
-      if (sanitized[field]) {
-        sanitized[field] = '***HIDDEN***';
-      }
-    });
-
-    return sanitized;
-  }
 }
