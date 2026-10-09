@@ -122,7 +122,20 @@ export interface CheckoutQueueData {
  * 4. Se erro: Liberta lock e coloca na dead-letter queue
  */
 checkoutQueue.process(async (job: BullJob<CheckoutQueueData> | MemoryJob<CheckoutQueueData>) => {
-  const { orderId, items } = job.data;
+  const { orderId } = job.data;
+  const quantitiesByProduct = new Map<string, number>();
+  for (const item of job.data.items) {
+    quantitiesByProduct.set(
+      item.productId,
+      (quantitiesByProduct.get(item.productId) || 0) + item.quantity,
+    );
+  }
+  const items = Array.from(quantitiesByProduct, ([productId, quantity]) => ({
+    productId,
+    quantity,
+  })).sort((left, right) =>
+    left.productId < right.productId ? -1 : left.productId > right.productId ? 1 : 0,
+  );
   const locks: Map<string, string> = new Map();
   const decrementedItems: Array<{
     productId: string;

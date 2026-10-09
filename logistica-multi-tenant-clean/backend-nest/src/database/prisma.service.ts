@@ -61,7 +61,12 @@ export class PrismaService
         params.args = params.args || {};
 
         // For queries, add where clause
-        if (params.action === 'findUnique' || params.action === 'findFirst') {
+        if (
+          params.action === 'findUnique' ||
+          params.action === 'findUniqueOrThrow' ||
+          params.action === 'findFirst' ||
+          params.action === 'findFirstOrThrow'
+        ) {
           params.args.where = {
             ...params.args.where,
             companyId,
@@ -84,6 +89,10 @@ export class PrismaService
             ...params.args.where,
             companyId,
           };
+          params.args.data = {
+            ...params.args.data,
+            companyId,
+          };
         } else if (
           params.action === 'delete' ||
           params.action === 'deleteMany'
@@ -101,10 +110,26 @@ export class PrismaService
             ...params.args.where,
             companyId,
           };
-        } else if (params.action === 'createMany') {
+        } else if (
+          params.action === 'createMany' ||
+          params.action === 'createManyAndReturn'
+        ) {
           params.args.data = Array.isArray(params.args.data)
             ? params.args.data.map((data) => ({ ...data, companyId }))
             : { ...params.args.data, companyId };
+        } else if (params.action === 'upsert') {
+          params.args.where = {
+            ...params.args.where,
+            companyId,
+          };
+          params.args.create = {
+            ...params.args.create,
+            companyId,
+          };
+          params.args.update = {
+            ...params.args.update,
+            companyId,
+          };
         }
       }
 
@@ -130,6 +155,7 @@ export class PrismaService
       'ProductMovement',
       'StockReservation',
       'ProcessedStockSyncEvent',
+      'StockSyncDeadLetter',
       'AuditLog',
       'Settings',
       'Notification',

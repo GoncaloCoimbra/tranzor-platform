@@ -67,6 +67,7 @@ Os fluxos foram também testados manualmente com contas reais. As chamadas depen
 
 - Não coloques passwords, tokens, chaves de API, `JWT_SECRET` ou `TURN_SHARED_SECRET` em ficheiros versionados. Usa variáveis de ambiente e valores distintos por ambiente.
 - O login depende de contas do Commerce e de um `JWT_SECRET` partilhado entre os dois serviços.
+- Em Kubernetes, mantém `chatops-backend` com uma réplica: presença, ligações e salas de chamada são estado local do processo, não partilhado.
 - Para redes com NAT/firewalls restritivos, configura um servidor TURN real através de `CHATOPS_TURN_URLS` e `CHATOPS_TURN_SHARED_SECRET` na stack integrada. STUN, por si só, não garante conectividade entre redes.
 - Presença, ligações WebSocket e salas de chamada são mantidas em memória do backend. Não há coordenação entre réplicas e uma chamada em curso não é recuperada depois de um reinício do backend.
 - As migrações Prisma estão em `backend/prisma/migrations`. Antes de aplicar migrações a uma base de dados existente, confirma o estado e faz uma cópia de segurança adequada.

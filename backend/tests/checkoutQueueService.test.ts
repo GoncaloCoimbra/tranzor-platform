@@ -201,4 +201,52 @@ describe('checkout queue fallback', () => {
     expect(stockQuantity).toBe(0);
     expect(mockProduct.findOneAndUpdate).toHaveBeenCalledTimes(2);
   });
+
+  it('acquires one lock per unique product in deterministic order', async () => {
+    mockAcquireStockLock.mockImplementation(async (productId: string) => `lock-${productId}`);
+    mockProduct.findById.mockImplementation(async (productId: string) => ({
+      _id: productId,
+      name: productId,
+      inStock: true,
+      stockQuantity: 10,
+      save: jest.fn().mockResolvedValue(undefined),
+    }));
+    mockProduct.findOneAndUpdate.mockImplementation(async (filter) => ({
+      stockQuantity: 10 - filter.stockQuantity.$gte,
+      inStock: true,
+      save: jest.fn().mockResolvedValue(undefined),
+    }));
+
+    const { enqueueCheckout } = require('../server/services/checkoutQueueService');
+    const job = await enqueueCheckout({
+      orderId: 'deterministic-order',
+      userId: 'user-1',
+      items: [
+        { productId: 'product-b', quantity: 1 },
+        { productId: 'product-a', quantity: 1 },
+        { productId: 'product-b', quantity: 2 },
+      ],
+      timestamp: Date.now(),
+    });
+
+    await expect(job.finished()).resolves.toEqual({
+      success: true,
+      orderId: 'deterministic-order',
+    });
+    expect(mockAcquireStockLock.mock.calls.map(([productId]) => productId)).toEqual([
+      'product-a',
+      'product-b',
+    ]);
+    expect(mockProduct.findOneAndUpdate.mock.calls.map(([filter]) => [
+      filter._id,
+      filter.stockQuantity.$gte,
+    ])).toEqual([
+      ['product-a', 1],
+      ['product-b', 3],
+    ]);
+    expect(mockReleaseStockLock.mock.calls.map(([productId]) => productId)).toEqual([
+      'product-a',
+      'product-b',
+    ]);
+  });
 });

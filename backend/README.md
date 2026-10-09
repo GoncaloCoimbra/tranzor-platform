@@ -51,7 +51,7 @@ O ficheiro [docker-compose.capacity.yml](../docker-compose.capacity.yml) cria se
 
 ## Estado e limitações
 
-- O MongoDB da stack Compose não tem autenticação configurada.
+- O MongoDB da stack Compose exige autenticação root inicializada num volume de dados vazio; configura `MONGODB_URI` com as credenciais da aplicação. Para volumes existentes, não apagues nem recries dados: faz backup e planeia a ativação de autenticação antes de alterar a URI.
 - MongoDB, PostgreSQL, Redis e ClickHouse são instâncias únicas nas configurações Compose; não está configurada alta disponibilidade.
 - O Redis integrado é autenticado por `REDIS_PASSWORD`; não uses uma password diferente nos clientes que comunicam com a mesma instância.
 - Os manifests Kubernetes estão presentes em `k8s/`, mas não foram validados num cluster Kubernetes real.

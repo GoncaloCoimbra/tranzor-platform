@@ -16,7 +16,7 @@ docker build -t tranzor-frontend:local ./frontend
 docker build -t chatops-backend:local ./Chatops/backend
 docker build -t chatops-frontend:local \
   --build-arg VITE_API_URL=/api \
-  --build-arg VITE_WS_URL=ws://localhost:9001/ws \
+  --build-arg VITE_WS_URL=ws://chatops.local/ws \
   ./Chatops/frontend
 docker build -t logistica-backend:local \
   -f logistica-multi-tenant-clean/backend-nest/Dockerfile \
@@ -57,24 +57,16 @@ secret integration. Do not commit the populated `secrets.env`.
 
 - A default StorageClass able to provision ReadWriteOnce volumes.
 - An NGINX Ingress controller; configure DNS or local host entries for
-  `tranzor.local` and `logistica.local`.
-- ChatOps currently relies on the development-only `/auth/dev-token` endpoint
-  and keeps live state in process memory. Its deployment therefore remains
-  development-only and is not exposed through Ingress. Access it locally using
-  port-forwards in separate terminals:
-
-  ```sh
-  kubectl -n tranzor port-forward service/chatops-frontend 3006:80
-  kubectl -n tranzor port-forward service/chatops-backend 9001:9001
-  ```
-
-  The ChatOps WebSocket build URL must match that local port-forward. Do not
-  expose ChatOps publicly until its normal authentication flow and multi-replica
-  behavior are implemented and verified.
-- For a separately secured ChatOps installation, build `chatops-frontend` with
-  `VITE_WS_URL` set to its actual externally reachable `ws://` or `wss://` URL,
-  configure TLS and DNS, and deliberately add the desired Ingress route only
-  after replacing the development-token login flow.
+  `tranzor.local`, `logistica.local` and `chatops.local`.
+- ChatOps uses Commerce-backed cookie authentication and is exposed at
+  `http://chatops.local` through the frontend NGINX proxy, which forwards API,
+  upload and WebSocket paths to the backend. The frontend image's
+  `VITE_WS_URL` is fixed at build time; rebuild it with the correct `ws://` or
+  `wss://` URL whenever the hostname or TLS configuration changes.
+- Keep `chatops-backend` at one replica: its live presence, connections and call
+  rooms are process-local. The local `http://` setup is not suitable for public
+  production traffic; configure TLS, production cookie settings and verify
+  authentication and WebSocket behavior before external exposure.
 - Apply Tranzor and logistics Prisma migrations to their PostgreSQL databases
   before relying on those APIs. The ChatOps directory currently has no
   versioned Prisma migrations; its database schema needs a separately reviewed

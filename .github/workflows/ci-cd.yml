@@ -101,7 +101,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [backend-test, frontend-test]
 
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
 
     services:
       postgres:
@@ -165,6 +167,9 @@ jobs:
 
       - name: Generate ephemeral E2E admin password
         run: node -e "require('node:fs').appendFileSync(process.env.GITHUB_ENV, 'ADMIN_PASSWORD=' + require('node:crypto').randomBytes(32).toString('base64url') + '\n')"
+
+      - name: Mask ephemeral E2E admin password
+        run: echo "::add-mask::$ADMIN_PASSWORD"
 
       - name: Run E2E tests
         working-directory: backend

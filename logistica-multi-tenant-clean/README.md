@@ -65,7 +65,7 @@ O seed executa `TRUNCATE` em várias tabelas antes de inserir os dados de exempl
 ## Estado e limitações
 
 - As configurações Compose usam instâncias únicas de PostgreSQL e Redis; não fornecem alta disponibilidade.
-- O MongoDB usado pela stack integrada da raiz não tem autenticação configurada. O Compose autónomo deste módulo não define MongoDB.
+- O MongoDB usado pela stack integrada da raiz exige autenticação root num volume inicializado; o Compose autónomo deste módulo não define MongoDB.
 - O ChatOps autentica com contas do Commerce através de sessão protegida por cookie; Commerce e ChatOps têm de partilhar o mesmo `JWT_SECRET`. A antiga rota `/auth/dev-token` não está disponível.
 - As migrações Prisma do ChatOps estão versionadas em `Chatops/backend/prisma/migrations`. Mensagens e grupos são persistidos; ligações WebSocket, presença e salas de chamada permanecem em memória do processo e não são partilhadas entre réplicas.
 - Chamadas e partilha de ecrã usam WebRTC; as chamadas em curso não são recuperadas após reinício do backend. Para redes restritivas é necessário configurar e testar um servidor TURN. Os manifests Kubernetes do ChatOps ainda não foram validados num cluster real.

@@ -120,9 +120,9 @@ O objetivo usado no ensaio era P95 ≤1 s por rota e taxa de erro ≤0,1%: categ
 - As migrações Prisma do ChatOps estão versionadas em `Chatops/backend/prisma/migrations`. Confirma o estado e a compatibilidade da base de dados antes de as aplicar a uma instalação existente.
 - Chamadas de áudio/vídeo e partilha de ecrã usam WebRTC; as salas e a sinalização dependem do processo backend ativo. Um reinício ou uma falha abrupta termina as chamadas em curso. Para redes restritivas, é necessário configurar e testar um serviço TURN real.
 - MongoDB, PostgreSQL, Redis e ClickHouse são executados como instâncias únicas nas configurações Compose; não está configurada uma topologia de alta disponibilidade.
-- O MongoDB do Compose não tem autenticação configurada.
+- O MongoDB do Compose exige autenticação root inicializada num volume de dados vazio; a aplicação deve usar a URI autenticada definida em `MONGODB_URI`.
 - O Compose autónomo de ChatOps monta `./pgdata` para `/var/lib/postgresql/data`. Esse bind mount contém os dados locais da base de dados; preserva-o e não o apagues como parte de uma limpeza do repositório.
-- Os manifests Kubernetes estão presentes, mas não foram validados num cluster Kubernetes real. A validação de configuração ou a construção de imagens não substitui um ensaio de deployment num cluster.
+- Os manifests Kubernetes estão presentes, mas não foram validados num cluster Kubernetes real. Os deployments usam imagens `:local`, dependem de as imagens existirem nos nós e não constituem um pipeline de publicação. O Ingress ChatOps está preparado para o host `chatops.local`; use TLS e configuração de produção antes de expor a stack fora de um ambiente local.
 - As imagens Docker da Logística foram construídas localmente com os comandos indicados em [docs/DEPLOYMENT.md](./logistica-multi-tenant-clean/docs/DEPLOYMENT.md); os manifests Kubernetes continuam por validar em cluster.
 
 ## Seeds e credenciais
