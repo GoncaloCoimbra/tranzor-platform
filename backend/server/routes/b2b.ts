@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
-import XLSX from 'xlsx';
+import XLSX from '@e965/xlsx';
 import B2BQuote from '../models/B2BQuote';
 import Product from '../models/Product';
 import Cart from '../models/Cart';

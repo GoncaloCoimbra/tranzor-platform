@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
-import XLSX from 'xlsx';
+import XLSX from '@e965/xlsx';
 import Product from '../models/Product';
 import Cart from '../models/Cart';
 import User from '../models/User';
