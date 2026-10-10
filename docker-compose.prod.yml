@@ -40,7 +40,7 @@ services:
       - backend_logs:/app/logs
 
   mongo:
-    image: mongo:7
+    image: public.ecr.aws/docker/library/mongo:7
     restart: always
     environment:
       MONGO_INITDB_DATABASE: Tranzor
@@ -58,7 +58,7 @@ services:
       retries: 10
 
   postgres:
-    image: postgres:16
+    image: public.ecr.aws/docker/library/postgres:16
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-tranzor}
@@ -75,7 +75,7 @@ services:
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: public.ecr.aws/docker/library/redis:7-alpine
     restart: always
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD é obrigatória}"]
     environment:

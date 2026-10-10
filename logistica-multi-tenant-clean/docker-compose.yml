@@ -1,6 +1,6 @@
 ﻿services:
   db:
-    image: postgres:15-alpine
+    image: public.ecr.aws/docker/library/postgres:15-alpine
     container_name: logistica-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER must be set}
@@ -19,7 +19,7 @@
       retries: 5
 
   redis:
-    image: redis:7
+    image: public.ecr.aws/docker/library/redis:7
     container_name: logistica-redis
     ports:
       - "127.0.0.1:6379:6379"

@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo:7
+    image: public.ecr.aws/docker/library/mongo:7
     restart: unless-stopped
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-Tranzor}
@@ -19,7 +19,7 @@ services:
       - mongo_data:/data/db
 
   redis:
-    image: redis:7-alpine
+    image: public.ecr.aws/docker/library/redis:7-alpine
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD must be set}"]
     environment:
@@ -45,7 +45,7 @@ services:
       - typesense_data:/data
 
   postgres_Tranzor:
-    image: postgres:16
+    image: public.ecr.aws/docker/library/postgres:16
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-tranzor}
@@ -63,7 +63,7 @@ services:
       - postgres_Tranzor_data:/var/lib/postgresql/data
 
   postgres_logistica:
-    image: postgres:16
+    image: public.ecr.aws/docker/library/postgres:16
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_LOGISTICA_DB:-logistica}
@@ -81,7 +81,7 @@ services:
       - postgres_logistica_data:/var/lib/postgresql/data
 
   postgres_chatops:
-    image: postgres:16
+    image: public.ecr.aws/docker/library/postgres:16
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_CHATOPS_DB:-chatops_db}

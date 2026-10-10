@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: mongodb
-          image: mongo:7
+          image: public.ecr.aws/docker/library/mongo:7
           ports:
             - name: mongodb
               containerPort: 27017

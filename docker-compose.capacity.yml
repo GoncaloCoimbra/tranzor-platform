@@ -1,6 +1,6 @@
 services:
   mongo:
-    image: mongo:7
+    image: public.ecr.aws/docker/library/mongo:7
     command: ["mongod", "--wiredTigerCacheSizeGB", "0.25"]
     mem_limit: 768m
     cpus: ${CAPACITY_MONGO_CPUS:-1.5}
@@ -15,7 +15,7 @@ services:
       retries: 20
 
   redis:
-    image: redis:7-alpine
+    image: public.ecr.aws/docker/library/redis:7-alpine
     command: ["redis-server", "--save", "", "--appendonly", "no", "--requirepass", "${CAPACITY_REDIS_PASSWORD:?CAPACITY_REDIS_PASSWORD must be set}"]
     environment:
       CAPACITY_REDIS_PASSWORD: ${CAPACITY_REDIS_PASSWORD:?CAPACITY_REDIS_PASSWORD must be set}
