@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: redis
-          image: redis:7-alpine
+          image: public.ecr.aws/docker/library/redis:7-alpine
           command: ["sh", "-c"]
           args:
             - exec redis-server --appendonly yes --save 60 1 --requirepass "$REDIS_PASSWORD"

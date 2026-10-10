@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   postgres:
-    image: postgres:15
+    image: public.ecr.aws/docker/library/postgres:15
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-chatops}
@@ -13,7 +13,7 @@ services:
       - ./pgdata:/var/lib/postgresql/data
 
   redis:
-    image: redis:7
+    image: public.ecr.aws/docker/library/redis:7
     restart: unless-stopped
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD must be set}
