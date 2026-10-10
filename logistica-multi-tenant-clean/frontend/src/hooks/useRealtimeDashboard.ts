@@ -14,7 +14,7 @@ const realtimeEvents = [
 ] as const;
 
 function getSocketUrl(): string {
-  const configuredUrl = process.env.REACT_APP_WS_URL;
+  const configuredUrl = import.meta.env.VITE_WS_URL;
   if (configuredUrl) {
     return configuredUrl;
   }
