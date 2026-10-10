@@ -1,16 +1,17 @@
 import React from 'react';
 import { render } from '@testing-library/react';
+import { vi } from 'vitest';
 
-jest.mock('./contexts/AuthContext', () => ({
+vi.mock('./contexts/AuthContext', () => ({
   AuthProvider: ({ children }: any) => <>{children}</>,
   useAuth: () => ({
     user: null,
     loading: false,
-    login: jest.fn(),
-    register: jest.fn(),
-    demoLogin: jest.fn(),
-    logout: jest.fn(),
-    updateUserData: jest.fn(),
+    login: vi.fn(),
+    register: vi.fn(),
+    demoLogin: vi.fn(),
+    logout: vi.fn(),
+    updateUserData: vi.fn(),
     isAuthenticated: false,
     isSuperAdmin: false,
     isAdmin: false,
@@ -19,7 +20,7 @@ jest.mock('./contexts/AuthContext', () => ({
   }),
 }));
 
-jest.mock('react-leaflet', () => ({
+vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: any) => <div>{children}</div>,
   TileLayer: () => <div />,
   Popup: ({ children }: any) => <div>{children}</div>,
@@ -27,14 +28,18 @@ jest.mock('react-leaflet', () => ({
   Circle: () => <div />,
   Marker: () => <div />,
   useMap: () => ({
-    fitBounds: jest.fn(),
+    fitBounds: vi.fn(),
   }),
 }));
 
-jest.mock('leaflet', () => ({
+vi.mock('leaflet', () => ({
   latLng: (lat: number, lng: number) => ({ lat, lng }),
-  latLngBounds: jest.fn(),
-  divIcon: jest.fn().mockImplementation((opts: any) => ({ ...opts, options: opts })),
+  latLngBounds: vi.fn(),
+  divIcon: vi.fn().mockImplementation((opts: any) => ({ ...opts, options: opts })),
+  default: {
+    latLngBounds: vi.fn(),
+    divIcon: vi.fn().mockImplementation((opts: any) => ({ ...opts, options: opts })),
+  },
 }));
 
 import App from './App';

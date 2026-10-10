@@ -1,24 +1,24 @@
-# Frontend - React + Vite + Tailwind
+﻿# Frontend - React + Vite + Tailwind
 
 Modern interface for the multi-tenant logistics management platform.
 
-## 🎨 Design System (NEW)
+## ðŸŽ¨ Design System (NEW)
 
 The frontend is undergoing a **complete visual redesign** to match Website and ChatOps modules with a unified design system.
 
-### Current Status 🟢
-- ✅ **Phase 1 Complete**: Design system & components (600+ lines CSS, 13 components)
-- 🟡 **Phase 2 Ready**: Page refactoring (0/35 pages done, ~4-5 hours remaining)
-- ⏳ **Phase 3 Pending**: Testing & optimization
+### Current Status ðŸŸ¢
+- âœ… **Phase 1 Complete**: Design system & components (600+ lines CSS, 13 components)
+- ðŸŸ¡ **Phase 2 Ready**: Page refactoring (0/35 pages done, ~4-5 hours remaining)
+- â³ **Phase 3 Pending**: Testing & optimization
 
-### What's New ✨
-- ✅ Unified design tokens (colors, typography, spacing)
-- ✅ New component library (Button, Input, Card, Badge, Alert)
-- ✅ Light/Dark mode support with automatic switching (toggle 🌙)
-- ✅ Brand red color (#d90429) with semantic palette
-- ✅ New layout (Header, Sidebar, Footer) integrated
+### What's New âœ¨
+- âœ… Unified design tokens (colors, typography, spacing)
+- âœ… New component library (Button, Input, Card, Badge, Alert)
+- âœ… Light/Dark mode support with automatic switching (toggle ðŸŒ™)
+- âœ… Brand red color (#d90429) with semantic palette
+- âœ… New layout (Header, Sidebar, Footer) integrated
 
-### Getting Started 🚀
+### Getting Started ðŸš€
 
 **If you're refactoring pages:**
 1. Read [PHASE1_COMPLETE.md](./PHASE1_COMPLETE.md) (2-min overview)
@@ -35,14 +35,14 @@ import { Button, Input, Card, Badge, Alert } from '@/components/common';
 <Badge variant="success">Active</Badge>
 ```
 
-### Documentation 📚
+### Documentation ðŸ“š
 All redesign guides in `frontend/` root:
-- [PHASE1_COMPLETE.md](./PHASE1_COMPLETE.md) — Session summary
-- [START_HERE.md](./START_HERE.md) — Quick action plan (read this first!)
-- [IMPLEMENTATION_COMPLETE.md](./IMPLEMENTATION_COMPLETE.md) — Complete roadmap
-- [PAGE_MIGRATION_EXAMPLE.md](./PAGE_MIGRATION_EXAMPLE.md) — Before/after examples
-- [REFACTORING_CHECKLIST.md](./REFACTORING_CHECKLIST.md) — Component mapping
-- [EXAMPLE_REFACTORED_PRODUCTLIST.md](./EXAMPLE_REFACTORED_PRODUCTLIST.md) — Full page example
+- [PHASE1_COMPLETE.md](./PHASE1_COMPLETE.md) â€” Session summary
+- [START_HERE.md](./START_HERE.md) â€” Quick action plan (read this first!)
+- [IMPLEMENTATION_COMPLETE.md](./IMPLEMENTATION_COMPLETE.md) â€” Complete roadmap
+- [PAGE_MIGRATION_EXAMPLE.md](./PAGE_MIGRATION_EXAMPLE.md) â€” Before/after examples
+- [REFACTORING_CHECKLIST.md](./REFACTORING_CHECKLIST.md) â€” Component mapping
+- [EXAMPLE_REFACTORED_PRODUCTLIST.md](./EXAMPLE_REFACTORED_PRODUCTLIST.md) â€” Full page example
 
 ### Quick Start
 
@@ -76,39 +76,39 @@ npm run --workspace=frontend format
 
 ```
 src/
-├─ main.tsx / index.tsx   # Entry point
-├─ App.tsx                # Root component
-├─ api/
-│  └─ client.ts          # Axios instance + interceptors
-├─ components/            # Reusable components
-│  ├─ common/
-│  ├─ layout/
-│  └─ ...
-├─ pages/                 # Pages (routes)
-│  ├─ Dashboard.tsx
-│  ├─ Products/
-│  ├─ Vehicles/
-│  └─ ...
-├─ hooks/                 # Custom hooks
-│  └─ useAuth.ts
-├─ contexts/              # Context API
-├─ services/              # Data logic (non-API)
-├─ types/                 # TypeScript types
-├─ utils/                 # Utility functions
-└─ styles/                # Global CSS
+â”œâ”€ main.tsx / index.tsx   # Entry point
+â”œâ”€ App.tsx                # Root component
+â”œâ”€ api/
+â”‚  â””â”€ client.ts          # Axios instance + interceptors
+â”œâ”€ components/            # Reusable components
+â”‚  â”œâ”€ common/
+â”‚  â”œâ”€ layout/
+â”‚  â””â”€ ...
+â”œâ”€ pages/                 # Pages (routes)
+â”‚  â”œâ”€ Dashboard.tsx
+â”‚  â”œâ”€ Products/
+â”‚  â”œâ”€ Vehicles/
+â”‚  â””â”€ ...
+â”œâ”€ hooks/                 # Custom hooks
+â”‚  â””â”€ useAuth.ts
+â”œâ”€ contexts/              # Context API
+â”œâ”€ services/              # Data logic (non-API)
+â”œâ”€ types/                 # TypeScript types
+â”œâ”€ utils/                 # Utility functions
+â””â”€ styles/                # Global CSS
 
 public/
-├─ index.html
-├─ favicon.ico
-└─ manifest.json
+â”œâ”€ index.html
+â”œâ”€ favicon.ico
+â””â”€ manifest.json
 ```
 
 ## Environment Variables
 
 ```bash
 # .env.local
-REACT_APP_API_URL=http://localhost:3000/api
-REACT_APP_ENV=development
+VITE_API_URL=http://localhost:3000/api
+VITE_ENV=development
 ```
 
 ## Tests
@@ -179,13 +179,13 @@ apiClient.interceptors.response.use(
 - Components: reusable in `components/`
 # Frontend Logistics
 
-Frontend da demonstração de portfolio para o módulo de logística.
+Frontend da demonstraÃ§Ã£o de portfolio para o mÃ³dulo de logÃ­stica.
 
 ## Objetivo
-- mostrar o fluxo de gestão de produtos e stock
-- servir como camada visual para a integração com ChatOps
+- mostrar o fluxo de gestÃ£o de produtos e stock
+- servir como camada visual para a integraÃ§Ã£o com ChatOps
 
-## Execução local
+## ExecuÃ§Ã£o local
 ```bash
 cd frontend
 npm install
@@ -208,7 +208,7 @@ npm start
 
 ---
 
-## ✨ Features
+## âœ¨ Features
 
 ### Authentication and Security
 - Multi-tenant system with total data isolation
@@ -230,31 +230,31 @@ npm start
 - Top 5 suppliers
 - Real-time performance metrics
 
-### 🚚 Transport Management
+### ðŸšš Transport Management
 - Fleet vehicle registration
 - Transport creation and tracking
 - Integration with products and states
 - Status: In Transit, Delivered, Cancelled
 
-### 👥 Supplier Management
+### ðŸ‘¥ Supplier Management
 - Complete CRUD of suppliers
 - Product linkage
 - Supply history
 
-### 📜 Audit and History
+### ðŸ“œ Audit and History
 - Automatic recording of all operations
 - Filters by: date, action, entity, user
 - Complete tracking of changes
 - Immutable logs with timestamps
 
-### 🔔 Notification System
+### ðŸ”” Notification System
 - Alerts for products stuck in analysis
 - Real-time notifications
 - Notification history
 
 ---
 
-## 🛠️ Technology Stack
+## ðŸ› ï¸ Technology Stack
 
 ### Backend
 | Technology | Version | Description |
@@ -284,39 +284,39 @@ npm start
 
 ---
 
-## 🏗️ Architecture
+## ðŸ—ï¸ Architecture
 
 ### Multi-Tenant Pattern
 
 ```
-┌─────────────────────────────────────────┐
-│          Frontend (React SPA)           │
-└──────────────┬──────────────────────────┘
-               │ HTTP/REST API
-┌──────────────▼──────────────────────────┐
-│       Backend (Express + TypeScript)    │
-│  ┌────────────────────────────────┐     │
-│  │  Auth Middleware (JWT)         │     │
-│  └────────────┬───────────────────┘     │
-│  ┌────────────▼───────────────────┐     │
-│  │  Multi-Tenant Middleware       │     │
-│  │  (companyId isolation)         │     │
-│  └────────────┬───────────────────┘     │
-│  ┌────────────▼───────────────────┐     │
-│  │  Controllers & Services        │     │
-│  └────────────┬───────────────────┘     │
-└───────────────┼─────────────────────────┘
-                │ Prisma ORM
-┌───────────────▼─────────────────────────┐
-│         PostgreSQL Database             │
-│  ┌──────────────────────────────────┐   │
-│  │ Company 1 Data (isolated)        │   │
-│  ├──────────────────────────────────┤   │
-│  │ Company 2 Data (isolated)        │   │
-│  ├──────────────────────────────────┤   │
-│  │ Company N Data (isolated)        │   │
-│  └──────────────────────────────────┘   │
-└─────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚          Frontend (React SPA)           â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+               â”‚ HTTP/REST API
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚       Backend (Express + TypeScript)    â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”‚
+â”‚  â”‚  Auth Middleware (JWT)         â”‚     â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”‚
+â”‚  â”‚  Multi-Tenant Middleware       â”‚     â”‚
+â”‚  â”‚  (companyId isolation)         â”‚     â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”     â”‚
+â”‚  â”‚  Controllers & Services        â”‚     â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜     â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                â”‚ Prisma ORM
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–¼â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚         PostgreSQL Database             â”‚
+â”‚  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”   â”‚
+â”‚  â”‚ Company 1 Data (isolated)        â”‚   â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤   â”‚
+â”‚  â”‚ Company 2 Data (isolated)        â”‚   â”‚
+â”‚  â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤   â”‚
+â”‚  â”‚ Company N Data (isolated)        â”‚   â”‚
+â”‚  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜   â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### State Machine
@@ -343,7 +343,7 @@ stateDiagram-v2
 
 ---
 
-## 🚀 Getting Started
+## ðŸš€ Getting Started
 
 ### Prerequisites
 
@@ -453,7 +453,7 @@ cd frontend
 npm start
 ```
 
-**Modo Produção:**
+**Modo ProduÃ§Ã£o:**
 
 ```bash
 # Backend
@@ -475,96 +475,96 @@ npm run build
 
 ---
 
-## 📁 Estrutura do Projeto
+## ðŸ“ Estrutura do Projeto
 
 ```
 logistica-multi-tenant/
-├── backend/
-│   ├── prisma/
-│   │   ├── schema.prisma          # Schema da BD
-│   │   ├── migrations/            # Migrações
-│   │   └── seed.ts                # Dados iniciais
-│   ├── src/
-│   │   ├── config/
-│   │   │   ├── database.ts        # Prisma Configuration
-│   │   │   └── env.ts             # Variáveis de ambiente
-│   │   ├── controllers/           # Controladores de rotas
-│   │   │   ├── auth.controller.ts
-│   │   │   ├── products.controller.ts
-│   │   │   ├── dashboard.controller.ts
-│   │   │   ├── suppliers.controller.ts
-│   │   │   ├── vehicles.controller.ts
-│   │   │   ├── transports.controller.ts
-│   │   │   ├── auditlog.controller.ts
-│   │   │   └── notifications.controller.ts
-│   │   ├── middlewares/
-│   │   │   ├── auth.middleware.ts
-│   │   │   ├── errorHandler.ts
-│   │   │   ├── roleCheck.middleware.ts
-│   │   │   └── superAdmin.middleware.ts
-│   │   ├── routes/               # Definição de rotas
-│   │   ├── services/             # Lógica de negócio
-│   │   │   └── product-state.service.ts
-│   │   ├── types/                # Tipos TypeScript
-│   │   │   ├── express.d.ts
-│   │   │   └── product-states.ts
-│   │   ├── utils/                # Utilitários
-│   │   └── server.ts             # Entry point
-│   ├── .env                      # Variáveis de ambiente
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── api/
-│   │   │   └── config.ts        # Axios client
-│   │   ├── components/           # Componentes React
-│   │   │   ├── CompanyModal.tsx
-│   │   │   ├── EditGlobalUserModal.tsx
-│   │   │   ├── Header.tsx
-│   │   │   ├── NotificationPanel.tsx
-│   │   │   ├── PrivateRoute.tsx
-│   │   │   ├── ProductHistoryModal.tsx
-│   │   │   ├── StateTransition.tsx
-│   │   │   └── UserFormModal.tsx
-│   │   ├── contexts/
-│   │   │   └── AuthContext.tsx   # Authentication Context
-│   │   ├── pages/                # Páginas/Rotas
-│   │   │   ├── AuditLog.tsx
-│   │   │   ├── CompanyManagement.tsx
-│   │   │   ├── Dashboard.tsx
-│   │   │   ├── DashboardAdvanced.tsx
-│   │   │   ├── GlobalUserManagement.tsx
-│   │   │   ├── Login.tsx
-│   │   │   ├── NewProduct.tsx
-│   │   │   ├── ProductDetails.tsx
-│   │   │   ├── ProductList.tsx
-│   │   │   ├── Register.tsx
-│   │   │   ├── Settings.tsx
-│   │   │   ├── SuperAdminDashboard.tsx
-│   │   │   ├── SupplierList.tsx
-│   │   │   ├── TransportList.tsx
-│   │   │   └── VehicleList.tsx
-│   │   ├── App.tsx               # Componente raiz
-│   │   ├── index.tsx             # Entry point
-│   │   └── index.css             # Estilos globais
-│   ├── tailwind.config.js
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── docker/
-│   └── postgres/
-├── docker-compose.yml
-├── .gitignore
-└── README.md
+â”œâ”€â”€ backend/
+â”‚   â”œâ”€â”€ prisma/
+â”‚   â”‚   â”œâ”€â”€ schema.prisma          # Schema da BD
+â”‚   â”‚   â”œâ”€â”€ migrations/            # MigraÃ§Ãµes
+â”‚   â”‚   â””â”€â”€ seed.ts                # Dados iniciais
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ config/
+â”‚   â”‚   â”‚   â”œâ”€â”€ database.ts        # Prisma Configuration
+â”‚   â”‚   â”‚   â””â”€â”€ env.ts             # VariÃ¡veis de ambiente
+â”‚   â”‚   â”œâ”€â”€ controllers/           # Controladores de rotas
+â”‚   â”‚   â”‚   â”œâ”€â”€ auth.controller.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ products.controller.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ dashboard.controller.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ suppliers.controller.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ vehicles.controller.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ transports.controller.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ auditlog.controller.ts
+â”‚   â”‚   â”‚   â””â”€â”€ notifications.controller.ts
+â”‚   â”‚   â”œâ”€â”€ middlewares/
+â”‚   â”‚   â”‚   â”œâ”€â”€ auth.middleware.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ errorHandler.ts
+â”‚   â”‚   â”‚   â”œâ”€â”€ roleCheck.middleware.ts
+â”‚   â”‚   â”‚   â””â”€â”€ superAdmin.middleware.ts
+â”‚   â”‚   â”œâ”€â”€ routes/               # DefiniÃ§Ã£o de rotas
+â”‚   â”‚   â”œâ”€â”€ services/             # LÃ³gica de negÃ³cio
+â”‚   â”‚   â”‚   â””â”€â”€ product-state.service.ts
+â”‚   â”‚   â”œâ”€â”€ types/                # Tipos TypeScript
+â”‚   â”‚   â”‚   â”œâ”€â”€ express.d.ts
+â”‚   â”‚   â”‚   â””â”€â”€ product-states.ts
+â”‚   â”‚   â”œâ”€â”€ utils/                # UtilitÃ¡rios
+â”‚   â”‚   â””â”€â”€ server.ts             # Entry point
+â”‚   â”œâ”€â”€ .env                      # VariÃ¡veis de ambiente
+â”‚   â”œâ”€â”€ package.json
+â”‚   â””â”€â”€ tsconfig.json
+â”‚
+â”œâ”€â”€ frontend/
+â”‚   â”œâ”€â”€ public/
+â”‚   â”œâ”€â”€ src/
+â”‚   â”‚   â”œâ”€â”€ api/
+â”‚   â”‚   â”‚   â””â”€â”€ config.ts        # Axios client
+â”‚   â”‚   â”œâ”€â”€ components/           # Componentes React
+â”‚   â”‚   â”‚   â”œâ”€â”€ CompanyModal.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ EditGlobalUserModal.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ Header.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ NotificationPanel.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ PrivateRoute.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ ProductHistoryModal.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ StateTransition.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ UserFormModal.tsx
+â”‚   â”‚   â”œâ”€â”€ contexts/
+â”‚   â”‚   â”‚   â””â”€â”€ AuthContext.tsx   # Authentication Context
+â”‚   â”‚   â”œâ”€â”€ pages/                # PÃ¡ginas/Rotas
+â”‚   â”‚   â”‚   â”œâ”€â”€ AuditLog.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ CompanyManagement.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ Dashboard.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ DashboardAdvanced.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ GlobalUserManagement.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ Login.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ NewProduct.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ ProductDetails.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ ProductList.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ Register.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ Settings.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ SuperAdminDashboard.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ SupplierList.tsx
+â”‚   â”‚   â”‚   â”œâ”€â”€ TransportList.tsx
+â”‚   â”‚   â”‚   â””â”€â”€ VehicleList.tsx
+â”‚   â”‚   â”œâ”€â”€ App.tsx               # Componente raiz
+â”‚   â”‚   â”œâ”€â”€ index.tsx             # Entry point
+â”‚   â”‚   â””â”€â”€ index.css             # Estilos globais
+â”‚   â”œâ”€â”€ tailwind.config.js
+â”‚   â”œâ”€â”€ package.json
+â”‚   â””â”€â”€ tsconfig.json
+â”‚
+â”œâ”€â”€ docker/
+â”‚   â””â”€â”€ postgres/
+â”œâ”€â”€ docker-compose.yml
+â”œâ”€â”€ .gitignore
+â””â”€â”€ README.md
 ```
 
 ---
 
-## 📖 Usage
+## ðŸ“– Usage
 
-### 🎬 Basic Operation Flow
+### ðŸŽ¬ Basic Operation Flow
 
 #### 1. Company Registration
 
@@ -585,7 +585,7 @@ logistica-multi-tenant/
 
 #### 3. Add Product
 
-1. Go to **Products** → **New Product**
+1. Go to **Products** â†’ **New Product**
 2. Fill in required data:
    - Unique code
    - Description
@@ -605,8 +605,8 @@ logistica-multi-tenant/
 
 **Example Flow:**
 ```
-Received → Under Analysis → Approved → In Storage → 
-In Preparation → In Expedition → Delivered
+Received â†’ Under Analysis â†’ Approved â†’ In Storage â†’ 
+In Preparation â†’ In Expedition â†’ Delivered
 ```
 
 #### 5. Check History
@@ -618,18 +618,18 @@ In Preparation → In Expedition → Delivered
 #### 6. Dashboard
 
 - Acede ao **Dashboard** para:
-  - Ver resumo do inventário por estado
-  - Analisar distribuição com gráficos
-  - Monitorizar movimentações recentes
+  - Ver resumo do inventÃ¡rio por estado
+  - Analisar distribuiÃ§Ã£o com grÃ¡ficos
+  - Monitorizar movimentaÃ§Ãµes recentes
   - Identify products stopped for longer time
 
 ---
 
-## 🔌 API Endpoints
+## ðŸ”Œ API Endpoints
 
 ### Authentication
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
 | POST | `/api/auth/register` | Company registration and admin |  |
 | POST | `/api/auth/login` | Login |  |
@@ -637,7 +637,7 @@ In Preparation → In Expedition → Delivered
 
 ### Products
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
 | GET | `/api/products` | Lista products |  |
 | GET | `/api/products/:id` | Detalhes de um product |  |
@@ -645,18 +645,18 @@ In Preparation → In Expedition → Delivered
 | PUT | `/api/products/:id` | Atualizar product |  |
 | DELETE | `/api/products/:id` | Eliminar product |  Admin |
 | POST | `/api/products/:id/transition` | Alterar estado |  |
-| GET | `/api/products/:id/history` | Histórico de movimentações |  |
+| GET | `/api/products/:id/history` | HistÃ³rico de movimentaÃ§Ãµes |  |
 
 ### Dashboard
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
-| GET | `/api/dashboard/stats` | Estatísticas gerais |  |
-| GET | `/api/dashboard/by-status` | Distribuição por estado |  |
+| GET | `/api/dashboard/stats` | EstatÃ­sticas gerais |  |
+| GET | `/api/dashboard/by-status` | DistribuiÃ§Ã£o por estado |  |
 
 ### Suppliers
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
 | GET | `/api/suppliers` | List suppliers |  |
 | POST | `/api/suppliers` | Create supplier |  |
@@ -665,7 +665,7 @@ In Preparation → In Expedition → Delivered
 
 ### Vehicles
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
 | GET | `/api/vehicles` | List vehicles |  |
 | POST | `/api/vehicles` | Create vehicle |  |
@@ -674,7 +674,7 @@ In Preparation → In Expedition → Delivered
 
 ### Transports
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
 | GET | `/api/transports` | List transports |  |
 | POST | `/api/transports` | Create transport |  |
@@ -683,21 +683,21 @@ In Preparation → In Expedition → Delivered
 
 ### Auditoria
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
 | GET | `/api/auditlog` | Lista logs de auditoria |  |
 
-### Notificações
+### NotificaÃ§Ãµes
 
-| Método | Endpoint | Descrição | Auth |
+| MÃ©todo | Endpoint | DescriÃ§Ã£o | Auth |
 |--------|----------|-----------|------|
-| GET | `/api/notifications` | Lista notificações |  |
+| GET | `/api/notifications` | Lista notificaÃ§Ãµes |  |
 | PUT | `/api/notifications/:id/read` | Marcar como lida |  |
 | PUT | `/api/notifications/read-all` | Marcar todas como lidas |  |
 
 ---
 
-## 🔄 Product States
+## ðŸ”„ Product States
 
 ### Available States
 
@@ -746,18 +746,18 @@ In Preparation → In Expedition → Delivered
 ### Operator (per company)
 
 **Acesso restrito:**
-- Gerir inventário e movimentações
+- Gerir inventÃ¡rio e movimentaÃ§Ãµes
 - **Cannot** approve or reject products
-- **Não pode** eliminar registos
-- Acesso limitado a determinadas transições de estado
+- **NÃ£o pode** eliminar registos
+- Acesso limitado a determinadas transiÃ§Ãµes de estado
 
 ---
 
-## 💻 Development Guide
+## ðŸ’» Development Guide
 
 ### Before Programming
 
-📖 **Read the requirements document 3 times:**
+ðŸ“– **Read the requirements document 3 times:**
 
 1. **First reading**: Understand the general scope
 2. **Second reading**: Highlight mandatory fields, transitions, business rules
@@ -771,12 +771,12 @@ Draw on paper or visual tool:
    - Tables and fields
    - Relationships (FK)
    - Important indexes
-   - ⚠️ Don't forget `companyId` in multi-tenant tables
+   - âš ï¸ Don't forget `companyId` in multi-tenant tables
 
 2. **Fluxo de Estados**
    - Diagrama com todos os estados
-   - Setas com transições permitidas
-   - Quem pode fazer cada transição
+   - Setas com transiÃ§Ãµes permitidas
+   - Quem pode fazer cada transiÃ§Ã£o
 
 3. **Estrutura de Pastas**
    - Controllers, services, routes
@@ -784,8 +784,8 @@ Draw on paper or visual tool:
    - Logical organization
 
 4. **Application Screens**
-   - Rascunho de cada página
-   - Posição de filtros, tabelas, formulários
+   - Rascunho de cada pÃ¡gina
+   - PosiÃ§Ã£o de filtros, tabelas, formulÃ¡rios
 
 ### Executar Testes
 
@@ -810,53 +810,53 @@ npx prisma studio
 
 Acede a http://localhost:5555
 
-### Boas Práticas
+### Boas PrÃ¡ticas
 
 -  Sempre validar input com Zod
 -  Sempre filtrar por `companyId` em queries multi-tenant
--  Registar operações importantes no audit log
--  Usar transações Prisma para operações complexas
--  Escrever testes para lógica crítica
+-  Registar operaÃ§Ãµes importantes no audit log
+-  Usar transaÃ§Ãµes Prisma para operaÃ§Ãµes complexas
+-  Escrever testes para lÃ³gica crÃ­tica
 -  Documentar endpoints na API
--  Usar variáveis de ambiente para secrets
+-  Usar variÃ¡veis de ambiente para secrets
 
 ---
 
-## 🗺️ Roadmap
+## ðŸ—ºï¸ Roadmap
 
-### Fase 1 - Concluído 
+### Fase 1 - ConcluÃ­do 
 - [x] Sistema multi-tenant
 - [x] JWT Authentication
 - [x] Product CRUD
-- [x] Máquina de estados
-- [x] Dashboard básico
+- [x] MÃ¡quina de estados
+- [x] Dashboard bÃ¡sico
 - [x] Operation history
 
-### Fase 2 - Concluído 
+### Fase 2 - ConcluÃ­do 
 - [x] Supplier management
 - [x] Vehicle management
 - [x] Transport management
-- [x] Sistema de notificações
-- [x] Dashboard avançado
+- [x] Sistema de notificaÃ§Ãµes
+- [x] Dashboard avanÃ§ado
 - [x] Super Admin
 
-### Fase 3 - Em Desenvolvimento 🚧
-- [ ] Relatórios avançados em PDF
+### Fase 3 - Em Desenvolvimento ðŸš§
+- [ ] RelatÃ³rios avanÃ§ados em PDF
 - [ ] Data export (Excel, CSV)
 - [ ] Carrier API integration
-- [ ] Sistema de alertas configurável
+- [ ] Sistema de alertas configurÃ¡vel
 - [ ] Mobile app (React Native)
 
-### Fase 4 - Planeado 📋
+### Fase 4 - Planeado ðŸ“‹
 - [ ] Cross-company integration
 - [ ] Transport marketplace
-- [ ] BI e análise preditiva
+- [ ] BI e anÃ¡lise preditiva
 - [ ] ERP integration
-- [ ] API pública para terceiros
+- [ ] API pÃºblica para terceiros
 
 ---
 
-## 🤝 Contribute
+## ðŸ¤ Contribute
 
 Contributions are welcome! This project was developed for the **Commit PT** community on Discord.
 
@@ -875,13 +875,13 @@ Contributions are welcome! This project was developed for the **Commit PT** comm
 
 ---
 
-## 📄 License
+## ðŸ“„ License
 
 This project is under the MIT license. See the [LICENSE](LICENSE) file for more details.
 
 ---
 
-## 👥 Community
+## ðŸ‘¥ Community
 
 This project was developed for the [**Commit PT**] community
 Join the community to:
@@ -892,7 +892,7 @@ Join the community to:
 
 ---
 
-## 📞 Support
+## ðŸ“ž Support
 
 If you found any issues or have suggestions:
 
@@ -903,4 +903,4 @@ If you found any issues or have suggestions:
 
 
 
-**Developed by Gonçalo Coimbra**
+**Developed by GonÃ§alo Coimbra**

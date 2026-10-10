@@ -1,11 +1,12 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import Sidebar from '../Sidebar';
 
 // mock the auth hook so we can control the returned user
-jest.mock('../../contexts/AuthContext', () => ({
+vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({
     user: { role: 'SUPER_ADMIN' },
   }),

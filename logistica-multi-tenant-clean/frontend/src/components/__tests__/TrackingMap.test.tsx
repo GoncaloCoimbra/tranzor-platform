@@ -1,10 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 import TrackingMap from '../TrackingMap';
 
 // Mock Leaflet
-jest.mock('react-leaflet', () => ({
+vi.mock('react-leaflet', () => ({
   MapContainer: ({ children }: any) => <div data-testid="map-container">{children}</div>,
   TileLayer: () => <div data-testid="tile-layer" />,
   Marker: ({ children }: any) => <div data-testid="marker">{children}</div>,
@@ -12,17 +13,24 @@ jest.mock('react-leaflet', () => ({
   Polyline: () => <div data-testid="polyline" />,
   Circle: () => <div data-testid="circle" />,
   useMap: () => ({
-    fitBounds: jest.fn(),
+    fitBounds: vi.fn(),
   }),
 }));
 
-jest.mock('leaflet', () => ({
+vi.mock('leaflet', () => ({
   latLng: (lat: number, lng: number) => ({ lat, lng }),
-  latLngBounds: jest.fn(),
-  divIcon: jest.fn().mockImplementation((opts: any) => ({
+  latLngBounds: vi.fn(),
+  divIcon: vi.fn().mockImplementation((opts: any) => ({
     ...opts,
     options: opts,
   })),
+  default: {
+    latLngBounds: vi.fn(),
+    divIcon: vi.fn().mockImplementation((opts: any) => ({
+      ...opts,
+      options: opts,
+    })),
+  },
 }));
 
 describe('TrackingMap Component', () => {
