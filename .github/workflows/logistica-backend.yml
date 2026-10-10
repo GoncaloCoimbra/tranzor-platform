@@ -55,7 +55,7 @@ jobs:
       - run: npm run prisma:generate
       - run: npx prisma migrate deploy --schema prisma/schema.prisma
       - run: npx eslint "{src,apps,libs,test}/**/*.ts"
-      - run: npm test
+      - run: npm test -- --runInBand
       - run: npm run build
         env:
           CI: true
@@ -120,7 +120,7 @@ jobs:
           cache: npm
           cache-dependency-path: logistica-multi-tenant-clean/frontend/package-lock.json
       - run: npm ci
-      - run: npm test -- --runInBand
+      - run: npm test
         env:
           CI: true
       - run: npm run build
