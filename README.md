@@ -44,6 +44,12 @@ Para uma visão geral, arranque e testes do módulo de comunicação, consulte o
 
 ## Docker Compose
 
+### Estado de estabilidade e validação
+
+A stack Docker foi ajustada para evitar falhas causadas pelas restrições de pull anónimo do Docker Hub. As imagens dos serviços de dados foram substituídas por equivalentes públicos em `public.ecr.aws/docker/library/...`, mantendo a mesma versão principal e sem alterar a lógica da aplicação. Esta mudança foi aplicada ao Compose da raiz e às stacks produtivas/compatibilidade relevantes, mantendo a execução local compatível com o arquivo `.env` real.
+
+Também foi validada a sincronização do lockfile de dependências: o projeto foi corrigido para que `npm ci` funcione corretamente tanto na raiz como no módulo de logística, sem necessidade de alterar a aplicação em si. A verificação foi feita com a stack real e os serviços iniciaram em estado saudável.
+
 ### Desenvolvimento integrado
 
 O Compose carrega automaticamente `docker-compose.override.yml` quando se executa o ficheiro base:
