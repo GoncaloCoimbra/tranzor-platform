@@ -7,22 +7,23 @@ Módulo de gestão logística multi-tenant. O repositório contém uma API NestJ
 | Caminho | Componente |
 | --- | --- |
 | `backend-nest/` | API NestJS em TypeScript, com Prisma |
-| `frontend/` | Aplicação React criada com React Scripts (Create React App) |
+| `frontend/` | Aplicação React e TypeScript com Vite |
 | `backend-nest/prisma/` | Schema, migrações e seed Prisma |
-| `k8s/` | Manifests Kubernetes |
+| `../k8s/` | Manifests Kubernetes partilhados da plataforma |
 
-O frontend usa `react-scripts start` e `react-scripts build`, conforme os scripts do seu `package.json`; não é uma aplicação Vite.
+O frontend usa Vite: `npm run start` inicia o servidor de desenvolvimento, `npm run build` executa o type-check e cria a build de produção, e `npm test` executa os testes Vitest.
 
 ## Arranque local com Docker Compose
 
 O [Compose autónomo](./docker-compose.yml) define PostgreSQL, Redis, backend e frontend. A partir da raiz do repositório:
 
 ```sh
-docker compose -f logistica-multi-tenant-clean/docker-compose.yml config
-docker compose -f logistica-multi-tenant-clean/docker-compose.yml up --build
+cp logistica-multi-tenant-clean/.env.example logistica-multi-tenant-clean/.env
+docker compose --env-file logistica-multi-tenant-clean/.env -f logistica-multi-tenant-clean/docker-compose.yml config
+docker compose --env-file logistica-multi-tenant-clean/.env -f logistica-multi-tenant-clean/docker-compose.yml up --build
 ```
 
-O ficheiro usa o [Dockerfile do backend](./backend-nest/Dockerfile) com contexto na raiz deste módulo e o `frontend/Dockerfile.dev` para a interface em desenvolvimento. O ficheiro [backend-nest/.env.example](./backend-nest/.env.example) contém placeholders de configuração; o Compose não o carrega automaticamente.
+O ficheiro usa o [Dockerfile do backend](./backend-nest/Dockerfile) com contexto na raiz deste módulo e o `frontend/Dockerfile.dev` para a interface em desenvolvimento. O ficheiro [.env.example](./.env.example) contém os valores de interpolação do Compose; substitui os placeholders antes de iniciar. O Compose não carrega automaticamente `backend-nest/.env`.
 
 ## Portas
 
@@ -44,17 +45,30 @@ Na stack integrada definida na raiz, Logística, ChatOps e Commerce partilham o 
 
 O Compose autónomo usa uma única instância PostgreSQL para o módulo. O Compose integrado usa um serviço PostgreSQL separado para Logística. Não está configurada alta disponibilidade para estas instâncias.
 
-## Construção e validação
+## Testes e construção
 
-Os seguintes builds de imagem foram executados localmente em 2026-10-02:
+Na raiz de `logistica-multi-tenant-clean/`, instala as dependências e executa os testes:
 
-| Alvo | Comando | Resultado |
-| --- | --- | --- |
-| Backend e frontend de desenvolvimento | `docker compose -f logistica-multi-tenant-clean/docker-compose.yml build backend frontend` | Imagens construídas |
-| Frontend de produção | `docker build -f logistica-multi-tenant-clean/frontend/Dockerfile -t logistica-frontend:block3-validation logistica-multi-tenant-clean/frontend` | Imagem construída |
-| Manifests Kubernetes | Não foi executado num cluster Kubernetes real | Por validar |
+```sh
+npm ci
+npm run --workspace=backend-nest test
+npm run --workspace=frontend test
+```
 
-A construção da imagem não comprova o arranque ou o comportamento da aplicação em execução. Os manifests em `k8s/` também não foram validados num cluster real.
+Para validar os builds TypeScript e Vite:
+
+```sh
+npm run --workspace=backend-nest build
+npm run --workspace=frontend build
+```
+
+Os testes E2E do backend usam PostgreSQL e precisam de `DATABASE_URL` e das dependências externas configuradas:
+
+```sh
+npm run --workspace=backend-nest test:e2e
+```
+
+Os manifests Kubernetes partilhados estão em `../k8s/`. Foram documentados comandos de build e aplicação, mas não há validação desta stack num cluster Kubernetes real; a criação de uma imagem não comprova o arranque nem o comportamento da aplicação.
 
 ## Seed e dados
 

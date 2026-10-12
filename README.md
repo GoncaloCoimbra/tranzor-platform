@@ -10,7 +10,7 @@ Plataforma composta por três serviços: Commerce, para operações de comércio
 | Frontend Commerce | React e Vite |
 | ChatOps | Node.js, TypeScript, Fastify, WebSocket, Prisma e Redis |
 | Logística | NestJS, Prisma, PostgreSQL e Redis |
-| Frontend Logística | React Scripts (Create React App) |
+| Frontend Logística | React e Vite |
 | Execução local | Docker Compose |
 
 ## Obter o código
@@ -117,7 +117,7 @@ Foi executado um ensaio local de 30 minutos com 100 utilizadores virtuais e um c
 | Detalhe do produto | 834,7 ms |
 | Pesquisa | 982,6 ms |
 
-O objetivo usado no ensaio era P95 ≤1 s por rota e taxa de erro ≤0,1%: categorias, detalhe, pesquisa e taxa de erros cumpriram-no; a listagem ficou 82,3 ms acima do limite. Estes resultados descrevem um teste local controlado, não uma certificação de produção nem uma previsão de tráfego real. Os dados completos e a análise das métricas estão em [backend/docs/capacity/2026-10-08-200847-full-30min-100vu-summary.md](./backend/docs/capacity/2026-10-08-200847-full-30min-100vu-summary.md); o procedimento e os limites da stack estão documentados em [backend/README.md](./backend/README.md).
+O objetivo usado no ensaio era P95 ≤1 s por rota e taxa de erro ≤0,1%: categorias, detalhe, pesquisa e taxa de erros cumpriram-no; a listagem ficou 82,3 ms acima do limite. Estes resultados descrevem um teste local controlado, não uma certificação de produção nem uma previsão de tráfego real. O relatório detalhado do ensaio permanece num artefacto local não versionado e, por isso, não está disponível através deste repositório; o procedimento e os limites da stack estão documentados em [backend/README.md](./backend/README.md).
 
 ## Estado e limitações
 

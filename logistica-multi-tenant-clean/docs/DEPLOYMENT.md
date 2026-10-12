@@ -17,7 +17,8 @@ docker build \
 
 ### Frontend de produção
 
-O Dockerfile de produção constrói a aplicação React Scripts e serve o resultado através de Nginx na porta `80` do container:
+O Dockerfile de produção constrói a aplicação React/Vite e serve os ficheiros
+de `dist/` através de Nginx na porta `80` do container:
 
 ```sh
 docker build \
@@ -26,15 +27,17 @@ docker build \
   logistica-multi-tenant-clean/frontend
 ```
 
-O [Compose autónomo](../docker-compose.yml) usa `frontend/Dockerfile.dev` e inicia o servidor de desenvolvimento, não o Dockerfile de produção. A aplicação usa React Scripts (`react-scripts start` e `react-scripts build`), não Vite.
+O [Compose autónomo](../docker-compose.yml) usa `frontend/Dockerfile.dev` e inicia o servidor Vite de desenvolvimento, não o Dockerfile de produção.
 
 ## Docker Compose
 
 A partir da raiz do repositório, valida a configuração e, se pretenderes iniciar o ambiente local, usa:
 
 ```sh
-docker compose -f logistica-multi-tenant-clean/docker-compose.yml config
-docker compose -f logistica-multi-tenant-clean/docker-compose.yml up --build
+cp logistica-multi-tenant-clean/.env.example logistica-multi-tenant-clean/.env
+# Replace the placeholder credentials in the copied local .env file.
+docker compose --env-file logistica-multi-tenant-clean/.env -f logistica-multi-tenant-clean/docker-compose.yml config
+docker compose --env-file logistica-multi-tenant-clean/.env -f logistica-multi-tenant-clean/docker-compose.yml up --build
 ```
 
 O Compose autónomo inclui PostgreSQL, Redis, backend e frontend. Publica a API em `localhost:3002` (container `3000`) e a interface de desenvolvimento em `localhost:3001` (container `3000`). As portas host de PostgreSQL (`5432`) e Redis (`6379`) estão limitadas a `127.0.0.1`.
@@ -43,21 +46,21 @@ Na stack integrada da raiz, a API Logística escuta internamente na porta `3000`
 
 ## Variáveis de ambiente
 
-O Compose autónomo usa fallbacks locais para PostgreSQL, Redis e `JWT_SECRET`. Esses valores destinam-se apenas ao desenvolvimento local. O ficheiro [backend-nest/.env.example](../backend-nest/.env.example) contém placeholders e não é carregado automaticamente pelo Compose.
+O Compose autónomo exige `POSTGRES_PASSWORD`, `REDIS_PASSWORD` e `JWT_SECRET`; não inicia com valores predefinidos para estas credenciais. O ficheiro [`.env.example`](../.env.example) contém placeholders para a interpolação do Compose e tem de ser passado com `--env-file` ao executar a partir da raiz do repositório. O ficheiro [backend-nest/.env.example](../backend-nest/.env.example) contém configuração da aplicação, mas não substitui o ficheiro de interpolação do Compose.
 
 O template [backend-nest/staging.env.example](../backend-nest/staging.env.example) inclui placeholders de staging. Não coloques passwords ou tokens reais em ficheiros versionados.
 
 Na stack integrada, Logística, ChatOps e Commerce partilham um Redis autenticado. Usa a mesma variável `REDIS_PASSWORD` no serviço Redis e nos três URLs clientes. As configurações de staging e produção da raiz exigem `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `CLICKHOUSE_PASSWORD`, `JWT_SECRET` e `JWT_REFRESH_SECRET` para a API Commerce. Os Compose de staging e produção não constituem uma configuração de deployment de produção da Logística.
 
-O MongoDB usado pela stack integrada não tem autenticação configurada. Os serviços de dados em Compose são instâncias únicas, sem configuração de alta disponibilidade.
+O MongoDB usado pela stack integrada exige autenticação root, configurada na inicialização do volume. Os serviços de dados em Compose são instâncias únicas, sem configuração de alta disponibilidade.
 
 ## Kubernetes
 
-Existem manifests em `k8s/`, incluindo Deployments para backend e frontend e um StatefulSet PostgreSQL. Os manifests indicam três réplicas para o backend e uma para PostgreSQL; a imagem do frontend serve na porta `80`.
+Existem manifests em `k8s/`, incluindo Deployments para backend e frontend e um StatefulSet PostgreSQL. O Deployment Logística declara uma réplica para o backend e o StatefulSet uma instância PostgreSQL; a imagem do frontend serve na porta `80`.
 
-Os manifests não foram validados num cluster Kubernetes real. A presença dos ficheiros ou a construção local das imagens não confirma que os Secrets, a rede, o armazenamento, as migrações ou o arranque funcionem no cluster. Não consideres o deployment Kubernetes validado até que seja ensaiado no ambiente de destino.
+Os manifests não foram validados num cluster Kubernetes real. A presença dos ficheiros ou a construção local das imagens não confirma que os Secrets, a rede, o armazenamento, as migrações ou o arranque funcionem no cluster. A imagem runtime da Logística não inclui a CLI Prisma e os manifests não definem um Job de migração; prepara e valida separadamente um ambiente controlado para aplicar as migrações antes de depender da API. Não consideres o deployment Kubernetes validado até que seja ensaiado no ambiente de destino.
 
-O ChatOps partilhado continua a ter limitações de autenticação e estado: `/auth/dev-token` é apenas para desenvolvimento, as migrações Prisma não estão versionadas e parte do estado de ligações e canais reside em memória. O Compose autónomo ChatOps também monta `Chatops/pgdata` para `/var/lib/postgresql/data`; essa pasta contém dados locais PostgreSQL e não deve ser apagada durante uma limpeza.
+O ChatOps partilhado tem limitações de estado: parte do estado de ligações, presença e salas reside em memória e não é partilhada entre réplicas. As migrações Prisma estão versionadas em `Chatops/backend/prisma/migrations`, mas os manifests não as aplicam automaticamente. O Compose autónomo ChatOps também monta `Chatops/pgdata` para `/var/lib/postgresql/data`; essa pasta contém dados locais PostgreSQL e não deve ser apagada durante uma limpeza.
 
 ## Estado dos builds
 

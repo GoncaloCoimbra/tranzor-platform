@@ -67,18 +67,25 @@ secret integration. Do not commit the populated `secrets.env`.
   rooms are process-local. The local `http://` setup is not suitable for public
   production traffic; configure TLS, production cookie settings and verify
   authentication and WebSocket behavior before external exposure.
-- Apply Tranzor and logistics Prisma migrations to their PostgreSQL databases
-  before relying on those APIs. The ChatOps directory currently has no
-  versioned Prisma migrations; its database schema needs a separately reviewed
-  initialization process. The manifests do not run `prisma db push` or alter
-  schemas automatically.
+- Apply Tranzor, ChatOps and logistics Prisma migrations to their PostgreSQL
+  databases before relying on those APIs. ChatOps migrations are versioned in
+  `Chatops/backend/prisma/migrations`; the manifests do not run migrations or
+  alter schemas automatically.
 
 After the databases are ready, the Tranzor image applies its migrations on
-startup and fails to start if migration deployment fails. Logistics migrations
-can be run explicitly from a running backend container:
+startup and fails to start if migration deployment fails. The Logistics
+runtime image omits development dependencies, including the Prisma CLI, and
+the manifests do not define a migration Job. Apply Logistics migrations using
+a separately prepared, controlled Prisma CLI environment connected to the
+target database before relying on the API; do not assume the CLI is available
+inside the running application container.
+
+The ChatOps runtime image includes Prisma CLI and its versioned migrations.
+After reviewing the target database and taking an appropriate backup, they
+can be applied from the running backend container:
 
 ```sh
-kubectl -n tranzor exec deploy/logistica-backend -- \
+kubectl -n tranzor exec deploy/chatops-backend -- \
   npx prisma migrate deploy --schema prisma/schema.prisma
 ```
 

@@ -64,5 +64,5 @@ No canal `#Logística`, estão disponíveis `/stock [SKU]`, `/low-stock` e `/ord
 - Chamadas e sinalização não são partilhadas entre réplicas. As salas são voláteis: um encerramento gracioso avisa os participantes e termina a chamada; uma falha abrupta também perde a sala, sem recuperação possível da sessão WebRTC. O frontend fecha o estado local se perder a ligação de sinalização. As chamadas não são restauradas após reinício.
 - As chamadas são transitórias e não guardam áudio/vídeo na base de dados. Os comandos que alteram dados, incluindo `/approve-credit`, continuam bloqueados até existir uma integração autorizada.
 - As configurações Compose usam instâncias únicas de PostgreSQL e Redis, sem configuração de alta disponibilidade.
-- O MongoDB não é utilizado pelo Compose autónomo de ChatOps; esse Compose define PostgreSQL e Redis. Na stack integrada, a instância MongoDB comum não tem autenticação configurada.
+- O MongoDB não é utilizado pelo ChatOps. O Compose autónomo define PostgreSQL e Redis; na stack integrada, o MongoDB partilhado exige autenticação configurada pela stack Commerce.
 - A configuração Kubernetes está documentada na raiz, mas não foi validada num cluster real.
